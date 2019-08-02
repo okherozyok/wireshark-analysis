@@ -1,0 +1,1 @@
+frame.time >="2019-07-18 16:14:00" and frame.time <"2019-07-18 16:15:00" and ip.src==172.17.161.0/24 and !icmp and tcp
