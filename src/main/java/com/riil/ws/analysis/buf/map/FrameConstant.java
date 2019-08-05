@@ -26,7 +26,9 @@ public final class FrameConstant {
 	public static final String TCP_CONNECTION_SYN = "tcp_connection_syn";
 	public static final String TCP_CONNECTION_SACK = "tcp_connection_sack";
 	public static final String TCP_CONNECTION_RST = "tcp_connection_rst";
-	
+	public static final String TCP_SEGMENT = "tcp_segment";
+	public static final String HTTP_REQUEST = "http_request";
+
 	// 指标，补充的
 	public static final String CLIENT_IP = "client_ip";
 	public static final String SERVER_IP = "server_ip";
@@ -41,4 +43,6 @@ public final class FrameConstant {
 	public static final String TCP_CONNECTION_DELAY = "tcp_connection_delay";
 	public static final String TCP_UP_RTT = "tcp_up_rtt";
 	public static final String TCP_DOWN_RTT = "tcp_down_rtt";
+	public static final String HTTP_REQ_TRANS_DELAY = "http_req_trans_delay";
+
 }

@@ -132,6 +132,9 @@ Content-Type: application/json
                     },
                     "server_ip":{
                         "type":"ip"
+                    },
+                    "http_req_trans_delay":{
+                        "type":"long"
                     }
                 }
             },
