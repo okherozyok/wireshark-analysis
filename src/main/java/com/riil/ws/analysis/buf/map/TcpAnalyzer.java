@@ -87,6 +87,7 @@ public class TcpAnalyzer {
 
     private void httpDelay(Frame frame, TcpStream tcpStream) {
         httpReqTransDelay(frame, tcpStream);
+        httpRespAndRespTransDelay(frame, tcpStream);
     }
 
     private void markTcpConnSuccess(TcpStream tcpStream, Frame frame) {
@@ -122,12 +123,38 @@ public class TcpAnalyzer {
             return;
         }
 
-        Integer frameNumber = frame.getFirstTcpSegmentIfHas();
-        if (frameNumber == null) {
-            frame.setHttpReqTransDelay("0");
+        Integer firstSegment = frame.getFirstTcpSegmentIfHas();
+        if (firstSegment == null) {
+            frame.setHttpReqTransDelay(FrameConstant.ZERO_STRING);
         } else {
-            Long delay = Long.valueOf(frame.getTimeStamp()) - Long.valueOf(MapCache.getFrame(frameNumber).getTimeStamp());
+            Long delay = Long.valueOf(frame.getTimeStamp()) - Long.valueOf(MapCache.getFrame(firstSegment).getTimeStamp());
             frame.setHttpReqTransDelay(String.valueOf(delay));
+        }
+    }
+
+    private void httpRespAndRespTransDelay(Frame frame, TcpStream tcpStream) {
+        if (!frame.isHttpResponse()) {
+            return;
+        }
+
+        Integer httpRequestIn = frame.getHttpRequestIn();
+        if (httpRequestIn == null) {
+            LOGGER.warn("TcpStream=" + tcpStream.getTcpStreamNumber() + ", frameNumber=" + frame.getFrameNumber() + ", httpRequestIn is null.");
+        }
+        Integer firstSegment = frame.getFirstTcpSegmentIfHas();
+        if (firstSegment == null) {
+            if (httpRequestIn != null) {
+                Long delay = Long.valueOf(frame.getTimeStamp()) - Long.valueOf(MapCache.getFrame(httpRequestIn).getTimeStamp());
+                frame.setHttpRespDelay(String.valueOf(delay));
+            }
+            frame.setHttpRespTransDelay(FrameConstant.ZERO_STRING);
+        } else {
+            if (httpRequestIn != null) {
+                Long respDelay = Long.valueOf(MapCache.getFrame(firstSegment).getTimeStamp()) - Long.valueOf(MapCache.getFrame(httpRequestIn).getTimeStamp());
+                frame.setHttpRespDelay(String.valueOf(respDelay));
+            }
+            Long respTransDelay = Long.valueOf(frame.getTimeStamp()) - Long.valueOf(MapCache.getFrame(firstSegment).getTimeStamp());
+            frame.setHttpRespTransDelay(String.valueOf(respTransDelay));
         }
     }
 

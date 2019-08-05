@@ -118,6 +118,15 @@ public class Frame {
         return false;
     }
 
+    public boolean isHttpResponse() {
+        Object httpResponse = getLayerBy(FrameConstant.HTTP_RESPONSE);
+        if (httpResponse != null) {
+            return true;
+        }
+
+        return false;
+    }
+
     @SuppressWarnings("unchecked")
     public Integer getFirstTcpSegmentIfHas() {
         List<String> tcpSegments = (List<String>) getLayerBy(FrameConstant.TCP_SEGMENT);
@@ -143,6 +152,15 @@ public class Frame {
 
     public Long getTcpAck() {
         return Long.valueOf(getLayerFirstBy(FrameConstant.TCP_ACK));
+    }
+
+    @SuppressWarnings("unchecked")
+    public Integer getHttpRequestIn() {
+        Object o = getLayerBy(FrameConstant.HTTP_REQUEST_IN);
+        if (o != null) {
+            return Integer.valueOf(((List<String>) o).get(0));
+        }
+        return null;
     }
 
     public void setClientIp(String clientIp) {
@@ -209,8 +227,16 @@ public class Frame {
         setLayerBy(FrameConstant.HTTP_REQ_TRANS_DELAY, delay);
     }
 
+    public void setHttpRespDelay(String delay) {
+        setLayerBy(FrameConstant.HTTP_RESP_DELAY, delay);
+    }
+
+    public void setHttpRespTransDelay(String delay) {
+        setLayerBy(FrameConstant.HTTP_RESP_TRANS_DELAY, delay);
+    }
+
     @SuppressWarnings("unchecked")
-    public Long getLongLayerFirstBy(String metric) {
+    private Long getLongLayerFirstBy(String metric) {
         Object tcpStream = getLayerBy(metric);
         if (tcpStream != null) {
             return Long.valueOf(((List<String>) tcpStream).get(0));
@@ -220,7 +246,7 @@ public class Frame {
     }
 
     @SuppressWarnings("unchecked")
-    public Integer getIntegerLayerFirstBy(String metric) {
+    private Integer getIntegerLayerFirstBy(String metric) {
         Object tcpStream = getLayerBy(metric);
         if (tcpStream != null) {
             return Integer.valueOf(((List<String>) tcpStream).get(0));

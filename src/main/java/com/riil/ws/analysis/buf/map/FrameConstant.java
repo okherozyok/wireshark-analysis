@@ -5,6 +5,7 @@ public final class FrameConstant {
 	public static final String SIGN_PLACEHOLDER = "1";
 	public static final Integer ICMP_PROTO_NUM = 1;
 	public static final Integer TCP_PROTO_NUM = 6;
+	public static final String ZERO_STRING="0";
 	
 	// 结构
 	public static final String LAYERS = "layers";
@@ -28,6 +29,8 @@ public final class FrameConstant {
 	public static final String TCP_CONNECTION_RST = "tcp_connection_rst";
 	public static final String TCP_SEGMENT = "tcp_segment";
 	public static final String HTTP_REQUEST = "http_request";
+	public static final String HTTP_RESPONSE = "http_response";
+	public static final String HTTP_REQUEST_IN = "http_request_in";
 
 	// 指标，补充的
 	public static final String CLIENT_IP = "client_ip";
@@ -44,5 +47,7 @@ public final class FrameConstant {
 	public static final String TCP_UP_RTT = "tcp_up_rtt";
 	public static final String TCP_DOWN_RTT = "tcp_down_rtt";
 	public static final String HTTP_REQ_TRANS_DELAY = "http_req_trans_delay";
+	public static final String HTTP_RESP_DELAY = "http_resp_delay";
+	public static final String HTTP_RESP_TRANS_DELAY = "http_resp_trans_delay";
 
 }

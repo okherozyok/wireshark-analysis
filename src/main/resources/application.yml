@@ -4,7 +4,7 @@ logging:
   path: ./log
   
 output:
-  to: ES #elasticsearch用ES，文件用File
+  to: File #elasticsearch用ES，文件用File
   file: 
     lineSeparator: n #windows格式用rn，Linux格式用n
     name: output2es.json

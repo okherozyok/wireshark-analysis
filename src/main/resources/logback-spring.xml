@@ -56,11 +56,12 @@
 
     <!-- 根据 springboot 运行环境来确定日志输出 -->
     <springProfile name="local">
-        <root level="info">
+        <root level="error">
             <appender-ref ref="STDOUT" />
             <appender-ref ref="DAILY_ROLLING"/>
             <appender-ref ref="DEBUG_DAILY_ROLLING"/>
         </root>
+		<logger name="com.riil.ws.analysis.buf" level="warn"/>
     </springProfile>
 
 </configuration>
