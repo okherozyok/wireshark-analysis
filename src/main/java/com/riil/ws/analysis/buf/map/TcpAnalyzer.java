@@ -206,34 +206,62 @@ public class TcpAnalyzer {
 
         List<Frame> frames = tcpStream.getFrames();
         for (Frame frame : frames) {
-            onlySuccessRTT(tcpStream, frame);
+            FrameJsonObject json = frame.toJsonObject();
+            onlySuccessRTT(tcpStream, json);
+            onlySuccessRetrans(tcpStream, json);
+            frame.setFrameJson(json);
         }
     }
 
-    private void onlySuccessRTT(TcpStream tcpStream, Frame frame) {
+    private void onlySuccessRTT(TcpStream tcpStream, FrameJsonObject json) {
         // 不计算三次握手的
-        if (frame.isTcpConnectionSyn() || frame.isTcpConnectionSack()) {
+        if (json.isTcpConnectionSyn() || json.isTcpConnectionSack()) {
             return;
         }
-        if (frame.getTcpAckFrameNumber() != null && !tcpStream.hasSackFrameNumber(frame.getTcpAckFrameNumber())) {
+        if (json.getTcpAckFrameNumber() != null && !tcpStream.hasSackFrameNumber(json.getTcpAckFrameNumber())) {
             // 不计算tcp 长度 大于 0 的
-            if (frame.getTcpLen() > 0) {
+            if (json.isTcpLenBt0()) {
                 return;
             }
 
-            Long rtt = frame.getTcpAnalysisAckRtt();
-            if (frame.getSrcIp().equals(tcpStream.getServerIp())) {
-                frame.setClientIp(tcpStream.getClientIp());
-                frame.setServerIp(tcpStream.getServerIp());
-                frame.setTcpUpRTT(String.valueOf(rtt));
-            } else if (frame.getSrcIp().equals(tcpStream.getClientIp())) {
-                frame.setClientIp(tcpStream.getClientIp());
-                frame.setServerIp(tcpStream.getServerIp());
-                frame.setTcpDownRTT(String.valueOf(rtt));
+            Long rtt = json.getTcpAnalysisAckRtt();
+            if (json.getSrcIp().equals(tcpStream.getServerIp())) {
+                json.setClientIp(tcpStream.getClientIp());
+                json.setServerIp(tcpStream.getServerIp());
+                json.setTcpUpRTT(String.valueOf(rtt));
+            } else if (json.getSrcIp().equals(tcpStream.getClientIp())) {
+                json.setClientIp(tcpStream.getClientIp());
+                json.setServerIp(tcpStream.getServerIp());
+                json.setTcpDownRTT(String.valueOf(rtt));
             } else {
                 LOGGER.error("Tcp stream: " + tcpStream.getTcpStreamNumber()
-                        + ", Can't judge server ip or client ip, frame src_ip: " + frame.getSrcIp());
+                        + ", Can't judge server ip or client ip, frame src_ip: " + json.getSrcIp());
             }
+        }
+    }
+
+    private void onlySuccessRetrans(TcpStream tcpStream, FrameJsonObject json) {
+        if (!json.isTcpLenBt0() || json.isTcpConnectionSyn() || json.isTcpConnectionSack() || json.isTcpConnectionRst()
+                || json.isTcpConnectionFin() || json.isTcpKeepAlive() || json.isTcpDupAck()) {
+            return;
+        }
+
+        json.setClientIp(tcpStream.getClientIp());
+        json.setServerIp(tcpStream.getServerIp());
+
+        if (tcpStream.getClientIp().equals(json.getSrcIp())) {
+            json.setTcpUpPayload();
+            if (json.isRetrans()) {
+                json.setTcpUpRetrans();
+            }
+        } else if (tcpStream.getServerIp().equals(json.getSrcIp())) {
+            json.setTcpDownPayload();
+            if (json.isRetrans()) {
+                json.setTcpDownRetrans();
+            }
+        } else {
+            LOGGER.error("TcpStream=" + tcpStream.getTcpStreamNumber() + ", frameNumber=" + json.getFrameNumber() +
+                    ", can't judge client ip or server ip.");
         }
     }
 }

@@ -3,6 +3,7 @@ package com.riil.ws.analysis.buf.map;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Map;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -13,6 +14,7 @@ import com.alibaba.fastjson.JSONObject;
 public class Frame {
     private String esIndexJson;
     private String frameJson;
+    private Map<String, Object> map = null;
 
     public String getEsIndexJson() {
         return esIndexJson;
@@ -28,6 +30,15 @@ public class Frame {
 
     public void setFrameJson(String frameJson) {
         this.frameJson = frameJson;
+    }
+
+    public void setFrameJson(FrameJsonObject jsonObject) {
+        setFrameJson(jsonObject.toJsonString());
+    }
+
+    public FrameJsonObject toJsonObject() {
+        JSONObject parseObject = JSON.parseObject(getFrameJson());
+        return new FrameJsonObject(parseObject);
     }
 
     /**

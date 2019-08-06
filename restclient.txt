@@ -124,6 +124,18 @@ Content-Type: application/json
                     "tcp_down_rtt":{
                         "type":"long"
                     },
+                    "tcp_up_retrans":{
+                        "type":"byte"
+                    },
+                    "tcp_down_retrans":{
+                        "type":"byte"
+                    },
+                    "tcp_up_payload":{
+                        "type":"byte"
+                    },
+                    "tcp_down_payload":{
+                        "type":"byte"
+                    },
                     "http_response_code":{
                         "type":"integer"
                     },

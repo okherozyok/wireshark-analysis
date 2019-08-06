@@ -18,7 +18,7 @@ public final class FrameConstant {
 	public static final String IP_DST = "ip_dst";
 	public static final String TCP_SEQ = "tcp_seq";
 	public static final String TCP_ACK = "tcp_ack";
-	
+
 	// 指标，wireshark已有的
 	public static final String IP_PROTO = "ip_proto";
 	public static final String TCP_LEN = "tcp_len";
@@ -27,6 +27,12 @@ public final class FrameConstant {
 	public static final String TCP_CONNECTION_SYN = "tcp_connection_syn";
 	public static final String TCP_CONNECTION_SACK = "tcp_connection_sack";
 	public static final String TCP_CONNECTION_RST = "tcp_connection_rst";
+	public static final String TCP_CONNECTION_FIN = "tcp_connection_fin";
+	public static final String TCP_ANALYSIS_KEEP_ALIVE = "tcp_analysis_keep_alive";
+	public static final String TCP_ANALYSIS_DUPLICATE_ACK = "tcp_analysis_duplicate_ack";
+	public static final String TCP_ANALYSIS_RETRANSMISSION = "tcp_analysis_retransmission";
+	public static final String TCP_ANALYSIS_SPURIOUS_RETRANSMISSION = "tcp_analysis_spurious_retransmission";
+	public static final String TCP_ANALYSIS_FAST_RETRANSMISSION = "tcp_analysis_fast_retransmission";
 	public static final String TCP_SEGMENT = "tcp_segment";
 	public static final String HTTP_REQUEST = "http_request";
 	public static final String HTTP_RESPONSE = "http_response";
@@ -46,6 +52,10 @@ public final class FrameConstant {
 	public static final String TCP_CONNECTION_DELAY = "tcp_connection_delay";
 	public static final String TCP_UP_RTT = "tcp_up_rtt";
 	public static final String TCP_DOWN_RTT = "tcp_down_rtt";
+	public static final String TCP_UP_RETRANS = "tcp_up_retrans";
+	public static final String TCP_DOWN_RETRANS = "tcp_down_retrans";
+	public static final String TCP_UP_PAYLOAD = "tcp_up_payload";
+	public static final String TCP_DOWN_PAYLOAD = "tcp_down_payload";
 	public static final String HTTP_REQ_TRANS_DELAY = "http_req_trans_delay";
 	public static final String HTTP_RESP_DELAY = "http_resp_delay";
 	public static final String HTTP_RESP_TRANS_DELAY = "http_resp_trans_delay";

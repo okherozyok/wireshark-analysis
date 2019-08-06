@@ -56,7 +56,7 @@
 
     <!-- 根据 springboot 运行环境来确定日志输出 -->
     <springProfile name="local">
-        <root level="error">
+        <root level="info">
             <appender-ref ref="STDOUT" />
             <appender-ref ref="DAILY_ROLLING"/>
             <appender-ref ref="DEBUG_DAILY_ROLLING"/>
