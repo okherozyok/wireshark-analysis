@@ -17,8 +17,10 @@ public class TcpAnalyzer {
 
         List<Frame> frames = tcpStream.getFrames();
         for (Frame frame : frames) {
-            realTimeCreateConn(frame, tcpStream);
-            httpDelay(frame, tcpStream);
+            FrameJsonObject json = frame.toJsonObject();
+            realTimeCreateConn(json, tcpStream);
+            httpDelay(json, tcpStream);
+            frame.setFrameJson(json);
         }
 
         endCreateConn(tcpStream);
@@ -33,34 +35,34 @@ public class TcpAnalyzer {
      * 该方法会在一个tcpStream的过程中一直被调用，因为目前还不能准确判断出数据传输是什么时候开始。
      * 业务定义（客户端建连时延、服务端建连时延）与ws的ack_frame不同。有些场景，不能使用ack_frame直接匹配syn+ack，需要将syn+ack的number存储起来，查找是否包含ack_frame
      *
-     * @param frame
+     * @param json
      * @param tcpStream
      */
-    private void realTimeCreateConn(Frame frame, TcpStream tcpStream) {
-        if (frame.isTcpConnectionSyn()) { // syn包
+    private void realTimeCreateConn(FrameJsonObject json, TcpStream tcpStream) {
+        if (json.isTcpConnectionSyn()) { // syn包
             tcpStream.setHasSyn(true);
 
             // 只记录第一个syn包的时间
             if (tcpStream.getSynTimeStamp() == null) {
-                tcpStream.setSynTimeStamp(frame.getTimeStamp());
-                tcpStream.setClientIp(frame.getSrcIp());
-                tcpStream.setServerIp(frame.getDstIp());
+                tcpStream.setSynTimeStamp(json.getTimeStamp());
+                tcpStream.setClientIp(json.getSrcIp());
+                tcpStream.setServerIp(json.getDstIp());
             }
 
             // 可能发生了syn重传，清除建连成功的标志
             clearTcpConnSuccess(tcpStream);
-        } else if (frame.isTcpConnectionSack()) { // syn+ack包
+        } else if (json.isTcpConnectionSack()) { // syn+ack包
             if (tcpStream.getClientIp() == null && tcpStream.getServerIp() == null) {
                 // 丢失syn包的时候，纠正下客户端和服务端ip
-                tcpStream.setClientIp(frame.getDstIp());
-                tcpStream.setServerIp(frame.getSrcIp());
+                tcpStream.setClientIp(json.getDstIp());
+                tcpStream.setServerIp(json.getSrcIp());
             }
-            tcpStream.addSackFrameNumber(frame.getFrameNumber());
-            tcpStream.setSackTimeStamp(frame.getTimeStamp());
+            tcpStream.addSackFrameNumber(json.getFrameNumber());
+            tcpStream.setSackTimeStamp(json.getTimeStamp());
 
             // 可能发生了syn+ack 重传，清除建连成功的标志
             clearTcpConnSuccess(tcpStream);
-        } else if (frame.isTcpConnectionRst()) { // rst包
+        } else if (json.isTcpConnectionRst()) { // rst包
             if (tcpStream.getTcpConnectionSuccess() == null) {
                 if (!tcpStream.hasSyn()) {
                     LOGGER.warn("TcpStream: " + tcpStream.getTcpStreamNumber() + ", ifHasSyn=" + tcpStream.hasSyn()
@@ -68,29 +70,29 @@ public class TcpAnalyzer {
                 } else {
                     // RST建连失败
                     tcpStream.setTcpConnectionSuccess(Boolean.FALSE);
-                    frame.setClientIp(tcpStream.getClientIp());
-                    frame.setServerIp(tcpStream.getServerIp());
-                    if (frame.getSrcIp().equals(tcpStream.getClientIp())) { // 客户端建连RST
-                        frame.setTcpClientConnectionRst();
-                    } else if (frame.getSrcIp().equals(tcpStream.getServerIp())) { // 服务端建连RST
-                        frame.setTcpServerConnectionRst();
+                    json.setClientIp(tcpStream.getClientIp());
+                    json.setServerIp(tcpStream.getServerIp());
+                    if (json.getSrcIp().equals(tcpStream.getClientIp())) { // 客户端建连RST
+                        json.setTcpClientConnectionRst();
+                    } else if (json.getSrcIp().equals(tcpStream.getServerIp())) { // 服务端建连RST
+                        json.setTcpServerConnectionRst();
                     }
                 }
             }
-        } else if (frame.getTcpAckFrameNumber() != null // syn+ack包的ack包
-                && tcpStream.hasSackFrameNumber(frame.getTcpAckFrameNumber())) {
+        } else if (json.getTcpAckFrameNumber() != null // syn+ack包的ack包
+                && tcpStream.hasSackFrameNumber(json.getTcpAckFrameNumber())) {
             if (tcpStream.hasSyn()) {
-                markTcpConnSuccess(tcpStream, frame);
+                markTcpConnSuccess(tcpStream, json);
             }
         }
     }
 
-    private void httpDelay(Frame frame, TcpStream tcpStream) {
+    private void httpDelay(FrameJsonObject frame, TcpStream tcpStream) {
         httpReqTransDelay(frame, tcpStream);
         httpRespAndRespTransDelay(frame, tcpStream);
     }
 
-    private void markTcpConnSuccess(TcpStream tcpStream, Frame frame) {
+    private void markTcpConnSuccess(TcpStream tcpStream, FrameJsonObject frame) {
         tcpStream.setTcpConnAckTimeStamp(frame.getTimeStamp());
         tcpStream.setTcpConnAckFrameNumber(frame.getFrameNumber());
 
@@ -109,52 +111,58 @@ public class TcpAnalyzer {
     private void clearTcpConnSuccess(TcpStream tcpStream) {
         if (Boolean.TRUE.equals(tcpStream.getTcpConnectionSuccess())) {
             Frame frame = MapCache.getFrame(tcpStream.getTcpConnAckFrameNumber());
-            frame.delClientIp();
-            frame.delServerIp();
-            frame.delTcpConnectionSuccess();
+            FrameJsonObject json = frame.toJsonObject();
+            json.delClientIp();
+            json.delServerIp();
+            json.delTcpConnectionSuccess();
+            frame.setFrameJson(json);
             tcpStream.setTcpConnectionSuccess(null);
             tcpStream.setTcpConnAckFrameNumber(null);
             tcpStream.setTcpConnAckTimeStamp(null);
         }
     }
 
-    private void httpReqTransDelay(Frame frame, TcpStream tcpStream) {
-        if (!frame.isHttpRequest()) {
+    private void httpReqTransDelay(FrameJsonObject json, TcpStream tcpStream) {
+        if (!json.isHttpRequest()) {
             return;
         }
 
-        Integer firstSegment = frame.getFirstTcpSegmentIfHas();
+        Integer firstSegment = json.getFirstTcpSegmentIfHas();
         if (firstSegment == null) {
-            frame.setHttpReqTransDelay(FrameConstant.ZERO_STRING);
+            json.setHttpReqTransDelay(FrameConstant.ZERO_STRING);
         } else {
-            Long delay = Long.valueOf(frame.getTimeStamp()) - Long.valueOf(MapCache.getFrame(firstSegment).getTimeStamp());
-            frame.setHttpReqTransDelay(String.valueOf(delay));
+            Long delay = Long.valueOf(json.getTimeStamp())
+                    - Long.valueOf(MapCache.getFrame(firstSegment).toJsonObject().getTimeStamp());
+            json.setHttpReqTransDelay(String.valueOf(delay));
         }
     }
 
-    private void httpRespAndRespTransDelay(Frame frame, TcpStream tcpStream) {
-        if (!frame.isHttpResponse()) {
+    private void httpRespAndRespTransDelay(FrameJsonObject json, TcpStream tcpStream) {
+        if (!json.isHttpResponse()) {
             return;
         }
 
-        Integer httpRequestIn = frame.getHttpRequestIn();
+        Integer httpRequestIn = json.getHttpRequestIn();
         if (httpRequestIn == null) {
-            LOGGER.warn("TcpStream=" + tcpStream.getTcpStreamNumber() + ", frameNumber=" + frame.getFrameNumber() + ", httpRequestIn is null.");
+            LOGGER.warn("TcpStream=" + tcpStream.getTcpStreamNumber() + ", frameNumber=" + json.getFrameNumber() + ", httpRequestIn is null.");
         }
-        Integer firstSegment = frame.getFirstTcpSegmentIfHas();
+        Integer firstSegment = json.getFirstTcpSegmentIfHas();
         if (firstSegment == null) {
             if (httpRequestIn != null) {
-                Long delay = Long.valueOf(frame.getTimeStamp()) - Long.valueOf(MapCache.getFrame(httpRequestIn).getTimeStamp());
-                frame.setHttpRespDelay(String.valueOf(delay));
+                Long delay = Long.valueOf(json.getTimeStamp())
+                        - Long.valueOf(MapCache.getFrame(httpRequestIn).toJsonObject().getTimeStamp());
+                json.setHttpRespDelay(String.valueOf(delay));
             }
-            frame.setHttpRespTransDelay(FrameConstant.ZERO_STRING);
+            json.setHttpRespTransDelay(FrameConstant.ZERO_STRING);
         } else {
             if (httpRequestIn != null) {
-                Long respDelay = Long.valueOf(MapCache.getFrame(firstSegment).getTimeStamp()) - Long.valueOf(MapCache.getFrame(httpRequestIn).getTimeStamp());
-                frame.setHttpRespDelay(String.valueOf(respDelay));
+                Long respDelay = Long.valueOf(MapCache.getFrame(firstSegment).toJsonObject().getTimeStamp())
+                        - Long.valueOf(MapCache.getFrame(httpRequestIn).toJsonObject().getTimeStamp());
+                json.setHttpRespDelay(String.valueOf(respDelay));
             }
-            Long respTransDelay = Long.valueOf(frame.getTimeStamp()) - Long.valueOf(MapCache.getFrame(firstSegment).getTimeStamp());
-            frame.setHttpRespTransDelay(String.valueOf(respTransDelay));
+            Long respTransDelay = Long.valueOf(json.getTimeStamp())
+                    - Long.valueOf(MapCache.getFrame(firstSegment).toJsonObject().getTimeStamp());
+            json.setHttpRespTransDelay(String.valueOf(respTransDelay));
         }
     }
 
@@ -174,23 +182,31 @@ public class TcpAnalyzer {
             } else {
                 List<Frame> frames = tcpStream.getFrames();
                 Frame lastFrame = frames.get(frames.size() - 1);
-                lastFrame.setClientIp(tcpStream.getClientIp());
-                lastFrame.setServerIp(tcpStream.getServerIp());
+                FrameJsonObject json = lastFrame.toJsonObject();
+                json.setClientIp(tcpStream.getClientIp());
+                json.setServerIp(tcpStream.getServerIp());
                 if (tcpStream.getSynTimeStamp() != null && tcpStream.getSackTimeStamp() != null) {
-                    lastFrame.setTcpClientConnectionNoResp();
+                    json.setTcpClientConnectionNoResp();
                 } else if (tcpStream.getSynTimeStamp() != null) {
-                    lastFrame.setTcpServerConnectionNoResp();
+                    json.setTcpServerConnectionNoResp();
                 }
+                lastFrame.setFrameJson(json);
             }
         } else if (Boolean.TRUE.equals(tcpStream.getTcpConnectionSuccess())) { // 建连成功时，计算建连时延
             long clientConnDelay = tcpStream.getSackTimeStamp() - tcpStream.getSynTimeStamp();
             long serverConnDelay = tcpStream.getTcpConnAckTimeStamp() - tcpStream.getSackTimeStamp();
             int connAckFrameNumver = tcpStream.getTcpConnAckFrameNumber();
-            MapCache.getFrame(tcpStream.getLastSackFrameNumber())
-                    .setTcpClientConnectionDelay(String.valueOf(clientConnDelay));
-            MapCache.getFrame(connAckFrameNumver).setTcpServerConnectionDelay(String.valueOf(serverConnDelay));
-            MapCache.getFrame(connAckFrameNumver)
-                    .setTcpConnectionDelay(String.valueOf(clientConnDelay + serverConnDelay));
+
+            Frame lastSackFrame = MapCache.getFrame(tcpStream.getLastSackFrameNumber());
+            FrameJsonObject lastSackFramJson = lastSackFrame.toJsonObject();
+            lastSackFramJson.setTcpClientConnectionDelay(String.valueOf(clientConnDelay));
+            lastSackFrame.setFrameJson(lastSackFramJson);
+
+            Frame connAckFrame = MapCache.getFrame(connAckFrameNumver);
+            FrameJsonObject connAckFrameJson = connAckFrame.toJsonObject();
+            connAckFrameJson.setTcpServerConnectionDelay(String.valueOf(serverConnDelay));
+            connAckFrameJson.setTcpConnectionDelay(String.valueOf(clientConnDelay + serverConnDelay));
+            connAckFrame.setFrameJson(connAckFrameJson);
         }
     }
 

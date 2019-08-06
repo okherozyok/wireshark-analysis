@@ -63,11 +63,13 @@ public class MapAnalyzer implements IAnalyzer {
 		}
 
 		frame.setFrameJson(frameLineJson);
-		frame.setFrameProto();
-		MapCache.putFrame(frame);
+		FrameJsonObject json = frame.toJsonObject();
+		json.setFrameProto();
+		frame.setFrameJson(json);
+		MapCache.putFrame(json.getFrameNumber(), frame);
 
-		Integer tcpStreamNumber = frame.getTcpStreamNumber();
-		if (tcpStreamNumber != null && frame.isTcp()) {
+		Integer tcpStreamNumber = json.getTcpStreamNumber();
+		if (tcpStreamNumber != null && json.isTcp()) {
 			TcpStream tcpStream = MapCache.getTcpStream(tcpStreamNumber);
 			if (tcpStream == null) {
 				tcpStream = new TcpStream(tcpStreamNumber);

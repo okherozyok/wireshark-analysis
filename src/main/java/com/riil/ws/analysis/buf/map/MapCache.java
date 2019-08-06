@@ -13,8 +13,8 @@ public final class MapCache {
 		return INITIAL_CAPACITY;
 	}
 
-	public static void putFrame(Frame frame) {
-		FRAME_MAP.put(frame.getFrameNumber(), frame);
+	public static void putFrame(int frameNumber, Frame frame) {
+		FRAME_MAP.put(frameNumber, frame);
 	}
 
 	public static Frame getFrame(Integer frameNumber) {
