@@ -21,14 +21,14 @@ public class TsharkProcess {
     private final File STDOUT = new File("stdout");
     private final File STDERR = new File("stderr");
 
-    private String script = "tshark2json.bat";
+    private final String SCRIPT = "tshark2json.bat";
 
     @Autowired
     private IAnalyzer analyzer;
 
     public void run() {
         try {
-            timing((VOID) -> execScript(), "Exec script using ");
+            //timing((VOID) -> execScript(), "Exec script using ");
             timing((VOID) -> load2Mem(), "Load to mem using ");
             timing((VOID) -> analysis(), "Analysis using ");
             timing((VOID) -> output(), "Output using ");
@@ -42,7 +42,7 @@ public class TsharkProcess {
     private void execScript() throws Exception {
         Process p = null;
         try {
-            ProcessBuilder pb = new ProcessBuilder(SCRIPTS_DIR + script);
+            ProcessBuilder pb = new ProcessBuilder(SCRIPTS_DIR + SCRIPT);
 
             pb.redirectOutput(Redirect.to(STDOUT));
             pb.redirectError(Redirect.to(STDERR));

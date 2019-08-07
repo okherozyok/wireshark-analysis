@@ -147,6 +147,12 @@ Content-Type: application/json
                     },
                     "http_req_trans_delay":{
                         "type":"long"
+                    },
+                    "http_resp_delay":{
+                        "type":"long"
+                    },
+                    "http_resp_trans_delay":{
+                        "type":"long"
                     }
                 }
             },
