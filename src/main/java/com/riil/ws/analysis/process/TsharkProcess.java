@@ -28,7 +28,7 @@ public class TsharkProcess {
 
     public void run() {
         try {
-            //timing((VOID) -> execScript(), "Exec script using ");
+            timing((VOID) -> execScript(), "Exec script using ");
             timing((VOID) -> load2Mem(), "Load to mem using ");
             timing((VOID) -> analysis(), "Analysis using ");
             timing((VOID) -> output(), "Output using ");
