@@ -1,0 +1,23 @@
+#日志路径和名称配置.
+logging:
+  file: wireshark-analysis
+  path: ./log
+  
+output:
+  to: File #elasticsearch用ES，文件用File
+  file: 
+    lineSeparator: n #windows格式用rn，Linux格式用n
+    name: output2es.json
+  es:
+    bulkSize: 100000
+    host: 172.17.162.6
+    port: 9200
+
+spring:
+  profiles:
+    active: local
+  
+---
+
+spring:
+  profiles: local

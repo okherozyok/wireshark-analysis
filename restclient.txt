@@ -163,6 +163,30 @@ Content-Type: application/json
     }
 }
 
+{
+    "index_patterns":"tcp_concurrent_conn-*",
+    "settings":{
+        "number_of_shards":1,
+        "number_of_replicas":0
+    },
+    "mappings":{
+        "properties":{
+            "tcp_dstport":{
+                "type":"integer"
+            },
+            "server_ip":{
+                "type":"ip"
+            },
+            "connect_count":{
+                "type":"integer"
+            },
+            "timestamp":{
+                "type":"date"
+            }
+        }
+    }
+}
+
 {"bool":{"should":[{"term":{"layers.tcp_analysis_retransmission":1}},{"term":{"layers.tcp_analysis_spurious_retransmission":1}},{"term":{"layers.tcp_analysis_fast_retransmission":1}}]}}
 {
   "range": {

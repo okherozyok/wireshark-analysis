@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!--application.yml 传递参数，不能使用logback 自带的<property>标签 -->
+    <springProperty scope="context" name="appname" source="logging.file"/>
+    <springProperty scope="context" name="logdir" source="logging.path"/>
+
+    <contextName>logback</contextName>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+			<pattern>[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %logger - %msg%n
+			</pattern>
+		</encoder>
+    </appender>
+
+    <!-- https://logback.qos.ch/manual/filters.html -->
+    <appender name="DEBUG_DAILY_ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    	<file>${logdir}/debug.${appname}.log</file>
+	    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+	      	<fileNamePattern>${logdir}/debug.${appname}-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+	       	<maxFileSize>500MB</maxFileSize>    
+	       	<maxHistory>7</maxHistory>
+	       	<!-- “每天”日志的总大小 -->
+	       	<totalSizeCap>5GB</totalSizeCap>
+	    </rollingPolicy>
+	    <filter class="ch.qos.logback.classic.filter.LevelFilter">
+	      	<level>DEBUG</level>
+	      	<onMatch>ACCEPT</onMatch>
+	      	<onMismatch>DENY</onMismatch>
+	    </filter>
+	    <encoder>
+	      	<charset>UTF-8</charset>
+            <pattern>[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %logger - %msg%n</pattern>
+	    </encoder>
+  	</appender>
+  	
+    <!-- https://logback.qos.ch/manual/appenders.html#TimeBasedRollingPolicy -->
+    <appender name="DAILY_ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    	<file>${logdir}/${appname}.log</file>
+	    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+	      	<fileNamePattern>${logdir}/${appname}-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+	       	<maxFileSize>500MB</maxFileSize>    
+	       	<maxHistory>7</maxHistory>
+	       	<!-- “每天”日志的总大小 -->
+	       	<totalSizeCap>5GB</totalSizeCap>
+	    </rollingPolicy>
+	    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      		<level>INFO</level>
+    	</filter>
+	    <encoder>
+	      	<charset>UTF-8</charset>
+            <pattern>[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %logger - %msg%n</pattern>
+	    </encoder>
+  	</appender>
+
+    <!-- 根据 springboot 运行环境来确定日志输出 -->
+    <springProfile name="local">
+        <root level="info">
+            <appender-ref ref="STDOUT" />
+            <appender-ref ref="DAILY_ROLLING"/>
+            <appender-ref ref="DEBUG_DAILY_ROLLING"/>
+        </root>
+		<logger name="com.riil.ws.analysis.buf" level="warn"/>
+    </springProfile>
+
+</configuration>
