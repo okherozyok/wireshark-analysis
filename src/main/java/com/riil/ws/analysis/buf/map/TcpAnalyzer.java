@@ -127,6 +127,10 @@ public class TcpAnalyzer {
             return;
         }
 
+        // 根据http_request，可以判断一次客户端和服务端
+        json.setClientIp(json.getSrcIp());
+        json.setServerIp(json.getDstIp());
+
         Integer firstSegment = json.getFirstTcpSegmentIfHas();
         if (firstSegment == null) {
             json.setHttpReqTransDelay(FrameConstant.ZERO_STRING);
@@ -154,15 +158,27 @@ public class TcpAnalyzer {
                 json.setHttpRespDelay(String.valueOf(delay));
             }
             json.setHttpRespTransDelay(FrameConstant.ZERO_STRING);
+            // 根据http_response，可以判断一次客户端和服务端
+            json.setClientIp(json.getDstIp());
+            json.setServerIp(json.getSrcIp());
         } else {
             if (httpRequestIn != null) {
-                Long respDelay = Long.valueOf(MapCache.getFrame(firstSegment).toJsonObject().getTimeStamp())
+                Frame firstSegmentFrame = MapCache.getFrame(firstSegment);
+                FrameJsonObject firstSegmentFrameJson = firstSegmentFrame.toJsonObject();
+                Long respDelay = Long.valueOf(firstSegmentFrameJson.getTimeStamp())
                         - Long.valueOf(MapCache.getFrame(httpRequestIn).toJsonObject().getTimeStamp());
-                json.setHttpRespDelay(String.valueOf(respDelay));
+                firstSegmentFrameJson.setHttpRespDelay(String.valueOf(respDelay));
+                // 根据http_response，可以判断一次客户端和服务端
+                firstSegmentFrameJson.setClientIp(json.getDstIp());
+                firstSegmentFrameJson.setServerIp(json.getSrcIp());
+                firstSegmentFrame.setFrameJson(firstSegmentFrameJson);
             }
             Long respTransDelay = Long.valueOf(json.getTimeStamp())
                     - Long.valueOf(MapCache.getFrame(firstSegment).toJsonObject().getTimeStamp());
             json.setHttpRespTransDelay(String.valueOf(respTransDelay));
+            // 根据http_response，可以判断一次客户端和服务端
+            json.setClientIp(json.getDstIp());
+            json.setServerIp(json.getSrcIp());
         }
     }
 
