@@ -27,7 +27,10 @@ public class Adapter {
         setFrameProto();
         setSrcIp();
         setDstIp();
-        setIsTcpConnectionSyn();
+        setTcpConnectionSyn();
+        setTcpConnectionSack();
+        setTcpConnectionRst();
+        setTcpConnectionFin();
         setTcpStream();
         setTcpLen();
         setTcpSrcPort();
@@ -37,10 +40,16 @@ public class Adapter {
         setTcpAnalysisAcksFrame();
         setTcpAnalysisAckRtt();
         setTcpAnalysisDuplicateAck();
+        setTcpFirstSegment();
+        setTcpAnalysisRetransmission();
+        setTcpAnalysisKeepAlive();
+        setHttpRequest();
+        setHttpResponse();
+        setHttpRequestIn();
+        setHttpResponseCode();
 
         return frame;
     }
-
 
     private void setIndex() {
         frame.setIndex((String) ((JSONObject) indexJson.get("index")).get("_index"));
@@ -74,11 +83,21 @@ public class Adapter {
         }
     }
 
-    private void setIsTcpConnectionSyn() {
-        Object tcpConnectionSyn = getLayerBy(FrameConstant.TCP_CONNECTION_SYN);
-        if (tcpConnectionSyn != null) {
-            frame.getLayers().setTcpConnectionSyn(true);
-        }
+    private void setTcpConnectionSyn() {
+        frame.getLayers().setTcpConnectionSyn(getBooleanLayerBy(FrameConstant.TCP_CONNECTION_SYN));
+    }
+
+    private void setTcpConnectionSack() {
+        frame.getLayers().setTcpConnectionSack(getBooleanLayerBy(FrameConstant.TCP_CONNECTION_SACK));
+    }
+
+    private void setTcpConnectionFin() {
+        frame.getLayers().setTcpConnectionFin(getBooleanLayerBy(FrameConstant.TCP_CONNECTION_FIN));
+    }
+
+    private void setTcpConnectionRst() {
+        frame.getLayers().setTcpConnectionRst(getBooleanLayerBy(FrameConstant.TCP_CONNECTION_RST));
+
     }
 
     private void setSrcIp() {
@@ -123,6 +142,34 @@ public class Adapter {
 
     private void setTcpAnalysisDuplicateAck() {
         frame.getLayers().setTcpAnalysisDuplicateAck(getBooleanLayerBy(FrameConstant.TCP_ANALYSIS_DUPLICATE_ACK));
+    }
+
+    private void setTcpFirstSegment() {
+        frame.getLayers().setTcpFirstSegment(getIntegerLayerFirstBy(FrameConstant.TCP_FIRST_SEGMENT));
+    }
+
+    private void setTcpAnalysisRetransmission() {
+        frame.getLayers().setTcpAnalysisRetransmission(getBooleanLayerBy(FrameConstant.TCP_ANALYSIS_RETRANSMISSION));
+    }
+
+    private void setTcpAnalysisKeepAlive() {
+        frame.getLayers().setTcpAnalysisKeepAlive(getBooleanLayerBy(FrameConstant.TCP_ANALYSIS_KEEP_ALIVE));
+    }
+
+    private void setHttpRequest() {
+        frame.getLayers().setHttpRequest(getBooleanLayerBy(FrameConstant.HTTP_REQUEST));
+    }
+
+    private void setHttpResponse() {
+        frame.getLayers().setHttpResponse(getBooleanLayerBy(FrameConstant.HTTP_RESPONSE));
+    }
+
+    private void setHttpRequestIn() {
+        frame.getLayers().setHttpRequestIn(getBooleanLayerBy(FrameConstant.HTTP_REQUEST_IN));
+    }
+
+    private void setHttpResponseCode() {
+        frame.getLayers().setHttpResponseCode(getIntegerLayerFirstBy(FrameConstant.HTTP_RESPONSE_CODE));
     }
 
     @SuppressWarnings("unchecked")

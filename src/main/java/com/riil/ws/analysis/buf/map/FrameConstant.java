@@ -38,11 +38,13 @@ public final class FrameConstant {
 	public static final String HTTP_REQUEST = "http_request";
 	public static final String HTTP_RESPONSE = "http_response";
 	public static final String HTTP_REQUEST_IN = "http_request_in";
+	public static final String HTTP_RESPONSE_CODE = "http_response_code";
 
 	// 指标，补充的
 	public static final String CLIENT_IP = "client_ip";
 	public static final String SERVER_IP = "server_ip";
 	public static final String TCP = "tcp";
+	public static final String TCP_FIRST_SEGMENT = "tcp_first_segment";
 	public static final String TCP_CLIENT_CONNECTION_RST = "tcp_client_connection_rst";
 	public static final String TCP_SERVER_CONNECTION_RST = "tcp_server_connection_rst";
 	public static final String TCP_CLIENT_CONNECTION_NO_RESP = "tcp_client_connection_no_resp";

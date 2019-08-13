@@ -10,6 +10,11 @@ public class FrameBean {
 
     private Layers layers = new Layers();
 
+    @JSONField(serialize = false)
+    public Integer getFrameNumber() {
+        return layers.getFrameNumber();
+    }
+
     public String getIndex() {
         return index;
     }
@@ -86,6 +91,27 @@ public class FrameBean {
 
         @JSONField(name = FrameConstant.TCP_ANALYSIS_DUPLICATE_ACK)
         private Boolean tcpAnalysisDuplicateAck;
+
+        @JSONField(name = FrameConstant.TCP_FIRST_SEGMENT)
+        private Integer tcpFirstSegment;
+
+        @JSONField(name = FrameConstant.TCP_ANALYSIS_RETRANSMISSION)
+        private Boolean tcpAnalysisRetransmission;
+
+        @JSONField(name = FrameConstant.TCP_ANALYSIS_KEEP_ALIVE)
+        private Boolean tcpAnalysisKeepAlive;
+
+        @JSONField(name = FrameConstant.HTTP_REQUEST)
+        private Boolean httpRequest;
+
+        @JSONField(name = FrameConstant.HTTP_RESPONSE)
+        private Boolean httpResponse;
+
+        @JSONField(name = FrameConstant.HTTP_REQUEST_IN)
+        private Boolean httpRequestIn;
+
+        @JSONField(name = FrameConstant.HTTP_RESPONSE_CODE)
+        private Integer httpResponseCode;
 
         public void setSrcIp(String srcIp) {
             this.srcIpInt = IpV4Util.ipStr2Int(srcIp);
@@ -279,6 +305,62 @@ public class FrameBean {
 
         public void setTcpAnalysisDuplicateAck(Boolean tcpAnalysisDuplicateAck) {
             this.tcpAnalysisDuplicateAck = tcpAnalysisDuplicateAck;
+        }
+
+        public Integer getTcpFirstSegment() {
+            return tcpFirstSegment;
+        }
+
+        public void setTcpFirstSegment(Integer tcpFirstSegment) {
+            this.tcpFirstSegment = tcpFirstSegment;
+        }
+
+        public Boolean getTcpAnalysisRetransmission() {
+            return tcpAnalysisRetransmission;
+        }
+
+        public void setTcpAnalysisRetransmission(Boolean tcpAnalysisRetransmission) {
+            this.tcpAnalysisRetransmission = tcpAnalysisRetransmission;
+        }
+
+        public Boolean getTcpAnalysisKeepAlive() {
+            return tcpAnalysisKeepAlive;
+        }
+
+        public void setTcpAnalysisKeepAlive(Boolean tcpAnalysisKeepAlive) {
+            this.tcpAnalysisKeepAlive = tcpAnalysisKeepAlive;
+        }
+
+        public Boolean getHttpRequest() {
+            return httpRequest;
+        }
+
+        public void setHttpRequest(Boolean httpRequest) {
+            this.httpRequest = httpRequest;
+        }
+
+        public Boolean getHttpResponse() {
+            return httpResponse;
+        }
+
+        public void setHttpResponse(Boolean httpResponse) {
+            this.httpResponse = httpResponse;
+        }
+
+        public Boolean getHttpRequestIn() {
+            return httpRequestIn;
+        }
+
+        public void setHttpRequestIn(Boolean httpRequestIn) {
+            this.httpRequestIn = httpRequestIn;
+        }
+
+        public Integer getHttpResponseCode() {
+            return httpResponseCode;
+        }
+
+        public void setHttpResponseCode(Integer httpResponseCode) {
+            this.httpResponseCode = httpResponseCode;
         }
     }
 }
