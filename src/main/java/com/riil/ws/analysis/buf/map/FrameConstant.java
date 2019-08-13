@@ -9,25 +9,26 @@ public final class FrameConstant {
 	
 	// 结构
 	public static final String LAYERS = "layers";
-	
-	// 属性
-	public static final String FRAME_NUMBER = "frame_number";
-	public static final String TCP_STREAM = "tcp_stream";
+
+	// 指标，wireshark已有的
 	public static final String TIMESTAMP = "timestamp";
+	public static final String FRAME_NUMBER = "frame_number";
+	public static final String FRAME_LEN = "frame_len";
+	public static final String IP_PROTO = "ip_proto";
+	public static final String TCP_STREAM = "tcp_stream";
+	public static final String TCP_SRCPORT = "tcp_srcport";
+	public static final String TCP_DSTPORT = "tcp_dstport";
 	public static final String IP_SRC = "ip_src";
 	public static final String IP_DST = "ip_dst";
 	public static final String TCP_SEQ = "tcp_seq";
 	public static final String TCP_ACK = "tcp_ack";
-
-	// 指标，wireshark已有的
-	public static final String IP_PROTO = "ip_proto";
 	public static final String TCP_LEN = "tcp_len";
-	public static final String TCP_ANALYSIS_ACKS_FRAME = "tcp_analysis_acks_frame";
-	public static final String TCP_ANALYSIS_ACK_RTT = "tcp_analysis_ack_rtt";
 	public static final String TCP_CONNECTION_SYN = "tcp_connection_syn";
 	public static final String TCP_CONNECTION_SACK = "tcp_connection_sack";
 	public static final String TCP_CONNECTION_RST = "tcp_connection_rst";
 	public static final String TCP_CONNECTION_FIN = "tcp_connection_fin";
+	public static final String TCP_ANALYSIS_ACKS_FRAME = "tcp_analysis_acks_frame";
+	public static final String TCP_ANALYSIS_ACK_RTT = "tcp_analysis_ack_rtt";
 	public static final String TCP_ANALYSIS_KEEP_ALIVE = "tcp_analysis_keep_alive";
 	public static final String TCP_ANALYSIS_DUPLICATE_ACK = "tcp_analysis_duplicate_ack";
 	public static final String TCP_ANALYSIS_RETRANSMISSION = "tcp_analysis_retransmission";

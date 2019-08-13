@@ -22,12 +22,25 @@ public class Adapter {
 
         json = JSON.parseObject(frameJson);
         setTimeStamp();
+        setFrameNumber();
+        setFrameLen();
         setFrameProto();
-        setIsTcpConnectionSyn();
         setSrcIp();
+        setDstIp();
+        setIsTcpConnectionSyn();
+        setTcpStream();
+        setTcpLen();
+        setTcpSrcPort();
+        setTcpDstPort();
+        setTcpSeq();
+        setTcpAck();
+        setTcpAnalysisAcksFrame();
+        setTcpAnalysisAckRtt();
+        setTcpAnalysisDuplicateAck();
 
         return frame;
     }
+
 
     private void setIndex() {
         frame.setIndex((String) ((JSONObject) indexJson.get("index")).get("_index"));
@@ -37,6 +50,15 @@ public class Adapter {
         frame.setTimestamp(Long.parseLong((String) json.get("timestamp")));
     }
 
+    private void setFrameNumber() {
+        frame.getLayers().setFrameNumber(getIntegerLayerFirstBy(FrameConstant.FRAME_NUMBER));
+    }
+
+    private void setFrameLen() {
+        frame.getLayers().setFrameLen(getIntegerLayerFirstBy(FrameConstant.FRAME_LEN));
+    }
+
+
     /**
      * 由于ip_protoc 是 协议数组，取第一个协议为该frame的协议
      */
@@ -44,8 +66,10 @@ public class Adapter {
     public void setFrameProto() {
         Object protos = getLayerBy(FrameConstant.IP_PROTO);
         if (protos != null) {
-            if (FrameConstant.TCP_PROTO_NUM.equals(Integer.valueOf(((List<String>) protos).get(0)))) {
-                frame.setTcp(true);
+            Integer ipProto = Integer.valueOf(((List<String>) protos).get(0));
+            frame.getLayers().setIpProto(ipProto);
+            if (FrameConstant.TCP_PROTO_NUM.equals(ipProto)) {
+                frame.getLayers().setTcp(true);
             }
         }
     }
@@ -53,12 +77,52 @@ public class Adapter {
     private void setIsTcpConnectionSyn() {
         Object tcpConnectionSyn = getLayerBy(FrameConstant.TCP_CONNECTION_SYN);
         if (tcpConnectionSyn != null) {
-            frame.setTcpConnectionSyn(true);
+            frame.getLayers().setTcpConnectionSyn(true);
         }
     }
 
     private void setSrcIp() {
         frame.getLayers().setSrcIp(getLayerFirstBy(FrameConstant.IP_SRC));
+    }
+
+    private void setDstIp() {
+        frame.getLayers().setDstIp(getLayerFirstBy(FrameConstant.IP_DST));
+    }
+
+    private void setTcpStream() {
+        frame.getLayers().setTcpStream(getIntegerLayerFirstBy(FrameConstant.TCP_STREAM));
+    }
+
+    private void setTcpLen() {
+        frame.getLayers().setTcpLen(getIntegerLayerFirstBy(FrameConstant.TCP_LEN));
+    }
+
+    private void setTcpSrcPort() {
+        frame.getLayers().setTcpSrcPort(getIntegerLayerFirstBy(FrameConstant.TCP_SRCPORT));
+    }
+
+    private void setTcpDstPort() {
+        frame.getLayers().setTcpDstPort(getIntegerLayerFirstBy(FrameConstant.TCP_DSTPORT));
+    }
+
+    private void setTcpSeq() {
+        frame.getLayers().setTcpSeq(getLongLayerFirstBy(FrameConstant.TCP_SEQ));
+    }
+
+    private void setTcpAck() {
+        frame.getLayers().setTcpAck(getLongLayerFirstBy(FrameConstant.TCP_ACK));
+    }
+
+    private void setTcpAnalysisAcksFrame() {
+        frame.getLayers().setTcpAnalysisAcksFrame(getIntegerLayerFirstBy(FrameConstant.TCP_ANALYSIS_ACKS_FRAME));
+    }
+
+    private void setTcpAnalysisAckRtt() {
+        frame.getLayers().setTcpAnalysisAckRtt(getFloatLayerFirstBy(FrameConstant.TCP_ANALYSIS_ACK_RTT));
+    }
+
+    private void setTcpAnalysisDuplicateAck() {
+        frame.getLayers().setTcpAnalysisDuplicateAck(getBooleanLayerBy(FrameConstant.TCP_ANALYSIS_DUPLICATE_ACK));
     }
 
     @SuppressWarnings("unchecked")
@@ -72,8 +136,42 @@ public class Adapter {
     }
 
     @SuppressWarnings("unchecked")
+    private Long getLongLayerFirstBy(String metric) {
+        Object o = getLayerBy(metric);
+        if (o != null) {
+            return Long.valueOf(((List<String>) o).get(0));
+        }
+
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Float getFloatLayerFirstBy(String metric) {
+        Object o = getLayerBy(metric);
+        if (o != null) {
+            return Float.valueOf(((List<String>) o).get(0));
+        }
+
+        return null;
+    }
+
+    private Boolean getBooleanLayerBy(String metric) {
+        Object o = getLayerBy(metric);
+        if (o != null) {
+            return true;
+        }
+
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
     private String getLayerFirstBy(String metric) {
-        return ((List<String>) getLayerBy(metric)).get(0);
+        Object o = getLayerBy(metric);
+        if (o != null) {
+            return ((List<String>) o).get(0);
+        }
+
+        return null;
     }
 
     private Object getLayerBy(String metric) {
