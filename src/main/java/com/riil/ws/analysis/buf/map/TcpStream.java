@@ -19,7 +19,7 @@ public class TcpStream {
 	private Boolean tcpConnectionSuccess = null;
 	private boolean hasSyn = false;
 
-	private List<Frame> frames;
+	private List<FrameBean> frames;
 
 	public TcpStream(Integer tcpStreamNumber) {
 		this.tcpStreamNumber = tcpStreamNumber;
@@ -112,11 +112,11 @@ public class TcpStream {
 		this.hasSyn = hasSyn;
 	}
 
-	public void append(Frame frame) {
+	public void append(FrameBean frame) {
 		frames.add(frame);
 	}
 
-	public List<Frame> getFrames() {
+	public List<FrameBean> getFrames() {
 		return frames;
 	}
 }

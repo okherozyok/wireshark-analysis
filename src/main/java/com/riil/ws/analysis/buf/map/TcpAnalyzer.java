@@ -15,12 +15,10 @@ public class TcpAnalyzer {
 
     public void analysis(TcpStream tcpStream) throws Exception {
 
-        List<Frame> frames = tcpStream.getFrames();
-        for (Frame frame : frames) {
-            FrameJsonObject json = frame.toJsonObject();
-            realTimeCreateConn(json, tcpStream);
-            httpDelay(json, tcpStream);
-            frame.setFrameJson(json);
+        List<FrameBean> frames = tcpStream.getFrames();
+        for (FrameBean frame : frames) {
+            realTimeCreateConn(frame, tcpStream);
+            httpDelay(frame, tcpStream);
         }
 
         endCreateConn(tcpStream);
@@ -34,17 +32,14 @@ public class TcpAnalyzer {
      * 建连成功状态会在分析过程中设置或者清楚：当分析出syn+ack的ack时，设置建连成功状态，当遇到syn重传或者syn+ack重传时，清除建连成功状态。
      * 该方法会在一个tcpStream的过程中一直被调用，因为目前还不能准确判断出数据传输是什么时候开始。
      * 业务定义（客户端建连时延、服务端建连时延）与ws的ack_frame不同。有些场景，不能使用ack_frame直接匹配syn+ack，需要将syn+ack的number存储起来，查找是否包含ack_frame
-     *
-     * @param json
-     * @param tcpStream
      */
-    private void realTimeCreateConn(FrameJsonObject json, TcpStream tcpStream) {
+    private void realTimeCreateConn(FrameBean json, TcpStream tcpStream) {
         if (json.isTcpConnectionSyn()) { // syn包
             tcpStream.setHasSyn(true);
 
             // 只记录第一个syn包的时间
             if (tcpStream.getSynTimeStamp() == null) {
-                tcpStream.setSynTimeStamp(json.getTimeStamp());
+                tcpStream.setSynTimeStamp(json.getTimestamp());
                 tcpStream.setClientIp(json.getSrcIp());
                 tcpStream.setServerIp(json.getDstIp());
             }
@@ -58,7 +53,7 @@ public class TcpAnalyzer {
                 tcpStream.setServerIp(json.getSrcIp());
             }
             tcpStream.addSackFrameNumber(json.getFrameNumber());
-            tcpStream.setSackTimeStamp(json.getTimeStamp());
+            tcpStream.setSackTimeStamp(json.getTimestamp());
 
             // 可能发生了syn+ack 重传，清除建连成功的标志
             clearTcpConnSuccess(tcpStream);
@@ -87,13 +82,13 @@ public class TcpAnalyzer {
         }
     }
 
-    private void httpDelay(FrameJsonObject frame, TcpStream tcpStream) {
+    private void httpDelay(FrameBean frame, TcpStream tcpStream) {
         httpReqTransDelay(frame, tcpStream);
         httpRespAndRespTransDelay(frame, tcpStream);
     }
 
-    private void markTcpConnSuccess(TcpStream tcpStream, FrameJsonObject frame) {
-        tcpStream.setTcpConnAckTimeStamp(frame.getTimeStamp());
+    private void markTcpConnSuccess(TcpStream tcpStream, FrameBean frame) {
+        tcpStream.setTcpConnAckTimeStamp(frame.getTimestamp());
         tcpStream.setTcpConnAckFrameNumber(frame.getFrameNumber());
 
         // 建连成功，如果发生syn或者syn+ack的重传，这个标志会被清除
@@ -105,24 +100,20 @@ public class TcpAnalyzer {
 
     /**
      * 遇到syn和syn+ack时被调用，如果已经是建连成功的，清除建连成功状态。
-     *
-     * @param tcpStream
      */
     private void clearTcpConnSuccess(TcpStream tcpStream) {
         if (Boolean.TRUE.equals(tcpStream.getTcpConnectionSuccess())) {
-            Frame frame = MapCache.getFrame(tcpStream.getTcpConnAckFrameNumber());
-            FrameJsonObject json = frame.toJsonObject();
-            json.delClientIp();
-            json.delServerIp();
-            json.delTcpConnectionSuccess();
-            frame.setFrameJson(json);
+            FrameBean frame = MapCache.getFrame(tcpStream.getTcpConnAckFrameNumber());
+            frame.delClientIp();
+            frame.delServerIp();
+            frame.delTcpConnectionSuccess();
             tcpStream.setTcpConnectionSuccess(null);
             tcpStream.setTcpConnAckFrameNumber(null);
             tcpStream.setTcpConnAckTimeStamp(null);
         }
     }
 
-    private void httpReqTransDelay(FrameJsonObject json, TcpStream tcpStream) {
+    private void httpReqTransDelay(FrameBean json, TcpStream tcpStream) {
         if (!json.isHttpRequest()) {
             return;
         }
@@ -133,15 +124,15 @@ public class TcpAnalyzer {
 
         Integer firstSegment = json.getFirstTcpSegmentIfHas();
         if (firstSegment == null) {
-            json.setHttpReqTransDelay(FrameConstant.ZERO_STRING);
+            json.setHttpReqTransDelay(Long.valueOf(FrameConstant.ZERO_STRING));
         } else {
-            Long delay = Long.valueOf(json.getTimeStamp())
-                    - Long.valueOf(MapCache.getFrame(firstSegment).toJsonObject().getTimeStamp());
-            json.setHttpReqTransDelay(String.valueOf(delay));
+            Long delay = json.getTimestamp()
+                    - MapCache.getFrame(firstSegment).getTimestamp();
+            json.setHttpReqTransDelay(delay);
         }
     }
 
-    private void httpRespAndRespTransDelay(FrameJsonObject json, TcpStream tcpStream) {
+    private void httpRespAndRespTransDelay(FrameBean json, TcpStream tcpStream) {
         if (!json.isHttpResponse()) {
             return;
         }
@@ -153,29 +144,27 @@ public class TcpAnalyzer {
         Integer firstSegment = json.getFirstTcpSegmentIfHas();
         if (firstSegment == null) {
             if (httpRequestIn != null) {
-                Long delay = Long.valueOf(json.getTimeStamp())
-                        - Long.valueOf(MapCache.getFrame(httpRequestIn).toJsonObject().getTimeStamp());
-                json.setHttpRespDelay(String.valueOf(delay));
+                Long delay = json.getTimestamp()
+                        - MapCache.getFrame(httpRequestIn).getTimestamp();
+                json.setHttpRespDelay(delay);
             }
-            json.setHttpRespTransDelay(FrameConstant.ZERO_STRING);
+            json.setHttpRespTransDelay(Long.valueOf(FrameConstant.ZERO_STRING) );
             // 根据http_response，可以判断一次客户端和服务端
             json.setClientIp(json.getDstIp());
             json.setServerIp(json.getSrcIp());
         } else {
             if (httpRequestIn != null) {
-                Frame firstSegmentFrame = MapCache.getFrame(firstSegment);
-                FrameJsonObject firstSegmentFrameJson = firstSegmentFrame.toJsonObject();
-                Long respDelay = Long.valueOf(firstSegmentFrameJson.getTimeStamp())
-                        - Long.valueOf(MapCache.getFrame(httpRequestIn).toJsonObject().getTimeStamp());
-                firstSegmentFrameJson.setHttpRespDelay(String.valueOf(respDelay));
+                FrameBean firstSegmentFrame = MapCache.getFrame(firstSegment);
+                Long respDelay = firstSegmentFrame.getTimestamp()
+                        - MapCache.getFrame(httpRequestIn).getTimestamp();
+                firstSegmentFrame.setHttpRespDelay(respDelay);
                 // 根据http_response，可以判断一次客户端和服务端
-                firstSegmentFrameJson.setClientIp(json.getDstIp());
-                firstSegmentFrameJson.setServerIp(json.getSrcIp());
-                firstSegmentFrame.setFrameJson(firstSegmentFrameJson);
+                firstSegmentFrame.setClientIp(json.getDstIp());
+                firstSegmentFrame.setServerIp(json.getSrcIp());
             }
-            Long respTransDelay = Long.valueOf(json.getTimeStamp())
-                    - Long.valueOf(MapCache.getFrame(firstSegment).toJsonObject().getTimeStamp());
-            json.setHttpRespTransDelay(String.valueOf(respTransDelay));
+            Long respTransDelay = json.getTimestamp()
+                    - MapCache.getFrame(firstSegment).getTimestamp();
+            json.setHttpRespTransDelay(respTransDelay);
             // 根据http_response，可以判断一次客户端和服务端
             json.setClientIp(json.getDstIp());
             json.setServerIp(json.getSrcIp());
@@ -187,7 +176,6 @@ public class TcpAnalyzer {
      * <p>
      * 结束时建连时延分析，判断出客户端建连时延、服务端建连时延、总建连时延
      *
-     * @param tcpStream
      */
     private void endCreateConn(TcpStream tcpStream) {
 
@@ -196,56 +184,47 @@ public class TcpAnalyzer {
                 LOGGER.warn("TcpStream: " + tcpStream.getTcpStreamNumber() + ", ifHasSyn=" + tcpStream.hasSyn()
                         + ", can't judge client or server no response.");
             } else {
-                List<Frame> frames = tcpStream.getFrames();
-                Frame lastFrame = frames.get(frames.size() - 1);
-                FrameJsonObject json = lastFrame.toJsonObject();
-                json.setClientIp(tcpStream.getClientIp());
-                json.setServerIp(tcpStream.getServerIp());
+                List<FrameBean> frames = tcpStream.getFrames();
+                FrameBean lastFrame = frames.get(frames.size() - 1);
+                lastFrame.setClientIp(tcpStream.getClientIp());
+                lastFrame.setServerIp(tcpStream.getServerIp());
                 if (tcpStream.getSynTimeStamp() != null && tcpStream.getSackTimeStamp() != null) {
-                    json.setTcpClientConnectionNoResp();
+                    lastFrame.setTcpClientConnectionNoResp();
                 } else if (tcpStream.getSynTimeStamp() != null) {
-                    json.setTcpServerConnectionNoResp();
+                    lastFrame.setTcpServerConnectionNoResp();
                 }
-                lastFrame.setFrameJson(json);
             }
         } else if (Boolean.TRUE.equals(tcpStream.getTcpConnectionSuccess())) { // 建连成功时，计算建连时延
             long clientConnDelay = tcpStream.getSackTimeStamp() - tcpStream.getSynTimeStamp();
             long serverConnDelay = tcpStream.getTcpConnAckTimeStamp() - tcpStream.getSackTimeStamp();
             int connAckFrameNumver = tcpStream.getTcpConnAckFrameNumber();
 
-            Frame lastSackFrame = MapCache.getFrame(tcpStream.getLastSackFrameNumber());
-            FrameJsonObject lastSackFramJson = lastSackFrame.toJsonObject();
-            lastSackFramJson.setTcpClientConnectionDelay(String.valueOf(clientConnDelay));
-            lastSackFrame.setFrameJson(lastSackFramJson);
+            FrameBean lastSackFrame = MapCache.getFrame(tcpStream.getLastSackFrameNumber());
+            lastSackFrame.setTcpClientConnectionDelay(clientConnDelay);
 
-            Frame connAckFrame = MapCache.getFrame(connAckFrameNumver);
-            FrameJsonObject connAckFrameJson = connAckFrame.toJsonObject();
-            connAckFrameJson.setTcpServerConnectionDelay(String.valueOf(serverConnDelay));
-            connAckFrameJson.setTcpConnectionDelay(String.valueOf(clientConnDelay + serverConnDelay));
-            connAckFrame.setFrameJson(connAckFrameJson);
+            FrameBean connAckFrame = MapCache.getFrame(connAckFrameNumver);
+            connAckFrame.setTcpServerConnectionDelay(serverConnDelay);
+            connAckFrame.setTcpConnectionDelay(clientConnDelay + serverConnDelay);
         }
     }
 
     /**
      * 传输阶段，只计算建连成功的。
      *
-     * @param tcpStream
      */
     private void onlySuccess(TcpStream tcpStream) {
         if (tcpStream.getTcpConnectionSuccess() == null || tcpStream.getTcpConnectionSuccess().equals(Boolean.FALSE)) {
             return;
         }
 
-        List<Frame> frames = tcpStream.getFrames();
-        for (Frame frame : frames) {
-            FrameJsonObject json = frame.toJsonObject();
-            onlySuccessRTT(tcpStream, json);
-            onlySuccessRetrans(tcpStream, json);
-            frame.setFrameJson(json);
+        List<FrameBean> frames = tcpStream.getFrames();
+        for (FrameBean frame : frames) {
+            onlySuccessRTT(tcpStream, frame);
+            onlySuccessRetrans(tcpStream, frame);
         }
     }
 
-    private void onlySuccessRTT(TcpStream tcpStream, FrameJsonObject json) {
+    private void onlySuccessRTT(TcpStream tcpStream, FrameBean json) {
         // 不计算三次握手的
         if (json.isTcpConnectionSyn() || json.isTcpConnectionSack()) {
             return;
@@ -260,11 +239,11 @@ public class TcpAnalyzer {
             if (json.getSrcIp().equals(tcpStream.getServerIp())) {
                 json.setClientIp(tcpStream.getClientIp());
                 json.setServerIp(tcpStream.getServerIp());
-                json.setTcpUpRTT(String.valueOf(rtt));
+                json.setTcpUpRTT(rtt);
             } else if (json.getSrcIp().equals(tcpStream.getClientIp())) {
                 json.setClientIp(tcpStream.getClientIp());
                 json.setServerIp(tcpStream.getServerIp());
-                json.setTcpDownRTT(String.valueOf(rtt));
+                json.setTcpDownRTT(rtt);
             } else {
                 LOGGER.error("Tcp stream: " + tcpStream.getTcpStreamNumber()
                         + ", Can't judge server ip or client ip, frame src_ip: " + json.getSrcIp());
@@ -272,7 +251,7 @@ public class TcpAnalyzer {
         }
     }
 
-    private void onlySuccessRetrans(TcpStream tcpStream, FrameJsonObject json) {
+    private void onlySuccessRetrans(TcpStream tcpStream, FrameBean json) {
         if (!json.isTcpLenBt0() || json.isTcpConnectionSyn() || json.isTcpConnectionSack() || json.isTcpConnectionRst()
                 || json.isTcpConnectionFin() || json.isTcpKeepAlive() || json.isTcpDupAck()) {
             return;

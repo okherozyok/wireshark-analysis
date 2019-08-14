@@ -23,7 +23,7 @@ Content-Type: application/json
                         "type":"short"
                     },
                     "tcp":{
-                        "type":"byte"
+                        "type":"boolean"
                     },
                     "ip_src":{
                         "type":"ip"
@@ -50,16 +50,16 @@ Content-Type: application/json
                         "type":"integer"
                     },
                     "tcp_connection_syn":{
-                        "type":"byte"
+                        "type":"boolean"
                     },
                     "tcp_connection_sack":{
-                        "type":"byte"
+                        "type":"boolean"
                     },
                     "tcp_connection_fin":{
-                        "type":"byte"
+                        "type":"boolean"
                     },
                     "tcp_connection_rst":{
-                        "type":"byte"
+                        "type":"boolean"
                     },
                     "tcp_analysis_acks_frame":{
                         "type":"integer"
@@ -67,47 +67,41 @@ Content-Type: application/json
                     "tcp_analysis_ack_rtt":{
                         "type":"float"
                     },
-                    "tcp_segment":{
+                    "tcp_first_segment":{
                         "type":"integer"
                     },
                     "tcp_analysis_retransmission":{
-                        "type":"byte"
-                    },
-                    "tcp_analysis_spurious_retransmission":{
-                        "type":"byte"
-                    },
-                    "tcp_analysis_fast_retransmission":{
-                        "type":"byte"
+                        "type":"boolean"
                     },
                     "tcp_analysis_keep_alive":{
-                        "type":"byte"
+                        "type":"boolean"
                     },
                     "tcp_analysis_duplicate_ack":{
-                        "type":"byte"
+                        "type":"boolean"
                     },
                     "http_request":{
-                        "type":"byte"
+                        "type":"boolean"
                     },
                     "http_response":{
-                        "type":"byte"
+                        "type":"boolean"
                     },
                     "http_request_in":{
                         "type":"integer"
                     },
                     "tcp_client_connection_rst":{
-                        "type":"byte"
+                        "type":"boolean"
                     },
                     "tcp_server_connection_rst":{
-                        "type":"byte"
+                        "type":"boolean"
                     },
                     "tcp_client_connection_no_resp":{
-                        "type":"byte"
+                        "type":"boolean"
                     },
                     "tcp_server_connection_no_resp":{
-                        "type":"byte"
+                        "type":"boolean"
                     },
                     "tcp_connection_success":{
-                        "type":"byte"
+                        "type":"boolean"
                     },
                     "tcp_client_connection_delay":{
                         "type":"long"
@@ -125,16 +119,16 @@ Content-Type: application/json
                         "type":"long"
                     },
                     "tcp_up_retrans":{
-                        "type":"byte"
+                        "type":"boolean"
                     },
                     "tcp_down_retrans":{
-                        "type":"byte"
+                        "type":"boolean"
                     },
                     "tcp_up_payload":{
-                        "type":"byte"
+                        "type":"boolean"
                     },
                     "tcp_down_payload":{
-                        "type":"byte"
+                        "type":"boolean"
                     },
                     "http_response_code":{
                         "type":"integer"

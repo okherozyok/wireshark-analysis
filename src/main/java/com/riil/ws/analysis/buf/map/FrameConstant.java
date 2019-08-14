@@ -32,8 +32,6 @@ public final class FrameConstant {
 	public static final String TCP_ANALYSIS_KEEP_ALIVE = "tcp_analysis_keep_alive";
 	public static final String TCP_ANALYSIS_DUPLICATE_ACK = "tcp_analysis_duplicate_ack";
 	public static final String TCP_ANALYSIS_RETRANSMISSION = "tcp_analysis_retransmission";
-	public static final String TCP_ANALYSIS_SPURIOUS_RETRANSMISSION = "tcp_analysis_spurious_retransmission";
-	public static final String TCP_ANALYSIS_FAST_RETRANSMISSION = "tcp_analysis_fast_retransmission";
 	public static final String TCP_SEGMENT = "tcp_segment";
 	public static final String HTTP_REQUEST = "http_request";
 	public static final String HTTP_RESPONSE = "http_response";

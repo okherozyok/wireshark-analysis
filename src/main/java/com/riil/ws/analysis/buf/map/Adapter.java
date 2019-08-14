@@ -51,6 +51,14 @@ public class Adapter {
         return frame;
     }
 
+    public String esBean2IndexJson(FrameBean frame) {
+        return "{\"index\":{\"_index\":\"" + frame.getIndex() + "\"}}";
+    }
+
+    public String esBean2FrameJson(FrameBean frame) {
+        return JSON.toJSONString(frame);
+    }
+
     private void setIndex() {
         frame.setIndex((String) ((JSONObject) indexJson.get("index")).get("_index"));
     }
@@ -72,7 +80,7 @@ public class Adapter {
      * 由于ip_protoc 是 协议数组，取第一个协议为该frame的协议
      */
     @SuppressWarnings("unchecked")
-    public void setFrameProto() {
+    private void setFrameProto() {
         Object protos = getLayerBy(FrameConstant.IP_PROTO);
         if (protos != null) {
             Integer ipProto = Integer.valueOf(((List<String>) protos).get(0));
@@ -145,7 +153,7 @@ public class Adapter {
     }
 
     private void setTcpFirstSegment() {
-        frame.getLayers().setTcpFirstSegment(getIntegerLayerFirstBy(FrameConstant.TCP_FIRST_SEGMENT));
+        frame.getLayers().setTcpFirstSegment(getIntegerLayerFirstBy(FrameConstant.TCP_SEGMENT));
     }
 
     private void setTcpAnalysisRetransmission() {
