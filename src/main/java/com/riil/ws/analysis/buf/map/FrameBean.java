@@ -3,17 +3,15 @@ package com.riil.ws.analysis.buf.map;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.riil.ws.analysis.common.IpV4Util;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 public class FrameBean {
     @JSONField(serialize = false)
     private String index;
     private long timestamp;
 
     private Layers layers = new Layers();
-
-    @JSONField(serialize = false)
-    public Integer getFrameNumber() {
-        return layers.getFrameNumber();
-    }
 
     public String getIndex() {
         return index;
@@ -29,6 +27,220 @@ public class FrameBean {
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    @JSONField(serialize = false)
+    public boolean isTcp() {
+        Boolean isTcp = layers.getTcp();
+        return isTcp == null ? false : isTcp;
+    }
+
+    @JSONField(serialize = false)
+    public Boolean isTcpLenBt0() {
+        Integer tcpLen = layers.getTcpLen();
+        if (tcpLen != null) {
+            return tcpLen > 0;
+        }
+
+        return null;
+    }
+
+    @JSONField(serialize = false)
+    public boolean isTcpConnectionSyn() {
+        Boolean tcpConnectionSyn = layers.getTcpConnectionSyn();
+        return tcpConnectionSyn == null ? false : tcpConnectionSyn;
+    }
+
+    @JSONField(serialize = false)
+    public boolean isTcpConnectionSack() {
+        Boolean tcpConnectionSack = layers.getTcpConnectionSack();
+        return tcpConnectionSack == null ? false : tcpConnectionSack;
+    }
+
+    @JSONField(serialize = false)
+    public boolean isTcpConnectionRst() {
+        Boolean tcpConnectionRst = layers.getTcpConnectionRst();
+        return tcpConnectionRst == null ? false : tcpConnectionRst;
+    }
+
+    @JSONField(serialize = false)
+    public boolean isTcpConnectionFin() {
+        Boolean tcpConnectionFin = layers.getTcpConnectionFin();
+        return tcpConnectionFin == null ? false : tcpConnectionFin;
+    }
+
+    @JSONField(serialize = false)
+    public boolean isTcpKeepAlive() {
+        Boolean tcpAnalysisKeepAlive = layers.getTcpAnalysisKeepAlive();
+        return tcpAnalysisKeepAlive == null ? false : tcpAnalysisKeepAlive;
+    }
+
+    @JSONField(serialize = false)
+    public boolean isTcpDupAck() {
+        Boolean tcpAnalysisDuplicateAck = layers.getTcpAnalysisDuplicateAck();
+        return tcpAnalysisDuplicateAck == null ? false : tcpAnalysisDuplicateAck;
+    }
+
+    @JSONField(serialize = false)
+    public boolean isRetrans() {
+        Boolean tcpAnalysisRetransmission = layers.getTcpAnalysisRetransmission();
+        return tcpAnalysisRetransmission == null ? false : tcpAnalysisRetransmission;
+    }
+
+    @JSONField(serialize = false)
+    public boolean isHttpRequest() {
+        Boolean httpRequest = layers.getHttpRequest();
+        return httpRequest == null ? false : httpRequest;
+    }
+
+    @JSONField(serialize = false)
+    public boolean isHttpResponse() {
+        Boolean httpResponse = layers.getHttpResponse();
+        return httpResponse == null ? false : httpResponse;
+    }
+
+    @JSONField(serialize = false)
+    public int getFrameNumber() {
+        return layers.getFrameNumber();
+    }
+
+    @JSONField(serialize = false)
+    public Integer getTcpStreamNumber() {
+        return layers.getTcpStream();
+    }
+
+    @JSONField(serialize = false)
+    public Integer getTcpAckFrameNumber() {
+        return layers.getTcpAnalysisAcksFrame();
+    }
+
+    @JSONField(serialize = false)
+    public Long getTcpAnalysisAckRtt() {
+        Float tcpAnalysisAckRtt = layers.getTcpAnalysisAckRtt();
+        BigDecimal bd = new BigDecimal(String.valueOf(tcpAnalysisAckRtt));
+        return bd.setScale(3, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(1000L)).longValue();
+    }
+
+    @JSONField(serialize = false)
+    public String getSrcIp() {
+        return layers.getIpSrc();
+    }
+
+    @JSONField(serialize = false)
+    public String getDstIp() {
+        return layers.getIpDst();
+    }
+
+    @JSONField(serialize = false)
+    public Integer getFirstTcpSegmentIfHas() {
+        return layers.getTcpFirstSegment();
+    }
+
+    @JSONField(serialize = false)
+    public Integer getHttpRequestIn() {
+        return layers.getHttpRequestIn();
+    }
+
+    /**
+     * 如果客户端ip已经存在，不再设置
+     *
+     * @param clientIp
+     */
+    public void setClientIp(String clientIp) {
+        if (layers.getClientIp() == null) {
+            layers.setClientIp(clientIp);
+        }
+    }
+
+    /**
+     * 如果服务端ip已经存在，不再设置
+     *
+     * @param serverIp
+     */
+    public void setServerIp(String serverIp) {
+        if (layers.getServerIp() == null) {
+            layers.setServerIp(serverIp);
+        }
+    }
+
+    public void setTcpConnectionSuccess() {
+        layers.setTcpConnectionSuccess(true);
+    }
+
+    public void setTcpClientConnectionRst() {
+        layers.setTcpClientConnectionRst(true);
+    }
+
+    public void setTcpServerConnectionRst() {
+        layers.setTcpServerConnectionRst(true);
+    }
+
+    public void setTcpClientConnectionNoResp() {
+        layers.setTcpClientConnectionNoResp(true);
+    }
+
+    public void setTcpServerConnectionNoResp() {
+        layers.setTcpServerConnectionNoResp(true);
+    }
+
+    public void setTcpClientConnectionDelay(Long delay) {
+        layers.setTcpClientConnectionDelay(delay);
+    }
+
+    public void setTcpServerConnectionDelay(Long delay) {
+        layers.setTcpServerConnectionDelay(delay);
+    }
+
+    public void setTcpConnectionDelay(Long delay) {
+        layers.setTcpConnectionDelay(delay);
+    }
+
+    public void setTcpUpRTT(Long rtt) {
+        layers.setTcpUpRtt(rtt);
+    }
+
+    public void setTcpDownRTT(Long rtt) {
+        layers.setTcpDownRtt(rtt);
+    }
+
+    public void setTcpUpPayload() {
+        layers.setTcpUpPayload(true);
+    }
+
+    public void setTcpDownPayload() {
+        layers.setTcpDownPayload(true);
+    }
+
+    public void setTcpUpRetrans() {
+        layers.setTcpUpRetrans(true);
+    }
+
+    public void setTcpDownRetrans() {
+        layers.setTcpDownRetrans(true);
+    }
+
+    public void setHttpReqTransDelay(Long delay) {
+        layers.setHttpReqTransDelay(delay);
+    }
+
+    public void setHttpRespDelay(Long delay) {
+        layers.setHttpRespDelay(delay);
+    }
+
+    public void setHttpRespTransDelay(Long delay) {
+        layers.setHttpRespTransDelay(delay);
+    }
+
+    public void delClientIp() {
+        layers.setClientIp(null);
+    }
+
+    public void delServerIp() {
+        layers.setServerIp(null);
+    }
+
+    public void delTcpConnectionSuccess() {
+        layers.setTcpConnectionSuccess(null);
     }
 
     public Layers getLayers() {
@@ -101,6 +313,48 @@ public class FrameBean {
         @JSONField(name = FrameConstant.TCP_ANALYSIS_KEEP_ALIVE)
         private Boolean tcpAnalysisKeepAlive;
 
+        @JSONField(name = FrameConstant.TCP_CONNECTION_SUCCESS)
+        private Boolean tcpConnectionSuccess;
+
+        @JSONField(name = FrameConstant.TCP_CLIENT_CONNECTION_RST)
+        private Boolean tcpClientConnectionRst;
+
+        @JSONField(name = FrameConstant.TCP_SERVER_CONNECTION_RST)
+        private Boolean tcpServerConnectionRst;
+
+        @JSONField(name = FrameConstant.TCP_CLIENT_CONNECTION_NO_RESP)
+        private Boolean tcpClientConnectionNoResp;
+
+        @JSONField(name = FrameConstant.TCP_SERVER_CONNECTION_NO_RESP)
+        private Boolean tcpServerConnectionNoResp;
+
+        @JSONField(name = FrameConstant.TCP_CLIENT_CONNECTION_DELAY)
+        private Long tcpClientConnectionDelay;
+
+        @JSONField(name = FrameConstant.TCP_SERVER_CONNECTION_DELAY)
+        private Long tcpServerConnectionDelay;
+
+        @JSONField(name = FrameConstant.TCP_CONNECTION_DELAY)
+        private Long tcpConnectionDelay;
+
+        @JSONField(name = FrameConstant.TCP_UP_RTT)
+        private Long tcpUpRtt;
+
+        @JSONField(name = FrameConstant.TCP_DOWN_RTT)
+        private Long tcpDownRtt;
+
+        @JSONField(name = FrameConstant.TCP_UP_PAYLOAD)
+        private Boolean tcpUpPayload;
+
+        @JSONField(name = FrameConstant.TCP_DOWN_PAYLOAD)
+        private Boolean tcpDownPayload;
+
+        @JSONField(name = FrameConstant.TCP_UP_RETRANS)
+        private Boolean tcpUpRetrans;
+
+        @JSONField(name = FrameConstant.TCP_DOWN_RETRANS)
+        private Boolean tcpDownRetrans;
+
         @JSONField(name = FrameConstant.HTTP_REQUEST)
         private Boolean httpRequest;
 
@@ -108,10 +362,19 @@ public class FrameBean {
         private Boolean httpResponse;
 
         @JSONField(name = FrameConstant.HTTP_REQUEST_IN)
-        private Boolean httpRequestIn;
+        private Integer httpRequestIn;
 
         @JSONField(name = FrameConstant.HTTP_RESPONSE_CODE)
         private Integer httpResponseCode;
+
+        @JSONField(name = FrameConstant.HTTP_REQ_TRANS_DELAY)
+        private Long httpReqTransDelay;
+
+        @JSONField(name = FrameConstant.HTTP_RESP_DELAY)
+        private Long httpRespDelay;
+
+        @JSONField(name = FrameConstant.HTTP_RESP_TRANS_DELAY)
+        private Long httpRespTransDelay;
 
         public void setSrcIp(String srcIp) {
             this.srcIpInt = IpV4Util.ipStr2Int(srcIp);
@@ -140,13 +403,11 @@ public class FrameBean {
             return null;
         }
 
-        /**
-         * 如果客户端ip已经存在，不再设置
-         *
-         * @param clientIp
-         */
+
         public void setClientIp(String clientIp) {
-            if (this.clientIpInt == null) {
+            if (clientIp == null) {
+                this.clientIpInt = null;
+            } else {
                 this.clientIpInt = IpV4Util.ipStr2Int(clientIp);
             }
         }
@@ -160,13 +421,10 @@ public class FrameBean {
             return null;
         }
 
-        /**
-         * 如果服务端ip已经存在，不再设置
-         *
-         * @param serverIp
-         */
         public void setServerIp(String serverIp) {
-            if (this.serverIpInt == null) {
+            if (serverIp == null) {
+                this.serverIpInt = null;
+            } else {
                 this.serverIpInt = IpV4Util.ipStr2Int(serverIp);
             }
         }
@@ -331,6 +589,118 @@ public class FrameBean {
             this.tcpAnalysisKeepAlive = tcpAnalysisKeepAlive;
         }
 
+        public Boolean getTcpConnectionSuccess() {
+            return tcpConnectionSuccess;
+        }
+
+        public void setTcpConnectionSuccess(Boolean tcpConnectionSuccess) {
+            this.tcpConnectionSuccess = tcpConnectionSuccess;
+        }
+
+        public Boolean getTcpClientConnectionRst() {
+            return tcpClientConnectionRst;
+        }
+
+        public void setTcpClientConnectionRst(Boolean tcpClientConnectionRst) {
+            this.tcpClientConnectionRst = tcpClientConnectionRst;
+        }
+
+        public Boolean getTcpServerConnectionRst() {
+            return tcpServerConnectionRst;
+        }
+
+        public void setTcpServerConnectionRst(Boolean tcpServerConnectionRst) {
+            this.tcpServerConnectionRst = tcpServerConnectionRst;
+        }
+
+        public Boolean getTcpClientConnectionNoResp() {
+            return tcpClientConnectionNoResp;
+        }
+
+        public void setTcpClientConnectionNoResp(Boolean tcpClientConnectionNoResp) {
+            this.tcpClientConnectionNoResp = tcpClientConnectionNoResp;
+        }
+
+        public Boolean getTcpServerConnectionNoResp() {
+            return tcpServerConnectionNoResp;
+        }
+
+        public void setTcpServerConnectionNoResp(Boolean tcpServerConnectionNoResp) {
+            this.tcpServerConnectionNoResp = tcpServerConnectionNoResp;
+        }
+
+        public Long getTcpServerConnectionDelay() {
+            return tcpServerConnectionDelay;
+        }
+
+        public void setTcpServerConnectionDelay(Long tcpServerConnectionDelay) {
+            this.tcpServerConnectionDelay = tcpServerConnectionDelay;
+        }
+
+        public Long getTcpConnectionDelay() {
+            return tcpConnectionDelay;
+        }
+
+        public void setTcpConnectionDelay(Long tcpConnectionDelay) {
+            this.tcpConnectionDelay = tcpConnectionDelay;
+        }
+
+        public Long getTcpUpRtt() {
+            return tcpUpRtt;
+        }
+
+        public void setTcpUpRtt(Long tcpUpRtt) {
+            this.tcpUpRtt = tcpUpRtt;
+        }
+
+        public Long getTcpDownRtt() {
+            return tcpDownRtt;
+        }
+
+        public void setTcpDownRtt(Long tcpDownRtt) {
+            this.tcpDownRtt = tcpDownRtt;
+        }
+
+        public Boolean getTcpUpPayload() {
+            return tcpUpPayload;
+        }
+
+        public void setTcpUpPayload(Boolean tcpUpPayload) {
+            this.tcpUpPayload = tcpUpPayload;
+        }
+
+        public Boolean getTcpDownPayload() {
+            return tcpDownPayload;
+        }
+
+        public void setTcpDownPayload(Boolean tcpDownPayload) {
+            this.tcpDownPayload = tcpDownPayload;
+        }
+
+        public Boolean getTcpUpRetrans() {
+            return tcpUpRetrans;
+        }
+
+        public void setTcpUpRetrans(Boolean tcpUpRetrans) {
+            this.tcpUpRetrans = tcpUpRetrans;
+        }
+
+        public Boolean getTcpDownRetrans() {
+            return tcpDownRetrans;
+        }
+
+        public void setTcpDownRetrans(Boolean tcpDownRetrans) {
+            this.tcpDownRetrans = tcpDownRetrans;
+        }
+
+        public Long getTcpClientConnectionDelay() {
+            return tcpClientConnectionDelay;
+        }
+
+        public void setTcpClientConnectionDelay(Long tcpClientConnectionDelay) {
+            this.tcpClientConnectionDelay = tcpClientConnectionDelay;
+        }
+
         public Boolean getHttpRequest() {
             return httpRequest;
         }
@@ -347,11 +717,11 @@ public class FrameBean {
             this.httpResponse = httpResponse;
         }
 
-        public Boolean getHttpRequestIn() {
+        public Integer getHttpRequestIn() {
             return httpRequestIn;
         }
 
-        public void setHttpRequestIn(Boolean httpRequestIn) {
+        public void setHttpRequestIn(Integer httpRequestIn) {
             this.httpRequestIn = httpRequestIn;
         }
 
@@ -361,6 +731,30 @@ public class FrameBean {
 
         public void setHttpResponseCode(Integer httpResponseCode) {
             this.httpResponseCode = httpResponseCode;
+        }
+
+        public Long getHttpReqTransDelay() {
+            return httpReqTransDelay;
+        }
+
+        public void setHttpReqTransDelay(Long httpReqTransDelay) {
+            this.httpReqTransDelay = httpReqTransDelay;
+        }
+
+        public Long getHttpRespDelay() {
+            return httpRespDelay;
+        }
+
+        public void setHttpRespDelay(Long httpRespDelay) {
+            this.httpRespDelay = httpRespDelay;
+        }
+
+        public Long getHttpRespTransDelay() {
+            return httpRespTransDelay;
+        }
+
+        public void setHttpRespTransDelay(Long httpRespTransDelay) {
+            this.httpRespTransDelay = httpRespTransDelay;
         }
     }
 }

@@ -165,7 +165,7 @@ public class Adapter {
     }
 
     private void setHttpRequestIn() {
-        frame.getLayers().setHttpRequestIn(getBooleanLayerBy(FrameConstant.HTTP_REQUEST_IN));
+        frame.getLayers().setHttpRequestIn(getIntegerLayerFirstBy(FrameConstant.HTTP_REQUEST_IN));
     }
 
     private void setHttpResponseCode() {
