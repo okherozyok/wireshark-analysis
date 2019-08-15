@@ -260,6 +260,7 @@ public class FrameBean {
         private Integer clientIpInt;
         private Integer serverIpInt;
 
+        @JSONField(name = FrameConstant.IP_PROTO)
         private Integer ipProto;
 
         @JSONField(name = FrameConstant.TCP)
