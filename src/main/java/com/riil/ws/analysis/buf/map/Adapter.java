@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.riil.ws.analysis.buf.map.AnalyzerConstant.*;
+
 @Service
 public class Adapter {
     private final Logger LOGGER = LoggerFactory.getLogger(Adapter.class);
@@ -52,7 +54,7 @@ public class Adapter {
     }
 
     public String esBean2IndexJson(FrameBean frame) {
-        return "{\"index\":{\"_index\":\"" + frame.getIndex() + "\"}}";
+        return generateIndexJson(frame.getIndex());
     }
 
     public String esBean2FrameJson(FrameBean frame) {
@@ -60,7 +62,7 @@ public class Adapter {
     }
 
     private void setIndex() {
-        frame.setIndex((String) ((JSONObject) indexJson.get("index")).get("_index"));
+        frame.setIndex((String) ((JSONObject) indexJson.get(INDEX)).get(_INDEX));
     }
 
     private void setTimeStamp() {

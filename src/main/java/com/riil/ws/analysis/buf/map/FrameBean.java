@@ -132,6 +132,11 @@ public class FrameBean {
     }
 
     @JSONField(serialize = false)
+    public Integer getTcpDstPort() {
+        return layers.getTcpDstPort();
+    }
+
+    @JSONField(serialize = false)
     public Integer getFirstTcpSegmentIfHas() {
         return layers.getTcpFirstSegment();
     }

@@ -1,10 +1,18 @@
 package com.riil.ws.analysis.buf.map;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import com.alibaba.fastjson.JSON;
+import com.riil.ws.analysis.common.IpPortUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import static com.riil.ws.analysis.buf.map.AnalyzerConstant.PACKET_INDEX_PREFIX;
+import static com.riil.ws.analysis.buf.map.AnalyzerConstant.TCP_CONCURRENT_CONN_INDEX_PREFIX;
 
 /**
  * @author GlobalZ
@@ -22,7 +30,6 @@ public class TcpAnalyzer {
         }
 
         endCreateConn(tcpStream);
-
         onlySuccess(tcpStream);
     }
 
@@ -42,6 +49,7 @@ public class TcpAnalyzer {
                 tcpStream.setSynTimeStamp(json.getTimestamp());
                 tcpStream.setClientIp(json.getSrcIp());
                 tcpStream.setServerIp(json.getDstIp());
+                tcpStream.setDstPort(json.getTcpDstPort());
             }
 
             // 可能发生了syn重传，清除建连成功的标志
@@ -51,6 +59,7 @@ public class TcpAnalyzer {
                 // 丢失syn包的时候，纠正下客户端和服务端ip
                 tcpStream.setClientIp(json.getDstIp());
                 tcpStream.setServerIp(json.getSrcIp());
+                tcpStream.setDstPort(json.getTcpDstPort());
             }
             tcpStream.addSackFrameNumber(json.getFrameNumber());
             tcpStream.setSackTimeStamp(json.getTimestamp());
@@ -148,7 +157,7 @@ public class TcpAnalyzer {
                         - MapCache.getFrame(httpRequestIn).getTimestamp();
                 json.setHttpRespDelay(delay);
             }
-            json.setHttpRespTransDelay(Long.valueOf(FrameConstant.ZERO_STRING) );
+            json.setHttpRespTransDelay(Long.valueOf(FrameConstant.ZERO_STRING));
             // 根据http_response，可以判断一次客户端和服务端
             json.setClientIp(json.getDstIp());
             json.setServerIp(json.getSrcIp());
@@ -175,7 +184,6 @@ public class TcpAnalyzer {
      * 结束时建连状态分析，判断建连无响应的情况，判断一个tcpStream是否有syn包。
      * <p>
      * 结束时建连时延分析，判断出客户端建连时延、服务端建连时延、总建连时延
-     *
      */
     private void endCreateConn(TcpStream tcpStream) {
 
@@ -210,7 +218,6 @@ public class TcpAnalyzer {
 
     /**
      * 传输阶段，只计算建连成功的。
-     *
      */
     private void onlySuccess(TcpStream tcpStream) {
         if (tcpStream.getTcpConnectionSuccess() == null || tcpStream.getTcpConnectionSuccess().equals(Boolean.FALSE)) {
@@ -222,6 +229,8 @@ public class TcpAnalyzer {
             onlySuccessRTT(tcpStream, frame);
             onlySuccessRetrans(tcpStream, frame);
         }
+
+        onlySuccessConcurrentConn(tcpStream);
     }
 
     private void onlySuccessRTT(TcpStream tcpStream, FrameBean json) {
@@ -273,6 +282,41 @@ public class TcpAnalyzer {
         } else {
             LOGGER.error("TcpStream=" + tcpStream.getTcpStreamNumber() + ", frameNumber=" + json.getFrameNumber() +
                     ", can't judge client ip or server ip.");
+        }
+    }
+
+    private void onlySuccessConcurrentConn(TcpStream tcpStream) {
+        final long second = 1000;
+
+        List<FrameBean> frames = tcpStream.getFrames();
+        FrameBean firstFrame = frames.get(0);
+        String firstFrameIndex = firstFrame.getIndex();
+        FrameBean lastFrame = frames.get(frames.size() - 1);
+
+        long startTime = firstFrame.getTimestamp() / second * second;
+        long endTime = lastFrame.getTimestamp() / second * second;
+
+        long ipPortKey = IpPortUtil.ipPortKey(tcpStream.getServerIp(), tcpStream.getDstPort());
+        Map<Long, Map<Long, ConcurrentConnBean>> concurrentConnCache = MapCache.getConcurrentConnCache();
+        Map<Long, ConcurrentConnBean> concurrentConnBeanMap = concurrentConnCache.get(ipPortKey);
+        if (concurrentConnBeanMap == null) {
+            concurrentConnBeanMap = new HashMap<>();
+            concurrentConnCache.put(ipPortKey, concurrentConnBeanMap);
+        }
+        while (startTime <= endTime) {
+            ConcurrentConnBean concurrentConnBean = concurrentConnBeanMap.get(startTime);
+            if (concurrentConnBean == null) {
+                concurrentConnBean = new ConcurrentConnBean();
+                concurrentConnBean.setIndex(firstFrameIndex.replace(PACKET_INDEX_PREFIX, TCP_CONCURRENT_CONN_INDEX_PREFIX));
+                concurrentConnBean.setServerIp(tcpStream.getServerIp());
+                concurrentConnBean.setTcpDstPort(tcpStream.getDstPort());
+                concurrentConnBean.setTimestamp(startTime);
+                concurrentConnBeanMap.put(startTime, concurrentConnBean);
+            }
+            concurrentConnBean.addConnectCount();
+            concurrentConnBean.addTcpStream(tcpStream.getTcpStreamNumber());
+
+            startTime += second;
         }
     }
 }

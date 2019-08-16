@@ -1,5 +1,7 @@
 package com.riil.ws.analysis.buf.map;
 
+import com.carrotsearch.hppc.CharShortMap;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,6 +10,9 @@ public final class MapCache {
 
 	private static final Map<Integer, FrameBean> FRAME_BEAN_MAP = new HashMap<>(INITIAL_CAPACITY);
 	private static final Map<Integer, TcpStream> TCP_STREAM_MAP = new HashMap<>();
+
+	// ip+port key，timestamp key
+	private static final Map<Long, Map<Long, ConcurrentConnBean>> CONCURRENT_CONN_CACHE = new HashMap<>();
 
 	public static int getInitCapacity() {
 		return INITIAL_CAPACITY;
@@ -35,5 +40,9 @@ public final class MapCache {
 
 	public static Map<Integer, TcpStream> getTcpStreamMap() {
 		return TCP_STREAM_MAP;
+	}
+
+	public static Map<Long, Map<Long, ConcurrentConnBean>> getConcurrentConnCache() {
+		return CONCURRENT_CONN_CACHE;
 	}
 }

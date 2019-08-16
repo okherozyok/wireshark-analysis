@@ -2,8 +2,6 @@ package com.riil.ws.analysis.buf.map;
 
 public final class FrameConstant {
 	// 值
-	public static final String SIGN_PLACEHOLDER = "1";
-	public static final Integer ICMP_PROTO_NUM = 1;
 	public static final Integer TCP_PROTO_NUM = 6;
 	public static final String ZERO_STRING="0";
 	
@@ -60,5 +58,6 @@ public final class FrameConstant {
 	public static final String HTTP_REQ_TRANS_DELAY = "http_req_trans_delay";
 	public static final String HTTP_RESP_DELAY = "http_resp_delay";
 	public static final String HTTP_RESP_TRANS_DELAY = "http_resp_trans_delay";
+	public static final String CONNECT_COUNT = "connect_count";
 
 }

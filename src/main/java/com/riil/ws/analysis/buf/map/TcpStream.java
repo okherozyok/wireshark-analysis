@@ -11,6 +11,7 @@ public class TcpStream {
 
 	private String clientIp = null;
 	private String serverIp = null;
+	private Integer dstPort = null;
 	private Long synTimeStamp = null;
 	private Long sackTimeStamp = null;
 	private Set<Integer> sackFrameNumberSet = new LinkedHashSet<Integer>();
@@ -44,6 +45,14 @@ public class TcpStream {
 
 	public void setServerIp(String serverIp) {
 		this.serverIp = serverIp;
+	}
+
+	public Integer getDstPort() {
+		return dstPort;
+	}
+
+	public void setDstPort(Integer dstPort) {
+		this.dstPort = dstPort;
 	}
 
 	public Long getSynTimeStamp() {
