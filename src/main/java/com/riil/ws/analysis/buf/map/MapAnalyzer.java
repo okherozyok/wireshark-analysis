@@ -53,6 +53,8 @@ public class MapAnalyzer implements IAnalyzer {
     @Autowired
     private TcpAnalyzer tcpAnalyzer;
 
+    private RestHighLevelClient client;
+
     public void save(String indexLineJson, String frameLineJson) throws Exception {
         FrameBean frame = adapter.esJson2Bean(indexLineJson, frameLineJson);
         MapCache.putFrame(frame.getFrameNumber(), frame);
@@ -142,6 +144,7 @@ public class MapAnalyzer implements IAnalyzer {
         if (bulkRequest.numberOfActions() > 0) {
             bulk2ES(client, bulkRequest);
         }
+
     }
 
     private void output2ESConcurrentConn() throws Exception {
@@ -171,10 +174,15 @@ public class MapAnalyzer implements IAnalyzer {
         if (bulkRequest.numberOfActions() > 0) {
             bulk2ES(client, bulkRequest);
         }
+
     }
 
     private RestHighLevelClient newRestHighLevelClient() {
-        return new RestHighLevelClient(RestClient.builder(new HttpHost(ESHost, ESPort, "http")));
+        if (client == null) {
+            return new RestHighLevelClient(RestClient.builder(new HttpHost(ESHost, ESPort, "http")));
+
+        }
+        return client;
     }
 
     private void bulk2ES(RestHighLevelClient client, BulkRequest bulkRequest) throws Exception {

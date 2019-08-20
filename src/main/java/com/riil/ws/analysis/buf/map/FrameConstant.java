@@ -3,6 +3,7 @@ package com.riil.ws.analysis.buf.map;
 public final class FrameConstant {
 	// 值
 	public static final Integer TCP_PROTO_NUM = 6;
+	public static final Integer UDP_PROTO_NUM = 17;
 	public static final String ZERO_STRING="0";
 	
 	// 结构
@@ -35,6 +36,16 @@ public final class FrameConstant {
 	public static final String HTTP_RESPONSE = "http_response";
 	public static final String HTTP_REQUEST_IN = "http_request_in";
 	public static final String HTTP_RESPONSE_CODE = "http_response_code";
+	public static final String DNS_ID = "dns_id";
+	public static final String DNS_FLAGS_RESPONSE = "dns_flags_response";
+	public static final String DNS_QRY_TYPE = "dns_qry_type";
+	public static final String DNS_FLAGS_RCODE = "dns_flags_rcode";
+	public static final int DNS_FLAGS_RCODE_NO_ERROR = 0;
+	public static final String DNS_QRY_NAME = "dns_qry_name";
+	public static final String DNS_COUNT_ANSWERS = "dns_count_answers";
+	public static final String DNS_RESP_TYPE = "dns_resp_type";
+	public static final String DNS_RESP_TYPE_HOST_ADDRESS = "1";
+	public static final String DNS_A = "dns_a";
 
 	// 指标，补充的
 	public static final String CLIENT_IP = "client_ip";
@@ -59,5 +70,6 @@ public final class FrameConstant {
 	public static final String HTTP_RESP_DELAY = "http_resp_delay";
 	public static final String HTTP_RESP_TRANS_DELAY = "http_resp_trans_delay";
 	public static final String CONNECT_COUNT = "connect_count";
-
+	public static final String DNS_QRY_HOST = "dns_qry_host";
+	public static final String DNS_ANSWER_IP = "dns_answer_ip";
 }

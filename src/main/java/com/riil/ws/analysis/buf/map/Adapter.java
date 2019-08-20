@@ -5,7 +5,9 @@ import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
+import java.util.Iterator;
 import java.util.List;
 
 import static com.riil.ws.analysis.buf.map.AnalyzerConstant.*;
@@ -49,6 +51,12 @@ public class Adapter {
         setHttpResponse();
         setHttpRequestIn();
         setHttpResponseCode();
+        setDnsId();
+        setDnsFlagsResponse();
+        setDnsQryHost();
+        setDnsFlagsRcode();
+        setDnsQryName();
+        setDnsAnswerIp();
 
         return frame;
     }
@@ -80,6 +88,8 @@ public class Adapter {
 
     /**
      * 由于ip_protoc 是 协议数组，取第一个协议为该frame的协议
+     * <p>
+     * 实际抓包时，发现网络层是ICMP，ICMP下又包含TCP，这样的packet不计算。
      */
     @SuppressWarnings("unchecked")
     private void setFrameProto() {
@@ -180,6 +190,85 @@ public class Adapter {
 
     private void setHttpResponseCode() {
         frame.getLayers().setHttpResponseCode(getIntegerLayerFirstBy(FrameConstant.HTTP_RESPONSE_CODE));
+    }
+
+    /**
+     * 实际抓包时，发现网络层是ICMP，ICMP下又包含DNS，这样的packet不计算。
+     */
+    @SuppressWarnings("unchecked")
+    private void setDnsId() {
+        Object protos = getLayerBy(FrameConstant.IP_PROTO);
+        if (protos != null) {
+            Integer ipProto = Integer.valueOf(((List<String>) protos).get(0));
+            frame.getLayers().setIpProto(ipProto);
+            if (FrameConstant.UDP_PROTO_NUM.equals(ipProto)) {
+                frame.getLayers().setDnsId(getLayerFirstBy(FrameConstant.DNS_ID));
+            }
+        }
+
+    }
+
+    private void setDnsFlagsResponse() {
+        frame.getLayers().setDnsFlagsResponse(getIntegerLayerFirstBy(FrameConstant.DNS_FLAGS_RESPONSE));
+    }
+
+    /**
+     * DNS的查询类型是 1 ， 表示查询主机。
+     */
+    private void setDnsQryHost() {
+        Integer qryType = getIntegerLayerFirstBy(FrameConstant.DNS_QRY_TYPE);
+        if (qryType != null) {
+            if (qryType.equals(1)) {
+                frame.getLayers().setDnsQryHost(true);
+            }
+        }
+    }
+
+    private void setDnsFlagsRcode() {
+        frame.getLayers().setDnsFlagsRcode(getIntegerLayerFirstBy(FrameConstant.DNS_FLAGS_RCODE));
+    }
+
+    private void setDnsQryName() {
+        frame.getLayers().setDnsQryName(getLayerFirstBy(FrameConstant.DNS_QRY_NAME));
+    }
+
+    @SuppressWarnings("unchecked")
+    private void setDnsAnswerIp() {
+        // 过滤掉 非 UDP
+        if (!FrameConstant.UDP_PROTO_NUM.equals(frame.getLayers().getIpProto())) {
+            return;
+        }
+
+        // 过滤掉 非 DNS 查询 主机
+        if (!Boolean.TRUE.equals(frame.getLayers().getDnsQryHost())) {
+            return;
+        }
+
+        // 过滤掉 响应 不成功的
+        if (!Integer.valueOf(FrameConstant.DNS_FLAGS_RCODE_NO_ERROR).equals(frame.getLayers().getDnsFlagsRcode())) {
+            return;
+        }
+
+        // DNS Answer RRS 的个数
+        Integer answers = getIntegerLayerFirstBy(FrameConstant.DNS_COUNT_ANSWERS);
+        if (answers != null && answers > 0) {
+            // DNS的 Answer RRs、Authority RRs、Additional RRs的类型
+            List<String> respTypes = (List<String>) getLayerBy(FrameConstant.DNS_RESP_TYPE);
+            // RRs中的所有是IP的
+            List<String> dnsAs = (List<String>) getLayerBy(FrameConstant.DNS_A);
+            // 应答是成功的，但是应答中没有ip
+            if (CollectionUtils.isEmpty(dnsAs)) {
+                LOGGER.debug("FrameNumber:" + frame.getLayers().getFrameNumber() + ", DnsId:" + frame.getLayers().getDnsId()
+                        + ", Answers RRs have no ip.");
+                return;
+            }
+            Iterator<String> dnsAIt = dnsAs.iterator();
+            for (int i = 0; i < answers; i++) {
+                if (respTypes.get(i).equals(FrameConstant.DNS_RESP_TYPE_HOST_ADDRESS)) {
+                    frame.getLayers().addAnswerIp(dnsAIt.next());
+                }
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")

@@ -2,9 +2,13 @@ package com.riil.ws.analysis.buf.map;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.riil.ws.analysis.common.IpV4Util;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FrameBean {
     @JSONField(serialize = false)
@@ -144,6 +148,11 @@ public class FrameBean {
     @JSONField(serialize = false)
     public Integer getHttpRequestIn() {
         return layers.getHttpRequestIn();
+    }
+
+    @JSONField(serialize = false)
+    public Integer getDnsId() {
+        return layers.getDnsIdInt();
     }
 
     /**
@@ -381,6 +390,22 @@ public class FrameBean {
 
         @JSONField(name = FrameConstant.HTTP_RESP_TRANS_DELAY)
         private Long httpRespTransDelay;
+
+        private Integer dnsId;
+
+        @JSONField(name = FrameConstant.DNS_FLAGS_RESPONSE)
+        private Integer dnsFlagsResponse;
+
+        @JSONField(name = FrameConstant.DNS_QRY_HOST)
+        private Boolean dnsQryHost;
+
+        @JSONField(name = FrameConstant.DNS_FLAGS_RCODE)
+        private Integer dnsFlagsRcode;
+
+        @JSONField(name = FrameConstant.DNS_QRY_NAME)
+        private String dnsQryName;
+
+        private List<Integer> dnsAnswerIp = null;
 
         public void setSrcIp(String srcIp) {
             this.srcIpInt = IpV4Util.ipStr2Int(srcIp);
@@ -761,6 +786,79 @@ public class FrameBean {
 
         public void setHttpRespTransDelay(Long httpRespTransDelay) {
             this.httpRespTransDelay = httpRespTransDelay;
+        }
+
+        @JSONField(name = FrameConstant.DNS_ID)
+        public String getDnsId() {
+            if (dnsId != null) {
+                return "0x" + Integer.toHexString(dnsId);
+            }
+
+            return null;
+        }
+
+        public void setDnsId(String dnsId) {
+            if (!StringUtils.isEmpty(dnsId)) {
+                this.dnsId = Integer.parseInt(dnsId.substring(2), 16);
+            }
+        }
+
+        public Integer getDnsIdInt() {
+            return dnsId;
+        }
+
+        public Integer getDnsFlagsResponse() {
+            return dnsFlagsResponse;
+        }
+
+        public void setDnsFlagsResponse(Integer dnsFlagsResponse) {
+            this.dnsFlagsResponse = dnsFlagsResponse;
+        }
+
+        public Boolean getDnsQryHost() {
+            return dnsQryHost;
+        }
+
+        public void setDnsQryHost(Boolean dnsQryHost) {
+            this.dnsQryHost = dnsQryHost;
+        }
+
+        public Integer getDnsFlagsRcode() {
+            return dnsFlagsRcode;
+        }
+
+        public void setDnsFlagsRcode(Integer dnsFlagsRcode) {
+            this.dnsFlagsRcode = dnsFlagsRcode;
+        }
+
+        public String getDnsQryName() {
+            return dnsQryName;
+        }
+
+        public void setDnsQryName(String dnsQryName) {
+            this.dnsQryName = dnsQryName;
+        }
+
+        public void addAnswerIp(String ip) {
+            if (dnsAnswerIp == null) {
+                dnsAnswerIp = new ArrayList<>();
+            }
+
+            dnsAnswerIp.add(IpV4Util.ipStr2Int(ip));
+        }
+
+        @JSONField(name = FrameConstant.DNS_ANSWER_IP)
+        public List<String> getAnswerIp() {
+            if (!CollectionUtils.isEmpty(dnsAnswerIp)) {
+                List<String> ips = new ArrayList<>(dnsAnswerIp.size());
+                for (Integer ip : dnsAnswerIp) {
+                    ips.add(IpV4Util.ipInt2Str(ip));
+                }
+
+                return ips;
+            }
+
+            return null;
         }
     }
 }

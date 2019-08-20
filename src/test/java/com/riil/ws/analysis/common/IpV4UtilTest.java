@@ -2,6 +2,7 @@ package com.riil.ws.analysis.common;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.springframework.util.StringUtils;
 
 import static org.junit.Assert.*;
 
@@ -18,5 +19,9 @@ public class IpV4UtilTest {
 
     @Test
     public void ipInt2Str() {
+        String id="0000105c";
+        int i = 0x0000105c;
+        System.out.println(Integer.parseInt(id, 16));
+        Assert.assertTrue(Integer.parseInt(id, 16) == i);
     }
 }
