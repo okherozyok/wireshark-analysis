@@ -1,4 +1,6 @@
-package com.riil.ws.analysis.buf.map;
+package com.riil.ws.analysis.buf.map.tcp;
+
+import com.riil.ws.analysis.buf.map.FrameBean;
 
 import java.util.ArrayList;
 import java.util.Iterator;

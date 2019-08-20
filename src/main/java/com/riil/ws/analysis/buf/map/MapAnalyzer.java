@@ -4,6 +4,9 @@ import java.io.FileWriter;
 import java.util.Map;
 import java.util.Set;
 
+import com.riil.ws.analysis.buf.map.dns.DnsSession;
+import com.riil.ws.analysis.buf.map.tcp.TcpAnalyzer;
+import com.riil.ws.analysis.buf.map.tcp.TcpStream;
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -19,7 +22,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.riil.ws.analysis.buf.IAnalyzer;
 
 import static com.riil.ws.analysis.buf.map.AnalyzerConstant.*;
@@ -69,6 +71,16 @@ public class MapAnalyzer implements IAnalyzer {
             tcpStream.append(frame);
         }
 
+        Boolean dnsQryHost = frame.getDnsQryHost();
+        if(Boolean.TRUE.equals(dnsQryHost)) {
+            int dnsId = frame.getDnsId();
+            DnsSession dnsSession = MapCache.getDnsSession(dnsId);
+            if(dnsSession == null) {
+                dnsSession = new DnsSession(dnsId);
+                MapCache.putDnsSession(dnsSession);
+            }
+            dnsSession.append(frame);
+        }
     }
 
     @Override

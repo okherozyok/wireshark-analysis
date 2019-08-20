@@ -23,5 +23,7 @@ public class IpV4UtilTest {
         int i = 0x0000105c;
         System.out.println(Integer.parseInt(id, 16));
         Assert.assertTrue(Integer.parseInt(id, 16) == i);
+
+        System.out.println(Boolean.FALSE.equals(null));
     }
 }

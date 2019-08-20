@@ -104,6 +104,12 @@ public class FrameBean {
     }
 
     @JSONField(serialize = false)
+    public boolean isDnsQry() {
+        Boolean dnsQryHost = layers.getDnsQryHost();
+        return dnsQryHost == null ? false : dnsQryHost;
+    }
+
+    @JSONField(serialize = false)
     public int getFrameNumber() {
         return layers.getFrameNumber();
     }
@@ -153,6 +159,11 @@ public class FrameBean {
     @JSONField(serialize = false)
     public Integer getDnsId() {
         return layers.getDnsIdInt();
+    }
+
+    @JSONField(serialize = false)
+    public Boolean getDnsQryHost() {
+        return layers.getDnsQryHost();
     }
 
     /**
