@@ -72,4 +72,9 @@ public final class FrameConstant {
 	public static final String CONNECT_COUNT = "connect_count";
 	public static final String DNS_QRY_HOST = "dns_qry_host";
 	public static final String DNS_ANSWER_IP = "dns_answer_ip";
+	public static final String DNS_REPLY_DELAY = "dns_reply_delay";
+	public static final String DNS_QRY_SUCCESS = "dns_qry_success";
+	public static final String DNS_ERROR_ANSWER = "dns_error_answer";
+	public static final String DNS_NO_RESPONSE = "dns_no_response";
+
 }

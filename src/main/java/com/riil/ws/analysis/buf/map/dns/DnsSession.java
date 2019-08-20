@@ -7,12 +7,12 @@ import java.util.List;
 
 public class DnsSession {
     private int dnsId;
-    private Long qryTime=null;
+    private Long qryTime = null;
     private String clientIp = null;
     private String serverIp = null;
+    private boolean hasResult = false;
 
     private List<FrameBean> frames;
-
 
     public DnsSession(int dnsId) {
         this.dnsId = dnsId;
@@ -57,5 +57,13 @@ public class DnsSession {
 
     public void setServerIp(String serverIp) {
         this.serverIp = serverIp;
+    }
+
+    public boolean isHasResult() {
+        return hasResult;
+    }
+
+    public void setHasResult(boolean hasResult) {
+        this.hasResult = hasResult;
     }
 }

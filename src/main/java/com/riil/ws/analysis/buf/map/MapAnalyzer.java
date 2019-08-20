@@ -4,6 +4,7 @@ import java.io.FileWriter;
 import java.util.Map;
 import java.util.Set;
 
+import com.riil.ws.analysis.buf.map.dns.DnsAnalyzer;
 import com.riil.ws.analysis.buf.map.dns.DnsSession;
 import com.riil.ws.analysis.buf.map.tcp.TcpAnalyzer;
 import com.riil.ws.analysis.buf.map.tcp.TcpStream;
@@ -55,6 +56,9 @@ public class MapAnalyzer implements IAnalyzer {
     @Autowired
     private TcpAnalyzer tcpAnalyzer;
 
+    @Autowired
+    private DnsAnalyzer dnsAnalyzer;
+
     private RestHighLevelClient client;
 
     public void save(String indexLineJson, String frameLineJson) throws Exception {
@@ -89,6 +93,12 @@ public class MapAnalyzer implements IAnalyzer {
         for (Integer tcpStreamNumber : keySet) {
             TcpStream tcpStream = MapCache.getTcpStream(tcpStreamNumber);
             tcpAnalyzer.analysis(tcpStream);
+        }
+
+        Set<Integer> dnsKeySet = MapCache.getDnsSessionMap().keySet();
+        for(Integer dnsId : dnsKeySet) {
+            DnsSession dnsSession = MapCache.getDnsSession(dnsId);
+            dnsAnalyzer.analysis(dnsSession);
         }
     }
 

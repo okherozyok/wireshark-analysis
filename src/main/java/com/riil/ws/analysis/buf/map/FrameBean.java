@@ -166,6 +166,16 @@ public class FrameBean {
         return layers.getDnsQryHost();
     }
 
+    @JSONField(serialize = false)
+    public Integer getDnsFlagsRcode() {
+        return layers.getDnsFlagsRcode();
+    }
+
+    @JSONField(serialize = false)
+    public List<String> getDnsAnswerIp() {
+        return layers.getDnsAnswerIp();
+    }
+
     /**
      * 如果客户端ip已经存在，不再设置
      *
@@ -254,6 +264,22 @@ public class FrameBean {
 
     public void setHttpRespTransDelay(Long delay) {
         layers.setHttpRespTransDelay(delay);
+    }
+
+    public void setDnsReplyDelay(Long delay) {
+        layers.setDnsReplyDelay(delay);
+    }
+
+    public void setDnsQrySuccess() {
+        layers.setDnsQrySuccess(true);
+    }
+
+    public void setDnsErrorAnswer() {
+        layers.setDnsErrorAnswer(true);
+    }
+
+    public void setDnsNoResponse() {
+        layers.setDnsNoResponse(true);
     }
 
     public void delClientIp() {
@@ -417,6 +443,18 @@ public class FrameBean {
         private String dnsQryName;
 
         private List<Integer> dnsAnswerIp = null;
+
+        @JSONField(name = FrameConstant.DNS_REPLY_DELAY)
+        private Long dnsReplyDelay;
+
+        @JSONField(name = FrameConstant.DNS_QRY_SUCCESS)
+        private Boolean dnsQrySuccess;
+
+        @JSONField(name = FrameConstant.DNS_ERROR_ANSWER)
+        private Boolean dnsErrorAnswer;
+
+        @JSONField(name = FrameConstant.DNS_NO_RESPONSE)
+        private Boolean dnsNoResponse;
 
         public void setSrcIp(String srcIp) {
             this.srcIpInt = IpV4Util.ipStr2Int(srcIp);
@@ -859,7 +897,7 @@ public class FrameBean {
         }
 
         @JSONField(name = FrameConstant.DNS_ANSWER_IP)
-        public List<String> getAnswerIp() {
+        public List<String> getDnsAnswerIp() {
             if (!CollectionUtils.isEmpty(dnsAnswerIp)) {
                 List<String> ips = new ArrayList<>(dnsAnswerIp.size());
                 for (Integer ip : dnsAnswerIp) {
@@ -870,6 +908,38 @@ public class FrameBean {
             }
 
             return null;
+        }
+
+        public Long getDnsReplyDelay() {
+            return dnsReplyDelay;
+        }
+
+        public void setDnsReplyDelay(Long dnsReplyDelay) {
+            this.dnsReplyDelay = dnsReplyDelay;
+        }
+
+        public Boolean getDnsQrySuccess() {
+            return dnsQrySuccess;
+        }
+
+        public void setDnsQrySuccess(Boolean dnsQrySuccess) {
+            this.dnsQrySuccess = dnsQrySuccess;
+        }
+
+        public Boolean getDnsErrorAnswer() {
+            return dnsErrorAnswer;
+        }
+
+        public void setDnsErrorAnswer(Boolean dnsErrorAnswer) {
+            this.dnsErrorAnswer = dnsErrorAnswer;
+        }
+
+        public Boolean getDnsNoResponse() {
+            return dnsNoResponse;
+        }
+
+        public void setDnsNoResponse(Boolean dnsNoResponse) {
+            this.dnsNoResponse = dnsNoResponse;
         }
     }
 }

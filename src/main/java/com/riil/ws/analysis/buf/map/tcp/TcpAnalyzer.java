@@ -1,15 +1,17 @@
-package com.riil.ws.analysis.buf.map;
+package com.riil.ws.analysis.buf.map.tcp;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import com.alibaba.fastjson.JSON;
+import com.riil.ws.analysis.buf.map.ConcurrentConnBean;
+import com.riil.ws.analysis.buf.map.FrameBean;
+import com.riil.ws.analysis.buf.map.FrameConstant;
+import com.riil.ws.analysis.buf.map.MapCache;
 import com.riil.ws.analysis.common.IpPortUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.riil.ws.analysis.buf.map.AnalyzerConstant.PACKET_INDEX_PREFIX;
 import static com.riil.ws.analysis.buf.map.AnalyzerConstant.TCP_CONCURRENT_CONN_INDEX_PREFIX;
