@@ -264,7 +264,7 @@ public class Adapter {
             }
             Iterator<String> dnsAIt = dnsAs.iterator();
             for (int i = 0; i < answers; i++) {
-                if (respTypes.get(i).equals(FrameConstant.DNS_RESP_TYPE_HOST_ADDRESS)) {
+                if (respTypes.get(i).equals(String.valueOf(FrameConstant.DNS_RESP_TYPE_HOST_ADDRESS))) {
                     frame.getLayers().addAnswerIp(dnsAIt.next());
                 }
             }

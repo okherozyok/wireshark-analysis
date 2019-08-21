@@ -147,6 +147,36 @@ Content-Type: application/json
                     },
                     "http_resp_trans_delay":{
                         "type":"long"
+                    },
+                    "udp_stream":{
+                        "type":"integer"
+                    },
+                    "dns_flags_response":{
+                        "type":"byte"
+                    },
+                    "dns_flags_rcode":{
+                        "type":"integer"
+                    },
+                    "dns_qry_host":{
+                        "type":"boolean"
+                    },
+                    "dns_answer_ip":{
+                        "type":"ip"
+                    },
+                    "dns_reply_delay":{
+                        "type":"long"
+                    },
+                    "dns_qry_success":{
+                        "type":"boolean"
+                    },
+                    "dns_error_answer":{
+                        "type":"boolean"
+                    },
+                    "dns_no_response":{
+                        "type":"boolean"
+                    },
+                    "dns_server_resp_no_ip":{
+                        "type":"boolean"
                     }
                 }
             },

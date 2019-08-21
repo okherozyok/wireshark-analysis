@@ -47,7 +47,7 @@ public final class FrameConstant {
 	public static final String DNS_QRY_NAME = "dns_qry_name";
 	public static final String DNS_COUNT_ANSWERS = "dns_count_answers";
 	public static final String DNS_RESP_TYPE = "dns_resp_type";
-	public static final String DNS_RESP_TYPE_HOST_ADDRESS = "1";
+	public static final int DNS_RESP_TYPE_HOST_ADDRESS = 1;
 	public static final String DNS_A = "dns_a";
 
 	// 指标，补充的
