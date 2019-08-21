@@ -51,7 +51,7 @@ public class Adapter {
         setHttpResponse();
         setHttpRequestIn();
         setHttpResponseCode();
-        setDnsId();
+        setUdpStream();
         setDnsFlagsResponse();
         setDnsQryHost();
         setDnsFlagsRcode();
@@ -196,13 +196,13 @@ public class Adapter {
      * 实际抓包时，发现网络层是ICMP，ICMP下又包含DNS，这样的packet不计算。
      */
     @SuppressWarnings("unchecked")
-    private void setDnsId() {
+    private void setUdpStream() {
         Object protos = getLayerBy(FrameConstant.IP_PROTO);
         if (protos != null) {
             Integer ipProto = Integer.valueOf(((List<String>) protos).get(0));
             frame.getLayers().setIpProto(ipProto);
             if (FrameConstant.UDP_PROTO_NUM.equals(ipProto)) {
-                frame.getLayers().setDnsId(getLayerFirstBy(FrameConstant.DNS_ID));
+                frame.getLayers().setUdpStream(getIntegerLayerFirstBy(FrameConstant.UDP_STREAM));
             }
         }
 
@@ -218,7 +218,7 @@ public class Adapter {
     private void setDnsQryHost() {
         Integer qryType = getIntegerLayerFirstBy(FrameConstant.DNS_QRY_TYPE);
         if (qryType != null) {
-            if (qryType.equals(1)) {
+            if (qryType.equals(FrameConstant.DNS_QRY_TYPE_HOST)) {
                 frame.getLayers().setDnsQryHost(true);
             }
         }
@@ -258,7 +258,7 @@ public class Adapter {
             List<String> dnsAs = (List<String>) getLayerBy(FrameConstant.DNS_A);
             // 应答是成功的，但是应答中没有ip
             if (CollectionUtils.isEmpty(dnsAs)) {
-                LOGGER.debug("FrameNumber:" + frame.getLayers().getFrameNumber() + ", DnsId:" + frame.getLayers().getDnsId()
+                LOGGER.warn("FrameNumber:" + frame.getLayers().getFrameNumber() + ", UdpStream:" + frame.getLayers().getUdpStream()
                         + ", Answers RRs have no ip.");
                 return;
             }

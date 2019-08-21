@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DnsSession {
-    private int dnsId;
+    private int udpStreamNumber;
     private Long qryTime = null;
     private String clientIp = null;
     private String serverIp = null;
@@ -14,17 +14,13 @@ public class DnsSession {
 
     private List<FrameBean> frames;
 
-    public DnsSession(int dnsId) {
-        this.dnsId = dnsId;
+    public DnsSession(int udpStreamNumber) {
+        this.udpStreamNumber = udpStreamNumber;
         frames = new ArrayList<>();
     }
 
-    public int getDnsId() {
-        return dnsId;
-    }
-
-    public void setDnsId(int dnsId) {
-        this.dnsId = dnsId;
+    public int getUdpStreamNumber() {
+        return udpStreamNumber;
     }
 
     public void append(FrameBean frame) {

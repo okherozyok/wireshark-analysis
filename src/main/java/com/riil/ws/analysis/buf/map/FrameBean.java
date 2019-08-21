@@ -105,8 +105,11 @@ public class FrameBean {
 
     @JSONField(serialize = false)
     public boolean isDnsQry() {
-        Boolean dnsQryHost = layers.getDnsQryHost();
-        return dnsQryHost == null ? false : dnsQryHost;
+        Integer dnsFlagsResponse = layers.getDnsFlagsResponse();
+        if(dnsFlagsResponse == null) {
+            return false;
+        }
+        return dnsFlagsResponse == 0 ? true : false;
     }
 
     @JSONField(serialize = false)
@@ -157,8 +160,8 @@ public class FrameBean {
     }
 
     @JSONField(serialize = false)
-    public Integer getDnsId() {
-        return layers.getDnsIdInt();
+    public Integer getUdpStreamNumber() {
+        return layers.getUdpStream();
     }
 
     @JSONField(serialize = false)
@@ -280,6 +283,10 @@ public class FrameBean {
 
     public void setDnsNoResponse() {
         layers.setDnsNoResponse(true);
+    }
+
+    public void setDnsServerRespNoIp() {
+        layers.setDnsServerRespNoIp(true);
     }
 
     public void delClientIp() {
@@ -428,7 +435,8 @@ public class FrameBean {
         @JSONField(name = FrameConstant.HTTP_RESP_TRANS_DELAY)
         private Long httpRespTransDelay;
 
-        private Integer dnsId;
+        @JSONField(name = FrameConstant.UDP_STREAM)
+        private Integer udpStream;
 
         @JSONField(name = FrameConstant.DNS_FLAGS_RESPONSE)
         private Integer dnsFlagsResponse;
@@ -455,6 +463,9 @@ public class FrameBean {
 
         @JSONField(name = FrameConstant.DNS_NO_RESPONSE)
         private Boolean dnsNoResponse;
+
+        @JSONField(name = FrameConstant.DNS_SERVER_RESP_NO_IP)
+        private Boolean dnsServerRespNoIp;
 
         public void setSrcIp(String srcIp) {
             this.srcIpInt = IpV4Util.ipStr2Int(srcIp);
@@ -837,23 +848,12 @@ public class FrameBean {
             this.httpRespTransDelay = httpRespTransDelay;
         }
 
-        @JSONField(name = FrameConstant.DNS_ID)
-        public String getDnsId() {
-            if (dnsId != null) {
-                return "0x" + Integer.toHexString(dnsId);
-            }
-
-            return null;
+        public Integer getUdpStream() {
+            return udpStream;
         }
 
-        public void setDnsId(String dnsId) {
-            if (!StringUtils.isEmpty(dnsId)) {
-                this.dnsId = Integer.parseInt(dnsId.substring(2), 16);
-            }
-        }
-
-        public Integer getDnsIdInt() {
-            return dnsId;
+        public void setUdpStream(Integer udpStream) {
+            this.udpStream = udpStream;
         }
 
         public Integer getDnsFlagsResponse() {
@@ -940,6 +940,14 @@ public class FrameBean {
 
         public void setDnsNoResponse(Boolean dnsNoResponse) {
             this.dnsNoResponse = dnsNoResponse;
+        }
+
+        public Boolean getDnsServerRespNoIp() {
+            return dnsServerRespNoIp;
+        }
+
+        public void setDnsServerRespNoIp(Boolean dnsServerRespNoIp) {
+            this.dnsServerRespNoIp = dnsServerRespNoIp;
         }
     }
 }

@@ -49,11 +49,11 @@ public final class MapCache {
     }
 
     public static void putDnsSession(DnsSession dnsSession) {
-        DNS_SESSION_MAP.put(dnsSession.getDnsId(), dnsSession);
+        DNS_SESSION_MAP.put(dnsSession.getUdpStreamNumber(), dnsSession);
     }
 
-    public static DnsSession getDnsSession(int dnsId) {
-        return DNS_SESSION_MAP.get(dnsId);
+    public static DnsSession getDnsSession(int udpStreamNumber) {
+        return DNS_SESSION_MAP.get(udpStreamNumber);
     }
 
     public static Map<Integer, DnsSession> getDnsSessionMap() {

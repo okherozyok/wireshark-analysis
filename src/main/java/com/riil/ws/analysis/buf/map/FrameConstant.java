@@ -36,9 +36,12 @@ public final class FrameConstant {
 	public static final String HTTP_RESPONSE = "http_response";
 	public static final String HTTP_REQUEST_IN = "http_request_in";
 	public static final String HTTP_RESPONSE_CODE = "http_response_code";
-	public static final String DNS_ID = "dns_id";
+	public static final String UDP_STREAM = "udp_stream";
 	public static final String DNS_FLAGS_RESPONSE = "dns_flags_response";
+	public static final int DNS_MESSAGE_IS_A_QUERY = 0;
+	public static final int DNS_MESSAGE_IS_A_RESPONSE = 1;
 	public static final String DNS_QRY_TYPE = "dns_qry_type";
+	public static final int DNS_QRY_TYPE_HOST = 1;
 	public static final String DNS_FLAGS_RCODE = "dns_flags_rcode";
 	public static final int DNS_FLAGS_RCODE_NO_ERROR = 0;
 	public static final String DNS_QRY_NAME = "dns_qry_name";
@@ -76,5 +79,6 @@ public final class FrameConstant {
 	public static final String DNS_QRY_SUCCESS = "dns_qry_success";
 	public static final String DNS_ERROR_ANSWER = "dns_error_answer";
 	public static final String DNS_NO_RESPONSE = "dns_no_response";
+	public static final String DNS_SERVER_RESP_NO_IP = "dns_server_resp_no_ip";
 
 }

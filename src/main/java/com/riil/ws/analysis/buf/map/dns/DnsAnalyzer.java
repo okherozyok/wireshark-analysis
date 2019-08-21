@@ -29,13 +29,17 @@ public class DnsAnalyzer {
                     frame.setDnsReplyDelay(frame.getTimestamp() - dnsSession.getQryTime());
                 }
                 if (dnsSession.getClientIp() == null) {
-                    dnsSession.setClientIp(frame.getDstIp());
-                    dnsSession.setServerIp(frame.getSrcIp());
+                    frame.setClientIp(frame.getDstIp());
+                    frame.setServerIp(frame.getSrcIp());
+                } else {
+                    frame.setClientIp(dnsSession.getClientIp());
+                    frame.setServerIp(dnsSession.getServerIp());
                 }
                 if (frame.getDnsFlagsRcode().equals(FrameConstant.DNS_FLAGS_RCODE_NO_ERROR)) {
                     // 虽然DNS服务器返回了应答，但是没有返回ip，也是无响应
                     if (frame.getDnsAnswerIp() == null) {
-                        frame.setDnsNoResponse();
+                        frame.setDnsServerRespNoIp();
+                        frame.setDnsReplyDelay(null);
                     } else {
                         frame.setDnsQrySuccess();
                     }
@@ -51,7 +55,10 @@ public class DnsAnalyzer {
         // 对frame循环结束，DNS没有结果，则是无响应
         if (!dnsSession.isHasResult()) {
             FrameBean lastFrame = frames.get(frames.size() - 1);
+            lastFrame.setClientIp(dnsSession.getClientIp());
+            lastFrame.setServerIp(dnsSession.getServerIp());
             lastFrame.setDnsNoResponse();
+            lastFrame.setDnsReplyDelay(null);
         }
     }
 }

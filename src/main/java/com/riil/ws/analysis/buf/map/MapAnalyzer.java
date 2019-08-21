@@ -75,12 +75,13 @@ public class MapAnalyzer implements IAnalyzer {
             tcpStream.append(frame);
         }
 
+
+        Integer udpStreamNumber = frame.getUdpStreamNumber();
         Boolean dnsQryHost = frame.getDnsQryHost();
-        if(Boolean.TRUE.equals(dnsQryHost)) {
-            int dnsId = frame.getDnsId();
-            DnsSession dnsSession = MapCache.getDnsSession(dnsId);
-            if(dnsSession == null) {
-                dnsSession = new DnsSession(dnsId);
+        if (udpStreamNumber != null && Boolean.TRUE.equals(dnsQryHost)) {
+            DnsSession dnsSession = MapCache.getDnsSession(udpStreamNumber);
+            if (dnsSession == null) {
+                dnsSession = new DnsSession(udpStreamNumber);
                 MapCache.putDnsSession(dnsSession);
             }
             dnsSession.append(frame);
@@ -96,7 +97,7 @@ public class MapAnalyzer implements IAnalyzer {
         }
 
         Set<Integer> dnsKeySet = MapCache.getDnsSessionMap().keySet();
-        for(Integer dnsId : dnsKeySet) {
+        for (Integer dnsId : dnsKeySet) {
             DnsSession dnsSession = MapCache.getDnsSession(dnsId);
             dnsAnalyzer.analysis(dnsSession);
         }

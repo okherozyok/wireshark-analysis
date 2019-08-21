@@ -10,7 +10,7 @@ output:
     name: output2es.json
   es:
     bulkSize: 100000
-    host: 172.17.162.6
+    host: 127.0.0.1
     port: 9200
 
 spring:

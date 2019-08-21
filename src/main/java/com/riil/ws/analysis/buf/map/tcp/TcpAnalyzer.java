@@ -300,11 +300,7 @@ public class TcpAnalyzer {
 
         long ipPortKey = IpPortUtil.ipPortKey(tcpStream.getServerIp(), tcpStream.getDstPort());
         Map<Long, Map<Long, ConcurrentConnBean>> concurrentConnCache = MapCache.getConcurrentConnCache();
-        Map<Long, ConcurrentConnBean> concurrentConnBeanMap = concurrentConnCache.get(ipPortKey);
-        if (concurrentConnBeanMap == null) {
-            concurrentConnBeanMap = new HashMap<>();
-            concurrentConnCache.put(ipPortKey, concurrentConnBeanMap);
-        }
+        Map<Long, ConcurrentConnBean> concurrentConnBeanMap = concurrentConnCache.computeIfAbsent(ipPortKey, k -> new HashMap<>());
         while (startTime <= endTime) {
             ConcurrentConnBean concurrentConnBean = concurrentConnBeanMap.get(startTime);
             if (concurrentConnBean == null) {
