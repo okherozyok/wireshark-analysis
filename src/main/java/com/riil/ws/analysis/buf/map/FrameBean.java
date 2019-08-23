@@ -438,6 +438,12 @@ public class FrameBean {
         @JSONField(name = FrameConstant.UDP_STREAM)
         private Integer udpStream;
 
+        @JSONField(name = FrameConstant.UDP_SRCPORT)
+        private Integer udpSrcPort;
+
+        @JSONField(name = FrameConstant.UDP_DSTPORT)
+        private Integer udpDstPort;
+
         @JSONField(name = FrameConstant.DNS_FLAGS_RESPONSE)
         private Integer dnsFlagsResponse;
 
@@ -854,6 +860,22 @@ public class FrameBean {
 
         public void setUdpStream(Integer udpStream) {
             this.udpStream = udpStream;
+        }
+
+        public Integer getUdpSrcPort() {
+            return udpSrcPort;
+        }
+
+        public void setUdpSrcPort(Integer udpSrcPort) {
+            this.udpSrcPort = udpSrcPort;
+        }
+
+        public Integer getUdpDstPort() {
+            return udpDstPort;
+        }
+
+        public void setUdpDstPort(Integer udpDstPort) {
+            this.udpDstPort = udpDstPort;
         }
 
         public Integer getDnsFlagsResponse() {

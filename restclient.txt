@@ -151,6 +151,12 @@ Content-Type: application/json
                     "udp_stream":{
                         "type":"integer"
                     },
+                    "udp_srcport":{
+                        "type":"integer"
+                    },
+                    "udp_dstport":{
+                        "type":"integer"
+                    },
                     "dns_flags_response":{
                         "type":"byte"
                     },

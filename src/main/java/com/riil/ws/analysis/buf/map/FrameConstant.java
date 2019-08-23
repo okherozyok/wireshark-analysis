@@ -37,6 +37,8 @@ public final class FrameConstant {
 	public static final String HTTP_REQUEST_IN = "http_request_in";
 	public static final String HTTP_RESPONSE_CODE = "http_response_code";
 	public static final String UDP_STREAM = "udp_stream";
+	public static final String UDP_SRCPORT = "udp_srcport";
+	public static final String UDP_DSTPORT = "udp_dstport";
 	public static final String DNS_FLAGS_RESPONSE = "dns_flags_response";
 	public static final int DNS_MESSAGE_IS_A_QUERY = 0;
 	public static final int DNS_MESSAGE_IS_A_RESPONSE = 1;

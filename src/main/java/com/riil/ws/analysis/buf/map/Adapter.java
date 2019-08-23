@@ -52,6 +52,8 @@ public class Adapter {
         setHttpRequestIn();
         setHttpResponseCode();
         setUdpStream();
+        setUdpSrcPort();
+        setUdpDstPort();
         setDnsFlagsResponse();
         setDnsQryHost();
         setDnsFlagsRcode();
@@ -206,6 +208,14 @@ public class Adapter {
             }
         }
 
+    }
+
+    private void setUdpSrcPort() {
+        frame.getLayers().setUdpSrcPort(getIntegerLayerFirstBy(FrameConstant.UDP_SRCPORT));
+    }
+
+    private void setUdpDstPort() {
+        frame.getLayers().setUdpDstPort(getIntegerLayerFirstBy(FrameConstant.UDP_DSTPORT));
     }
 
     private void setDnsFlagsResponse() {
