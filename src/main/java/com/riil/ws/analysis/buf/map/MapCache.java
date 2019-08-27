@@ -15,6 +15,7 @@ public final class MapCache {
 
     // ip+port key，timestamp key
     private static final Map<Long, Map<Long, ConcurrentConnBean>> CONCURRENT_CONN_CACHE = new HashMap<>();
+    private static final Map<Long, Map<Long, ConcurrentReqBean>> CONCURRENT_REQ_CACHE = new HashMap<>();
 
     public static int getInitCapacity() {
         return INITIAL_CAPACITY;
@@ -46,6 +47,10 @@ public final class MapCache {
 
     public static Map<Long, Map<Long, ConcurrentConnBean>> getConcurrentConnCache() {
         return CONCURRENT_CONN_CACHE;
+    }
+
+    public static Map<Long, Map<Long, ConcurrentReqBean>> getConcurrentReqCache() {
+        return CONCURRENT_REQ_CACHE;
     }
 
     public static void putDnsSession(DnsSession dnsSession) {

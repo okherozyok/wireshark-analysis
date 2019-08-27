@@ -106,11 +106,13 @@ public class MapAnalyzer implements IAnalyzer {
     @Override
     public void output() throws Exception {
         if (outputTo.equals(OUTPUT_TO_ES)) {
-            output2ES();
+            //output2ES();
             //output2ESConcurrentConn();
+            output2ESConcurrentReq();
         } else if (outputTo.equals(OUTPUT_TO_FILE)) {
             output2File();
             output2FileConcurrentConn();
+            output2FileConcurrentReq();
         } else {
             throw new Exception("Unknown output to : " + outputTo);
         }
@@ -139,6 +141,21 @@ public class MapAnalyzer implements IAnalyzer {
                 for (Long timestamp : concurrentConnBeanMap.keySet()) {
                     fw.append(generateIndexJson(concurrentConnBeanMap.get(timestamp).getIndex())).append(linSep)
                             .append(JSON.toJSONString(concurrentConnBeanMap.get(timestamp))).append(linSep);
+                }
+            }
+        }
+    }
+
+    private void output2FileConcurrentReq()  throws Exception {
+        String linSep = getLineSeparator();
+
+        try (FileWriter fw = new FileWriter(HTTP_CONCURRENT_REQ_INDEX_PREFIX + outputToFileName)) {
+            Map<Long, Map<Long, ConcurrentReqBean>> concurrentReqCache = MapCache.getConcurrentReqCache();
+            for (Long ipPortKey : concurrentReqCache.keySet()) {
+                Map<Long, ConcurrentReqBean> concurrentReqBeanMap = concurrentReqCache.get(ipPortKey);
+                for (Long timestamp : concurrentReqBeanMap.keySet()) {
+                    fw.append(generateIndexJson(concurrentReqBeanMap.get(timestamp).getIndex())).append(linSep)
+                            .append(JSON.toJSONString(concurrentReqBeanMap.get(timestamp))).append(linSep);
                 }
             }
         }
@@ -183,6 +200,36 @@ public class MapAnalyzer implements IAnalyzer {
 
                 IndexRequest indexRequest = new IndexRequest(concurrentConnBean.getIndex());
                 indexRequest.source(JSON.toJSONString(concurrentConnBean), XContentType.JSON);
+                bulkRequest.add(indexRequest);
+                count++;
+
+                if (count % outputToESBulkSize == 0) {
+                    bulk2ES(client, bulkRequest);
+                    bulkRequest = new BulkRequest();
+                }
+            }
+
+        }
+
+        if (bulkRequest.numberOfActions() > 0) {
+            bulk2ES(client, bulkRequest);
+        }
+
+    }
+
+    private void output2ESConcurrentReq() throws Exception {
+        RestHighLevelClient client = newRestHighLevelClient();
+        BulkRequest bulkRequest = new BulkRequest();
+        int count = 0;
+
+        Map<Long, Map<Long, ConcurrentReqBean>> concurrentReqCache = MapCache.getConcurrentReqCache();
+        for (Long ipPortKey : concurrentReqCache.keySet()) {
+            Map<Long, ConcurrentReqBean> concurrentReqBeanMap = concurrentReqCache.get(ipPortKey);
+            for (Long timestamp : concurrentReqBeanMap.keySet()) {
+                ConcurrentReqBean concurrentReqBean = concurrentReqBeanMap.get(timestamp);
+
+                IndexRequest indexRequest = new IndexRequest(concurrentReqBean.getIndex());
+                indexRequest.source(JSON.toJSONString(concurrentReqBean), XContentType.JSON);
                 bulkRequest.add(indexRequest);
                 count++;
 

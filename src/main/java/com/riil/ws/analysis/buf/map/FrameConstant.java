@@ -75,6 +75,7 @@ public final class FrameConstant {
 	public static final String HTTP_RESP_DELAY = "http_resp_delay";
 	public static final String HTTP_RESP_TRANS_DELAY = "http_resp_trans_delay";
 	public static final String CONNECT_COUNT = "connect_count";
+	public static final String REQ_COUNT = "req_count";
 	public static final String DNS_QRY_HOST = "dns_qry_host";
 	public static final String DNS_ANSWER_IP = "dns_answer_ip";
 	public static final String DNS_REPLY_DELAY = "dns_reply_delay";

@@ -1,9 +1,6 @@
 package com.riil.ws.analysis.buf.map.tcp;
 
-import com.riil.ws.analysis.buf.map.ConcurrentConnBean;
-import com.riil.ws.analysis.buf.map.FrameBean;
-import com.riil.ws.analysis.buf.map.FrameConstant;
-import com.riil.ws.analysis.buf.map.MapCache;
+import com.riil.ws.analysis.buf.map.*;
 import com.riil.ws.analysis.common.IpPortUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,8 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.riil.ws.analysis.buf.map.AnalyzerConstant.PACKET_INDEX_PREFIX;
-import static com.riil.ws.analysis.buf.map.AnalyzerConstant.TCP_CONCURRENT_CONN_INDEX_PREFIX;
+import static com.riil.ws.analysis.buf.map.AnalyzerConstant.*;
 
 /**
  * @author GlobalZ
@@ -28,7 +24,7 @@ public class TcpAnalyzer {
         List<FrameBean> frames = tcpStream.getFrames();
         for (FrameBean frame : frames) {
             realTimeCreateConn(frame, tcpStream);
-            httpDelay(frame, tcpStream);
+            http(frame, tcpStream);
         }
 
         endCreateConn(tcpStream);
@@ -93,9 +89,10 @@ public class TcpAnalyzer {
         }
     }
 
-    private void httpDelay(FrameBean frame, TcpStream tcpStream) {
+    private void http(FrameBean frame, TcpStream tcpStream) {
         httpReqTransDelay(frame, tcpStream);
         httpRespAndRespTransDelay(frame, tcpStream);
+        httpConcurrentReq(frame);
     }
 
     private void markTcpConnSuccess(TcpStream tcpStream, FrameBean frame) {
@@ -122,6 +119,30 @@ public class TcpAnalyzer {
             tcpStream.setTcpConnAckFrameNumber(null);
             tcpStream.setTcpConnAckTimeStamp(null);
         }
+    }
+
+    private void httpConcurrentReq(FrameBean json) {
+        if (!json.isHttpRequest()) {
+            return;
+        }
+
+        final long second = 1000;
+        long startTime = json.getTimestamp() / second * second;
+
+        long ipPortKey = IpPortUtil.ipPortKey(json.getDstIp(), json.getTcpDstPort());
+        Map<Long, Map<Long, ConcurrentReqBean>> concurrentReqCache = MapCache.getConcurrentReqCache();
+        Map<Long, ConcurrentReqBean> concurrentReqBeanMap = concurrentReqCache.computeIfAbsent(ipPortKey, k -> new HashMap<>());
+        ConcurrentReqBean concurrentReqBean = concurrentReqBeanMap.get(startTime);
+        if (concurrentReqBean == null) {
+            concurrentReqBean = new ConcurrentReqBean();
+            concurrentReqBean.setIndex(json.getIndex().replace(PACKET_INDEX_PREFIX, HTTP_CONCURRENT_REQ_INDEX_PREFIX));
+            concurrentReqBean.setServerIp(json.getDstIp());
+            concurrentReqBean.setTcpDstPort(json.getTcpDstPort());
+            concurrentReqBean.setTimestamp(startTime);
+            concurrentReqBeanMap.put(startTime, concurrentReqBean);
+        }
+        concurrentReqBean.addReqCount();
+        concurrentReqBean.addFrameNumber(json.getFrameNumber());
     }
 
     private void httpReqTransDelay(FrameBean json, TcpStream tcpStream) {
