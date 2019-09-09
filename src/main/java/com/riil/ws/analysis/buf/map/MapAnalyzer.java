@@ -106,9 +106,9 @@ public class MapAnalyzer implements IAnalyzer {
     @Override
     public void output() throws Exception {
         if (outputTo.equals(OUTPUT_TO_ES)) {
-            //output2ES();
+            output2ES();
             //output2ESConcurrentConn();
-            output2ESConcurrentReq();
+            //output2ESConcurrentReq();
         } else if (outputTo.equals(OUTPUT_TO_FILE)) {
             output2File();
             output2FileConcurrentConn();

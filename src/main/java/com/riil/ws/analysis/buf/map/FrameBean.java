@@ -106,7 +106,7 @@ public class FrameBean {
     @JSONField(serialize = false)
     public boolean isDnsQry() {
         Integer dnsFlagsResponse = layers.getDnsFlagsResponse();
-        if(dnsFlagsResponse == null) {
+        if (dnsFlagsResponse == null) {
             return false;
         }
         return dnsFlagsResponse == 0 ? true : false;
@@ -199,6 +199,10 @@ public class FrameBean {
         if (layers.getServerIp() == null) {
             layers.setServerIp(serverIp);
         }
+    }
+
+    public void setOnlineUser(String onlineUser) {
+        layers.setOnlineUser(onlineUser);
     }
 
     public void setTcpConnectionSuccess() {
@@ -317,6 +321,8 @@ public class FrameBean {
 
         private Integer clientIpInt;
         private Integer serverIpInt;
+
+        private Integer onlineUserInt;
 
         @JSONField(name = FrameConstant.IP_PROTO)
         private Integer ipProto;
@@ -523,6 +529,23 @@ public class FrameBean {
                 this.serverIpInt = null;
             } else {
                 this.serverIpInt = IpV4Util.ipStr2Int(serverIp);
+            }
+        }
+
+        @JSONField(name = FrameConstant.ONLINE_USER)
+        public String getOnlineUser() {
+            if (onlineUserInt != null) {
+                return IpV4Util.ipInt2Str(onlineUserInt);
+            }
+
+            return null;
+        }
+
+        public void setOnlineUser(String onlineUser) {
+            if (onlineUser == null) {
+                onlineUserInt = null;
+            } else {
+                onlineUserInt = IpV4Util.ipStr2Int(onlineUser);
             }
         }
 

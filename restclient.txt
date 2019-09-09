@@ -139,6 +139,9 @@ Content-Type: application/json
                     "server_ip":{
                         "type":"ip"
                     },
+                    "online_user":{
+                        "type":"ip"
+                    },
                     "http_req_trans_delay":{
                         "type":"long"
                     },

@@ -237,6 +237,8 @@ public class TcpAnalyzer {
             connAckFrame.setTcpServerConnectionDelay(serverConnDelay);
             connAckFrame.setTcpConnectionDelay(clientConnDelay + serverConnDelay);
         }
+
+        onlineUser(tcpStream);
     }
 
     /**
@@ -338,4 +340,19 @@ public class TcpAnalyzer {
             startTime += second;
         }
     }
+
+    /**
+     * 在tcpStream的第一条报文上，设置在线用户
+     *
+     * @param tcpStream
+     */
+    private void onlineUser(TcpStream tcpStream) {
+        FrameBean firstFrame = tcpStream.getFrames().get(0);
+        if (tcpStream.getClientIp() != null) {
+            firstFrame.setOnlineUser(tcpStream.getClientIp());
+        } else {
+            firstFrame.setOnlineUser(firstFrame.getSrcIp());
+        }
+    }
+
 }

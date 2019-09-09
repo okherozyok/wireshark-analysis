@@ -55,6 +55,7 @@ public final class FrameConstant {
 	// 指标，补充的
 	public static final String CLIENT_IP = "client_ip";
 	public static final String SERVER_IP = "server_ip";
+	public static final String ONLINE_USER = "online_user";
 	public static final String TCP = "tcp";
 	public static final String TCP_FIRST_SEGMENT = "tcp_first_segment";
 	public static final String TCP_CLIENT_CONNECTION_RST = "tcp_client_connection_rst";
