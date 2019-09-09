@@ -3,7 +3,6 @@ package com.riil.ws.analysis.buf.map;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.riil.ws.analysis.common.IpV4Util;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -201,6 +200,16 @@ public class FrameBean {
         }
     }
 
+    /**
+     * 如果服务端port已经存在，不再设置
+     * @param port
+     */
+    public void setServerPort(Integer port) {
+        if(layers.getServerPort() == null) {
+            layers.setServerPort(port);
+        }
+    }
+
     public void setOnlineUser(String onlineUser) {
         layers.setOnlineUser(onlineUser);
     }
@@ -223,6 +232,34 @@ public class FrameBean {
 
     public void setTcpServerConnectionNoResp() {
         layers.setTcpServerConnectionNoResp(true);
+    }
+
+    public void setTcpDisConnectionNormal() {
+        layers.setTcpDisconnectionNormal(true);
+    }
+
+    public void setTcpClientDisconnectionRst() {
+        layers.setTcpClientDisconnectionRst(true);
+    }
+
+    public void setTcpServerDisconnectionRst() {
+        layers.setTcpServerDisconnectionRst(true);
+    }
+
+    public void setTcpClientDisconnectionFinRst() {
+        layers.setTcpClientDisconnectionFinRst(true);
+    }
+
+    public void setTcpServerDisconnectionFinRst() {
+        layers.setTcpServerDisconnectionFinRst(true);
+    }
+
+    public void setTcpClientDisconnectionFinNoResp() {
+        layers.setTcpClientDisconnectionFinNoResp(true);
+    }
+
+    public void setTcpServerDisconnectionFinNoResp() {
+        layers.setTcpServerDisconnectionFinNoResp(true);
     }
 
     public void setTcpClientConnectionDelay(Long delay) {
@@ -322,6 +359,9 @@ public class FrameBean {
         private Integer clientIpInt;
         private Integer serverIpInt;
 
+        @JSONField(name = FrameConstant.SERVER_PORT)
+        private Integer serverPort;
+
         private Integer onlineUserInt;
 
         @JSONField(name = FrameConstant.IP_PROTO)
@@ -392,6 +432,27 @@ public class FrameBean {
 
         @JSONField(name = FrameConstant.TCP_SERVER_CONNECTION_NO_RESP)
         private Boolean tcpServerConnectionNoResp;
+
+        @JSONField(name = FrameConstant.TCP_DISCONNECTION_NORMAL)
+        private Boolean tcpDisconnectionNormal;
+
+        @JSONField(name = FrameConstant.TCP_CLIENT_DISCONNECTION_RST)
+        private Boolean tcpClientDisconnectionRst;
+
+        @JSONField(name = FrameConstant.TCP_SERVER_DISCONNECTION_RST)
+        private Boolean tcpServerDisconnectionRst;
+
+        @JSONField(name = FrameConstant.TCP_CLIENT_DISCONNECTION_FIN_RST)
+        private Boolean tcpClientDisconnectionFinRst;
+
+        @JSONField(name = FrameConstant.TCP_SERVER_DISCONNECTION_FIN_RST)
+        private Boolean tcpServerDisconnectionFinRst;
+
+        @JSONField(name = FrameConstant.TCP_CLIENT_DISCONNECTION_FIN_NO_RESP)
+        private Boolean tcpClientDisconnectionFinNoResp;
+
+        @JSONField(name = FrameConstant.TCP_SERVER_DISCONNECTION_FIN_NO_RESP)
+        private Boolean tcpServerDisconnectionFinNoResp;
 
         @JSONField(name = FrameConstant.TCP_CLIENT_CONNECTION_DELAY)
         private Long tcpClientConnectionDelay;
@@ -530,6 +591,14 @@ public class FrameBean {
             } else {
                 this.serverIpInt = IpV4Util.ipStr2Int(serverIp);
             }
+        }
+
+        public Integer getServerPort() {
+            return serverPort;
+        }
+
+        public void setServerPort(Integer serverPort) {
+            this.serverPort = serverPort;
         }
 
         @JSONField(name = FrameConstant.ONLINE_USER)
@@ -747,6 +816,62 @@ public class FrameBean {
 
         public void setTcpServerConnectionNoResp(Boolean tcpServerConnectionNoResp) {
             this.tcpServerConnectionNoResp = tcpServerConnectionNoResp;
+        }
+
+        public Boolean getTcpDisconnectionNormal() {
+            return tcpDisconnectionNormal;
+        }
+
+        public void setTcpDisconnectionNormal(Boolean tcpDisconnectionNormal) {
+            this.tcpDisconnectionNormal = tcpDisconnectionNormal;
+        }
+
+        public Boolean getTcpClientDisconnectionRst() {
+            return tcpClientDisconnectionRst;
+        }
+
+        public void setTcpClientDisconnectionRst(Boolean tcpClientDisconnectionRst) {
+            this.tcpClientDisconnectionRst = tcpClientDisconnectionRst;
+        }
+
+        public Boolean getTcpServerDisconnectionRst() {
+            return tcpServerDisconnectionRst;
+        }
+
+        public void setTcpServerDisconnectionRst(Boolean tcpServerDisconnectionRst) {
+            this.tcpServerDisconnectionRst = tcpServerDisconnectionRst;
+        }
+
+        public Boolean getTcpClientDisconnectionFinRst() {
+            return tcpClientDisconnectionFinRst;
+        }
+
+        public void setTcpClientDisconnectionFinRst(Boolean tcpClientDisconnectionFinRst) {
+            this.tcpClientDisconnectionFinRst = tcpClientDisconnectionFinRst;
+        }
+
+        public Boolean getTcpServerDisconnectionFinRst() {
+            return tcpServerDisconnectionFinRst;
+        }
+
+        public void setTcpServerDisconnectionFinRst(Boolean tcpServerDisconnectionFinRst) {
+            this.tcpServerDisconnectionFinRst = tcpServerDisconnectionFinRst;
+        }
+
+        public Boolean getTcpClientDisconnectionFinNoResp() {
+            return tcpClientDisconnectionFinNoResp;
+        }
+
+        public void setTcpClientDisconnectionFinNoResp(Boolean tcpClientDisconnectionFinNoResp) {
+            this.tcpClientDisconnectionFinNoResp = tcpClientDisconnectionFinNoResp;
+        }
+
+        public Boolean getTcpServerDisconnectionFinNoResp() {
+            return tcpServerDisconnectionFinNoResp;
+        }
+
+        public void setTcpServerDisconnectionFinNoResp(Boolean tcpServerDisconnectionFinNoResp) {
+            this.tcpServerDisconnectionFinNoResp = tcpServerDisconnectionFinNoResp;
         }
 
         public Long getTcpServerConnectionDelay() {

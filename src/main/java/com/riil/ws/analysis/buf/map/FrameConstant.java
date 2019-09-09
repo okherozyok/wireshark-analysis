@@ -55,6 +55,7 @@ public final class FrameConstant {
 	// 指标，补充的
 	public static final String CLIENT_IP = "client_ip";
 	public static final String SERVER_IP = "server_ip";
+	public static final String SERVER_PORT = "server_port";
 	public static final String ONLINE_USER = "online_user";
 	public static final String TCP = "tcp";
 	public static final String TCP_FIRST_SEGMENT = "tcp_first_segment";
@@ -63,6 +64,13 @@ public final class FrameConstant {
 	public static final String TCP_CLIENT_CONNECTION_NO_RESP = "tcp_client_connection_no_resp";
 	public static final String TCP_SERVER_CONNECTION_NO_RESP = "tcp_server_connection_no_resp";
 	public static final String TCP_CONNECTION_SUCCESS = "tcp_connection_success";
+	public static final String TCP_DISCONNECTION_NORMAL = "tcp_disconnection_normal";
+	public static final String TCP_CLIENT_DISCONNECTION_RST = "tcp_client_disconnection_rst";
+	public static final String TCP_SERVER_DISCONNECTION_RST = "tcp_server_disconnection_rst";
+	public static final String TCP_CLIENT_DISCONNECTION_FIN_RST = "tcp_client_disconnection_fin_rst";
+	public static final String TCP_SERVER_DISCONNECTION_FIN_RST = "tcp_server_disconnection_fin_rst";
+	public static final String TCP_CLIENT_DISCONNECTION_FIN_NO_RESP = "tcp_client_disconnection_fin_no_resp";
+	public static final String TCP_SERVER_DISCONNECTION_FIN_NO_RESP = "tcp_server_disconnection_fin_no_resp";
 	public static final String TCP_CLIENT_CONNECTION_DELAY = "tcp_client_connection_delay";
 	public static final String TCP_SERVER_CONNECTION_DELAY = "tcp_server_connection_delay";
 	public static final String TCP_CONNECTION_DELAY = "tcp_connection_delay";

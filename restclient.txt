@@ -139,6 +139,9 @@ Content-Type: application/json
                     "server_ip":{
                         "type":"ip"
                     },
+                    "server_port":{
+                        "type":"integer"
+                    },
                     "online_user":{
                         "type":"ip"
                     },

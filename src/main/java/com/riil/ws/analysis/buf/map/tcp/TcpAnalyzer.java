@@ -341,6 +341,67 @@ public class TcpAnalyzer {
         }
     }
 
+    private void onlySuccessDisconnection(TcpStream tcpStream) {
+        Integer clientFinFrame = null;
+        Integer serverFinFrame = null;
+        Integer clientRstFrame = null;
+        Integer serverRstFrame = null;
+
+        List<FrameBean> frames = tcpStream.getFrames();
+        for (FrameBean frame : frames) {
+            if (frame.isTcpConnectionFin()) {
+                if (tcpStream.getClientIp().equals(frame.getSrcIp())) {
+                    if (clientFinFrame == null) {
+                        clientFinFrame = frame.getFrameNumber();
+                    }
+                } else {
+                    if (serverFinFrame == null) {
+                        serverFinFrame = frame.getFrameNumber();
+                    }
+                }
+            } else if (frame.isTcpConnectionRst()) {
+                if (tcpStream.getClientIp().equals(frame.getSrcIp())) {
+                    if (clientRstFrame == null) {
+                        clientRstFrame = frame.getFrameNumber();
+                    }
+                } else {
+                    if (serverRstFrame == null) {
+                        serverRstFrame = frame.getFrameNumber();
+                    }
+                }
+
+            }
+        }
+
+        if (clientFinFrame != null && clientRstFrame != null) {
+            if(clientRstFrame > clientFinFrame) {
+                MapCache.getFrame(clientRstFrame).setTcpClientDisconnectionFinRst();
+            } else {
+                LOGGER.warn("TcpStream=" + tcpStream.getTcpStreamNumber() + " clientRstFrame="
+                        + clientRstFrame + " < clientFinFrame=" + clientFinFrame);
+                MapCache.getFrame(clientFinFrame).setTcpClientDisconnectionFinRst();
+            }
+        } else if (serverFinFrame != null && serverRstFrame != null) {
+            if(serverRstFrame > serverFinFrame) {
+                MapCache.getFrame(serverRstFrame).setTcpServerDisconnectionFinRst();
+            } else {
+                LOGGER.warn("TcpStream=" + tcpStream.getTcpStreamNumber() + " serverRstFrame="
+                        + serverRstFrame + " < serverFinFrame=" + serverFinFrame);
+                MapCache.getFrame(serverFinFrame).setTcpServerDisconnectionFinRst();
+            }
+        } else if (clientRstFrame != null) {
+
+        } else if (serverRstFrame != null) {
+
+        } else if (clientFinFrame != null && serverFinFrame != null) {
+
+        } else if (clientFinFrame != null) {
+
+        } else if (serverFinFrame != null) {
+
+        }
+    }
+
     /**
      * 在tcpStream的第一条报文上，设置在线用户
      *
@@ -350,8 +411,12 @@ public class TcpAnalyzer {
         FrameBean firstFrame = tcpStream.getFrames().get(0);
         if (tcpStream.getClientIp() != null) {
             firstFrame.setOnlineUser(tcpStream.getClientIp());
+            firstFrame.setServerIp(tcpStream.getServerIp());
+            firstFrame.setServerPort(tcpStream.getDstPort());
         } else {
             firstFrame.setOnlineUser(firstFrame.getSrcIp());
+            firstFrame.setServerIp(firstFrame.getDstIp());
+            firstFrame.setServerPort(firstFrame.getTcpDstPort());
         }
     }
 
