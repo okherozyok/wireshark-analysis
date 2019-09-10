@@ -103,6 +103,27 @@ Content-Type: application/json
                     "tcp_connection_success":{
                         "type":"boolean"
                     },
+                    "tcp_disconnection_normal":{
+                        "type":"boolean"
+                    },
+                    "tcp_client_disconnection_rst":{
+                        "type":"boolean"
+                    },
+                    "tcp_server_disconnection_rst":{
+                        "type":"boolean"
+                    },
+                    "tcp_client_disconnection_fin_rst":{
+                        "type":"boolean"
+                    },
+                    "tcp_server_disconnection_fin_rst":{
+                        "type":"boolean"
+                    },
+                    "tcp_client_disconnection_fin_no_resp":{
+                        "type":"boolean"
+                    },
+                    "tcp_server_disconnection_fin_no_resp":{
+                        "type":"boolean"
+                    },
                     "tcp_client_connection_delay":{
                         "type":"long"
                     },
