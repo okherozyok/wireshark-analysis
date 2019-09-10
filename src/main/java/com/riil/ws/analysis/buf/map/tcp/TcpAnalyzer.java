@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +68,7 @@ public class TcpAnalyzer {
         } else if (json.isTcpConnectionRst()) { // rst包
             if (tcpStream.getTcpConnectionSuccess() == null) {
                 if (!tcpStream.hasSyn()) {
-                    LOGGER.warn("TcpStream: " + tcpStream.getTcpStreamNumber() + ", ifHasSyn=" + tcpStream.hasSyn()
+                    LOGGER.debug("TcpStream: " + tcpStream.getTcpStreamNumber() + ", ifHasSyn=" + tcpStream.hasSyn()
                             + ", Can't judge client or server connection rst");
                 } else {
                     // RST建连失败
@@ -171,7 +172,7 @@ public class TcpAnalyzer {
 
         Integer httpRequestIn = json.getHttpRequestIn();
         if (httpRequestIn == null) {
-            LOGGER.warn("TcpStream=" + tcpStream.getTcpStreamNumber() + ", frameNumber=" + json.getFrameNumber() + ", httpRequestIn is null.");
+            LOGGER.debug("TcpStream=" + tcpStream.getTcpStreamNumber() + ", frameNumber=" + json.getFrameNumber() + ", httpRequestIn is null.");
         }
         Integer firstSegment = json.getFirstTcpSegmentIfHas();
         if (firstSegment == null) {
@@ -212,7 +213,7 @@ public class TcpAnalyzer {
 
         if (tcpStream.getTcpConnectionSuccess() == null) {
             if (!tcpStream.hasSyn()) {
-                LOGGER.warn("TcpStream: " + tcpStream.getTcpStreamNumber() + ", ifHasSyn=" + tcpStream.hasSyn()
+                LOGGER.debug("TcpStream: " + tcpStream.getTcpStreamNumber() + ", ifHasSyn=" + tcpStream.hasSyn()
                         + ", can't judge client or server no response.");
             } else {
                 List<FrameBean> frames = tcpStream.getFrames();
@@ -253,59 +254,61 @@ public class TcpAnalyzer {
         for (FrameBean frame : frames) {
             onlySuccessRTT(tcpStream, frame);
             onlySuccessRetrans(tcpStream, frame);
+            onlySuccessDisconnectionStart(tcpStream, frame);
         }
 
+        onlySuccessDisconnectionEnd(tcpStream);
         onlySuccessConcurrentConn(tcpStream);
     }
 
-    private void onlySuccessRTT(TcpStream tcpStream, FrameBean json) {
+    private void onlySuccessRTT(TcpStream tcpStream, FrameBean frame) {
         // 不计算三次握手的
-        if (json.isTcpConnectionSyn() || json.isTcpConnectionSack()) {
+        if (frame.isTcpConnectionSyn() || frame.isTcpConnectionSack()) {
             return;
         }
-        if (json.getTcpAckFrameNumber() != null && !tcpStream.hasSackFrameNumber(json.getTcpAckFrameNumber())) {
+        if (frame.getTcpAckFrameNumber() != null && !tcpStream.hasSackFrameNumber(frame.getTcpAckFrameNumber())) {
             // 不计算tcp 长度 大于 0 的
-            if (json.isTcpLenBt0()) {
+            if (frame.isTcpLenBt0()) {
                 return;
             }
 
-            Long rtt = json.getTcpAnalysisAckRtt();
-            if (json.getSrcIp().equals(tcpStream.getServerIp())) {
-                json.setClientIp(tcpStream.getClientIp());
-                json.setServerIp(tcpStream.getServerIp());
-                json.setTcpUpRTT(rtt);
-            } else if (json.getSrcIp().equals(tcpStream.getClientIp())) {
-                json.setClientIp(tcpStream.getClientIp());
-                json.setServerIp(tcpStream.getServerIp());
-                json.setTcpDownRTT(rtt);
+            Long rtt = frame.getTcpAnalysisAckRtt();
+            if (frame.getSrcIp().equals(tcpStream.getServerIp())) {
+                frame.setClientIp(tcpStream.getClientIp());
+                frame.setServerIp(tcpStream.getServerIp());
+                frame.setTcpUpRTT(rtt);
+            } else if (frame.getSrcIp().equals(tcpStream.getClientIp())) {
+                frame.setClientIp(tcpStream.getClientIp());
+                frame.setServerIp(tcpStream.getServerIp());
+                frame.setTcpDownRTT(rtt);
             } else {
                 LOGGER.error("Tcp stream: " + tcpStream.getTcpStreamNumber()
-                        + ", Can't judge server ip or client ip, frame src_ip: " + json.getSrcIp());
+                        + ", Can't judge server ip or client ip, frame src_ip: " + frame.getSrcIp());
             }
         }
     }
 
-    private void onlySuccessRetrans(TcpStream tcpStream, FrameBean json) {
-        if (!json.isTcpLenBt0() || json.isTcpConnectionSyn() || json.isTcpConnectionSack() || json.isTcpConnectionRst()
-                || json.isTcpConnectionFin() || json.isTcpKeepAlive() || json.isTcpDupAck()) {
+    private void onlySuccessRetrans(TcpStream tcpStream, FrameBean frame) {
+        if (!frame.isTcpLenBt0() || frame.isTcpConnectionSyn() || frame.isTcpConnectionSack() || frame.isTcpConnectionRst()
+                || frame.isTcpConnectionFin() || frame.isTcpKeepAlive() || frame.isTcpDupAck()) {
             return;
         }
 
-        json.setClientIp(tcpStream.getClientIp());
-        json.setServerIp(tcpStream.getServerIp());
+        frame.setClientIp(tcpStream.getClientIp());
+        frame.setServerIp(tcpStream.getServerIp());
 
-        if (tcpStream.getClientIp().equals(json.getSrcIp())) {
-            json.setTcpUpPayload();
-            if (json.isRetrans()) {
-                json.setTcpUpRetrans();
+        if (tcpStream.getClientIp().equals(frame.getSrcIp())) {
+            frame.setTcpUpPayload();
+            if (frame.isRetrans()) {
+                frame.setTcpUpRetrans();
             }
-        } else if (tcpStream.getServerIp().equals(json.getSrcIp())) {
-            json.setTcpDownPayload();
-            if (json.isRetrans()) {
-                json.setTcpDownRetrans();
+        } else if (tcpStream.getServerIp().equals(frame.getSrcIp())) {
+            frame.setTcpDownPayload();
+            if (frame.isRetrans()) {
+                frame.setTcpDownRetrans();
             }
         } else {
-            LOGGER.error("TcpStream=" + tcpStream.getTcpStreamNumber() + ", frameNumber=" + json.getFrameNumber() +
+            LOGGER.error("TcpStream=" + tcpStream.getTcpStreamNumber() + ", frameNumber=" + frame.getFrameNumber() +
                     ", can't judge client ip or server ip.");
         }
     }
@@ -341,64 +344,86 @@ public class TcpAnalyzer {
         }
     }
 
-    private void onlySuccessDisconnection(TcpStream tcpStream) {
-        Integer clientFinFrame = null;
-        Integer serverFinFrame = null;
-        Integer clientRstFrame = null;
-        Integer serverRstFrame = null;
-
-        List<FrameBean> frames = tcpStream.getFrames();
-        for (FrameBean frame : frames) {
-            if (frame.isTcpConnectionFin()) {
-                if (tcpStream.getClientIp().equals(frame.getSrcIp())) {
-                    if (clientFinFrame == null) {
-                        clientFinFrame = frame.getFrameNumber();
-                    }
-                } else {
-                    if (serverFinFrame == null) {
-                        serverFinFrame = frame.getFrameNumber();
-                    }
+    /**
+     * 仅建连成功时，记录拆连
+     *
+     * @param tcpStream
+     * @param frame
+     */
+    private void onlySuccessDisconnectionStart(TcpStream tcpStream, FrameBean frame) {
+        if (frame.isTcpConnectionFin()) {
+            if (tcpStream.getClientIp().equals(frame.getSrcIp())) {
+                if (tcpStream.getClientFinFrame() == null) {
+                    tcpStream.setClientFinFrame(frame.getFrameNumber());
                 }
-            } else if (frame.isTcpConnectionRst()) {
-                if (tcpStream.getClientIp().equals(frame.getSrcIp())) {
-                    if (clientRstFrame == null) {
-                        clientRstFrame = frame.getFrameNumber();
-                    }
-                } else {
-                    if (serverRstFrame == null) {
-                        serverRstFrame = frame.getFrameNumber();
-                    }
+            } else {
+                if (tcpStream.getServerFinFrame() == null) {
+                    tcpStream.setServerFinFrame(frame.getFrameNumber());
                 }
-
+            }
+        } else if (frame.isTcpConnectionRst()) {
+            if (tcpStream.getClientIp().equals(frame.getSrcIp())) {
+                if (tcpStream.getClientRstFrame() == null) {
+                    tcpStream.setClientRstFrame(frame.getFrameNumber());
+                }
+            } else {
+                if (tcpStream.getServerRstFrame() == null) {
+                    tcpStream.setServerRstFrame(frame.getFrameNumber());
+                }
             }
         }
+    }
 
-        if (clientFinFrame != null && clientRstFrame != null) {
-            if(clientRstFrame > clientFinFrame) {
-                MapCache.getFrame(clientRstFrame).setTcpClientDisconnectionFinRst();
+    /**
+     * 拆连结果统计
+     *
+     * @param tcpStream
+     */
+    private void onlySuccessDisconnectionEnd(TcpStream tcpStream) {
+        FrameBean frame = null;
+        if (tcpStream.getClientFinFrame() != null && tcpStream.getClientRstFrame() != null) {
+            if (tcpStream.getClientRstFrame() > tcpStream.getClientFinFrame()) {
+                frame = MapCache.getFrame(tcpStream.getClientRstFrame());
             } else {
-                LOGGER.warn("TcpStream=" + tcpStream.getTcpStreamNumber() + " clientRstFrame="
-                        + clientRstFrame + " < clientFinFrame=" + clientFinFrame);
-                MapCache.getFrame(clientFinFrame).setTcpClientDisconnectionFinRst();
+                LOGGER.debug("TcpStream=" + tcpStream.getTcpStreamNumber() + " clientRstFrame="
+                        + tcpStream.getClientRstFrame() + " < clientFinFrame=" + tcpStream.getClientFinFrame());
+                frame = MapCache.getFrame(tcpStream.getClientFinFrame());
             }
-        } else if (serverFinFrame != null && serverRstFrame != null) {
-            if(serverRstFrame > serverFinFrame) {
-                MapCache.getFrame(serverRstFrame).setTcpServerDisconnectionFinRst();
+            frame.setTcpClientDisconnectionFinRst();
+        } else if (tcpStream.getServerFinFrame() != null && tcpStream.getServerRstFrame() != null) {
+            if (tcpStream.getServerRstFrame() > tcpStream.getServerFinFrame()) {
+                frame = MapCache.getFrame(tcpStream.getServerRstFrame());
             } else {
-                LOGGER.warn("TcpStream=" + tcpStream.getTcpStreamNumber() + " serverRstFrame="
-                        + serverRstFrame + " < serverFinFrame=" + serverFinFrame);
-                MapCache.getFrame(serverFinFrame).setTcpServerDisconnectionFinRst();
+                LOGGER.debug("TcpStream=" + tcpStream.getTcpStreamNumber() + " serverRstFrame="
+                        + tcpStream.getServerRstFrame() + " < serverFinFrame=" + tcpStream.getServerFinFrame());
+                frame = MapCache.getFrame(tcpStream.getServerFinFrame());
             }
-        } else if (clientRstFrame != null) {
-
-        } else if (serverRstFrame != null) {
-
-        } else if (clientFinFrame != null && serverFinFrame != null) {
-
-        } else if (clientFinFrame != null) {
-
-        } else if (serverFinFrame != null) {
-
+            frame.setTcpServerDisconnectionFinRst();
+        } else if (tcpStream.getClientRstFrame() != null) {
+            frame = MapCache.getFrame(tcpStream.getClientRstFrame());
+            frame.setTcpClientDisconnectionRst();
+        } else if (tcpStream.getServerRstFrame() != null) {
+            frame = MapCache.getFrame(tcpStream.getServerRstFrame());
+            frame.setTcpServerDisconnectionRst();
+        } else if (tcpStream.getClientFinFrame() != null && tcpStream.getServerFinFrame() != null) {
+            if (tcpStream.getClientFinFrame() > tcpStream.getServerFinFrame()) {
+                frame = MapCache.getFrame(tcpStream.getClientFinFrame());
+            } else {
+                frame = MapCache.getFrame(tcpStream.getServerFinFrame());
+            }
+            frame.setTcpDisConnectionNormal();
+        } else if (tcpStream.getClientFinFrame() != null) {
+            frame = MapCache.getFrame(tcpStream.getClientFinFrame());
+            frame.setTcpClientDisconnectionFinNoResp();
+        } else if (tcpStream.getServerFinFrame() != null) {
+            frame = MapCache.getFrame(tcpStream.getServerFinFrame());
+            frame.setTcpServerDisconnectionFinNoResp();
+        }
+        if (frame != null) {
+            frame.setServerIp(tcpStream.getServerIp());
+            frame.setServerPort(tcpStream.getDstPort());
+        } else {
+            LOGGER.debug("tcpStream=" + tcpStream.getTcpStreamNumber() + " has no disconnection.");
         }
     }
 

@@ -268,7 +268,7 @@ public class Adapter {
             List<String> dnsAs = (List<String>) getLayerBy(FrameConstant.DNS_A);
             // 应答是成功的，但是应答中没有ip
             if (CollectionUtils.isEmpty(dnsAs)) {
-                LOGGER.warn("FrameNumber:" + frame.getLayers().getFrameNumber() + ", UdpStream:" + frame.getLayers().getUdpStream()
+                LOGGER.debug("FrameNumber:" + frame.getLayers().getFrameNumber() + ", UdpStream:" + frame.getLayers().getUdpStream()
                         + ", Answers RRs have no ip.");
                 return;
             }
