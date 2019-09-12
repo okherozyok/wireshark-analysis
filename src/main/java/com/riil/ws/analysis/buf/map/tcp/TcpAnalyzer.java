@@ -24,6 +24,10 @@ public class TcpAnalyzer {
 
         List<FrameBean> frames = tcpStream.getFrames();
         for (FrameBean frame : frames) {
+            // 比如：icmp的type=11 code=0，意思是 Time to live exceeded in transit
+            if (frame.containsIcmp()) {
+                continue;
+            }
             realTimeCreateConn(frame, tcpStream);
             http(frame, tcpStream);
         }

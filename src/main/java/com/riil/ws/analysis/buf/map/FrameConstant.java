@@ -2,6 +2,7 @@ package com.riil.ws.analysis.buf.map;
 
 public final class FrameConstant {
 	// 值
+	public static final Integer ICMP_PROTO_NUM = 1;
 	public static final Integer TCP_PROTO_NUM = 6;
 	public static final Integer UDP_PROTO_NUM = 17;
 	public static final String ZERO_STRING="0";

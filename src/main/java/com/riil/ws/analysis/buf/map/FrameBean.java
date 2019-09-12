@@ -33,12 +33,6 @@ public class FrameBean {
     }
 
     @JSONField(serialize = false)
-    public boolean isTcp() {
-        Boolean isTcp = layers.getTcp();
-        return isTcp == null ? false : isTcp;
-    }
-
-    @JSONField(serialize = false)
     public Boolean isTcpLenBt0() {
         Integer tcpLen = layers.getTcpLen();
         if (tcpLen != null) {
@@ -109,6 +103,15 @@ public class FrameBean {
             return false;
         }
         return dnsFlagsResponse == 0 ? true : false;
+    }
+
+    public boolean containsIcmp() {
+        List<Integer> ipProto = layers.getIpProto();
+        if(ipProto == null) {
+            return false;
+        }
+
+        return ipProto.contains(FrameConstant.ICMP_PROTO_NUM);
     }
 
     @JSONField(serialize = false)
@@ -365,7 +368,7 @@ public class FrameBean {
         private Integer onlineUserInt;
 
         @JSONField(name = FrameConstant.IP_PROTO)
-        private Integer ipProto;
+        private List<Integer> ipProto;
 
         @JSONField(name = FrameConstant.TCP)
         private Boolean tcp;
@@ -618,11 +621,11 @@ public class FrameBean {
             }
         }
 
-        public Integer getIpProto() {
+        public List<Integer> getIpProto() {
             return ipProto;
         }
 
-        public void setIpProto(Integer ipProto) {
+        public void setIpProto(List<Integer> ipProto) {
             this.ipProto = ipProto;
         }
 
@@ -640,14 +643,6 @@ public class FrameBean {
 
         public void setFrameLen(Integer frameLen) {
             this.frameLen = frameLen;
-        }
-
-        public Boolean getTcp() {
-            return tcp;
-        }
-
-        public void setTcp(Boolean tcp) {
-            this.tcp = tcp;
         }
 
         public Integer getTcpSrcPort() {

@@ -15,6 +15,10 @@ public class DnsAnalyzer {
     public void analysis(DnsSession dnsSession) throws Exception {
         List<FrameBean> frames = dnsSession.getFrames();
         for (FrameBean frame : frames) {
+            // 比如：icmp的type=3 code=3，意思是 Port unreachable
+            if (frame.containsIcmp()) {
+                continue;
+            }
             if (frame.isDnsQry()) {
                 if (dnsSession.getQryTime() == null) {
                     dnsSession.setQryTime(frame.getTimestamp());

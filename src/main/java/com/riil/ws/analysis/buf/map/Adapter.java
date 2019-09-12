@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -87,21 +88,16 @@ public class Adapter {
         frame.getLayers().setFrameLen(getIntegerLayerFirstBy(FrameConstant.FRAME_LEN));
     }
 
-
-    /**
-     * 由于ip_protoc 是 协议数组，取第一个协议为该frame的协议
-     * <p>
-     * 实际抓包时，发现网络层是ICMP，ICMP下又包含TCP，这样的packet不计算。
-     */
     @SuppressWarnings("unchecked")
     private void setFrameProto() {
-        Object protos = getLayerBy(FrameConstant.IP_PROTO);
-        if (protos != null) {
-            Integer ipProto = Integer.valueOf(((List<String>) protos).get(0));
-            frame.getLayers().setIpProto(ipProto);
-            if (FrameConstant.TCP_PROTO_NUM.equals(ipProto)) {
-                frame.getLayers().setTcp(true);
+        Object objs = getLayerBy(FrameConstant.IP_PROTO);
+        if (objs != null) {
+            List<String> protos = (List<String>) objs;
+            List<Integer> ipProtos = new ArrayList<>(protos.size());
+            for (String proto : protos) {
+                ipProtos.add(Integer.valueOf(proto));
             }
+            frame.getLayers().setIpProto(ipProtos);
         }
     }
 
@@ -194,20 +190,9 @@ public class Adapter {
         frame.getLayers().setHttpResponseCode(getIntegerLayerFirstBy(FrameConstant.HTTP_RESPONSE_CODE));
     }
 
-    /**
-     * 实际抓包时，发现网络层是ICMP，ICMP下又包含DNS，这样的packet不计算。
-     */
     @SuppressWarnings("unchecked")
     private void setUdpStream() {
-        Object protos = getLayerBy(FrameConstant.IP_PROTO);
-        if (protos != null) {
-            Integer ipProto = Integer.valueOf(((List<String>) protos).get(0));
-            frame.getLayers().setIpProto(ipProto);
-            if (FrameConstant.UDP_PROTO_NUM.equals(ipProto)) {
-                frame.getLayers().setUdpStream(getIntegerLayerFirstBy(FrameConstant.UDP_STREAM));
-            }
-        }
-
+        frame.getLayers().setUdpStream(getIntegerLayerFirstBy(FrameConstant.UDP_STREAM));
     }
 
     private void setUdpSrcPort() {
@@ -244,11 +229,6 @@ public class Adapter {
 
     @SuppressWarnings("unchecked")
     private void setDnsAnswerIp() {
-        // 过滤掉 非 UDP
-        if (!FrameConstant.UDP_PROTO_NUM.equals(frame.getLayers().getIpProto())) {
-            return;
-        }
-
         // 过滤掉 非 DNS 查询 主机
         if (!Boolean.TRUE.equals(frame.getLayers().getDnsQryHost())) {
             return;

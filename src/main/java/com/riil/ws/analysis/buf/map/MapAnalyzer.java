@@ -66,7 +66,7 @@ public class MapAnalyzer implements IAnalyzer {
         MapCache.putFrame(frame.getFrameNumber(), frame);
 
         Integer tcpStreamNumber = frame.getTcpStreamNumber();
-        if (tcpStreamNumber != null && frame.isTcp()) {
+        if (tcpStreamNumber != null ) {
             TcpStream tcpStream = MapCache.getTcpStream(tcpStreamNumber);
             if (tcpStream == null) {
                 tcpStream = new TcpStream(tcpStreamNumber);
