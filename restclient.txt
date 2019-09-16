@@ -160,6 +160,12 @@ Content-Type: application/json
                     "server_ip":{
                         "type":"ip"
                     },
+                    "client_traffic_ip":{
+                        "type":"ip"
+                    },
+                    "server_traffic_ip":{
+                        "type":"ip"
+                    },
                     "server_port":{
                         "type":"integer"
                     },

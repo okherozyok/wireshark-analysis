@@ -4,8 +4,8 @@ import java.io.FileWriter;
 import java.util.Map;
 import java.util.Set;
 
-import com.riil.ws.analysis.buf.map.dns.DnsAnalyzer;
-import com.riil.ws.analysis.buf.map.dns.DnsSession;
+import com.riil.ws.analysis.buf.map.udp.UdpAnalyzer;
+import com.riil.ws.analysis.buf.map.udp.UdpStream;
 import com.riil.ws.analysis.buf.map.tcp.TcpAnalyzer;
 import com.riil.ws.analysis.buf.map.tcp.TcpStream;
 import org.apache.http.HttpHost;
@@ -57,7 +57,7 @@ public class MapAnalyzer implements IAnalyzer {
     private TcpAnalyzer tcpAnalyzer;
 
     @Autowired
-    private DnsAnalyzer dnsAnalyzer;
+    private UdpAnalyzer udpAnalyzer;
 
     private RestHighLevelClient client;
 
@@ -75,16 +75,14 @@ public class MapAnalyzer implements IAnalyzer {
             tcpStream.append(frame);
         }
 
-
         Integer udpStreamNumber = frame.getUdpStreamNumber();
-        Boolean dnsQryHost = frame.getDnsQryHost();
-        if (udpStreamNumber != null && Boolean.TRUE.equals(dnsQryHost)) {
-            DnsSession dnsSession = MapCache.getDnsSession(udpStreamNumber);
-            if (dnsSession == null) {
-                dnsSession = new DnsSession(udpStreamNumber);
-                MapCache.putDnsSession(dnsSession);
+        if (udpStreamNumber != null) {
+            UdpStream udpStream = MapCache.getUdpStream(udpStreamNumber);
+            if (udpStream == null) {
+                udpStream = new UdpStream(udpStreamNumber);
+                MapCache.putUdpStream(udpStream);
             }
-            dnsSession.append(frame);
+            udpStream.append(frame);
         }
     }
 
@@ -96,10 +94,10 @@ public class MapAnalyzer implements IAnalyzer {
             tcpAnalyzer.analysis(tcpStream);
         }
 
-        Set<Integer> dnsKeySet = MapCache.getDnsSessionMap().keySet();
+        Set<Integer> dnsKeySet = MapCache.getUdpStreamMap().keySet();
         for (Integer dnsId : dnsKeySet) {
-            DnsSession dnsSession = MapCache.getDnsSession(dnsId);
-            dnsAnalyzer.analysis(dnsSession);
+            UdpStream udpStream = MapCache.getUdpStream(dnsId);
+            udpAnalyzer.analysis(udpStream);
         }
     }
 

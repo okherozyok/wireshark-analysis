@@ -13,6 +13,12 @@ public class TcpStream {
 
     private String clientIp = null;
     private String serverIp = null;
+
+    // 专为流量区分客户端、服务端ip使用。
+    // 不使用clientIp、serverIp的原因是如果没有syn和syn+ack，和http的request标记可能相反
+    private String clientTrafficIp = null;
+    private String serverTrafficIp = null;
+
     private Integer dstPort = null;
     private Long synTimeStamp = null;
     private Long sackTimeStamp = null;
@@ -51,6 +57,22 @@ public class TcpStream {
 
     public void setServerIp(String serverIp) {
         this.serverIp = serverIp;
+    }
+
+    public String getClientTrafficIp() {
+        return clientTrafficIp;
+    }
+
+    public void setClientTrafficIp(String clientTrafficIp) {
+        this.clientTrafficIp = clientTrafficIp;
+    }
+
+    public String getServerTrafficIp() {
+        return serverTrafficIp;
+    }
+
+    public void setServerTrafficIp(String serverTrafficIp) {
+        this.serverTrafficIp = serverTrafficIp;
     }
 
     public Integer getDstPort() {

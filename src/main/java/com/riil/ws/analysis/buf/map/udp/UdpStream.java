@@ -1,20 +1,20 @@
-package com.riil.ws.analysis.buf.map.dns;
+package com.riil.ws.analysis.buf.map.udp;
 
 import com.riil.ws.analysis.buf.map.FrameBean;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class DnsSession {
+public class UdpStream {
     private int udpStreamNumber;
     private Long qryTime = null;
     private String clientIp = null;
     private String serverIp = null;
-    private boolean hasResult = false;
+    private Boolean hasDnsResult = null;
 
     private List<FrameBean> frames;
 
-    public DnsSession(int udpStreamNumber) {
+    public UdpStream(int udpStreamNumber) {
         this.udpStreamNumber = udpStreamNumber;
         frames = new ArrayList<>();
     }
@@ -55,11 +55,11 @@ public class DnsSession {
         this.serverIp = serverIp;
     }
 
-    public boolean isHasResult() {
-        return hasResult;
+    public Boolean isHasDnsResult() {
+        return hasDnsResult;
     }
 
-    public void setHasResult(boolean hasResult) {
-        this.hasResult = hasResult;
+    public void setHasDnsResult(boolean hasDnsResult) {
+        this.hasDnsResult = hasDnsResult;
     }
 }

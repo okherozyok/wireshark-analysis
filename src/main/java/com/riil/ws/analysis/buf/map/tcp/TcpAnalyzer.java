@@ -5,6 +5,7 @@ import com.riil.ws.analysis.common.IpPortUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -24,6 +25,8 @@ public class TcpAnalyzer {
 
         List<FrameBean> frames = tcpStream.getFrames();
         for (FrameBean frame : frames) {
+            markIpDirection4Traffic(frame, tcpStream);
+
             // 比如：icmp的type=11 code=0，意思是 Time to live exceeded in transit
             if (frame.containsIcmp()) {
                 continue;
@@ -34,6 +37,28 @@ public class TcpAnalyzer {
 
         endCreateConn(tcpStream);
         onlySuccess(tcpStream);
+    }
+
+    private void markIpDirection4Traffic(FrameBean frame, TcpStream tcpStream) {
+        if (!StringUtils.isEmpty(tcpStream.getClientTrafficIp())) {
+            frame.setClientTrafficIp(tcpStream.getClientTrafficIp());
+            frame.setServerTrafficIp(tcpStream.getServerTrafficIp());
+
+            return;
+        }
+
+        if (frame.isTcpConnectionSyn()) {
+            tcpStream.setClientTrafficIp(frame.getSrcIp());
+            tcpStream.setServerTrafficIp(frame.getDstIp());
+        } else if (frame.isTcpConnectionSack()) {
+            tcpStream.setClientTrafficIp(frame.getDstIp());
+            tcpStream.setServerTrafficIp(frame.getSrcIp());
+        } else {
+            tcpStream.setClientTrafficIp(frame.getSrcIp());
+            tcpStream.setServerTrafficIp(frame.getDstIp());
+        }
+        frame.setClientTrafficIp(tcpStream.getClientTrafficIp());
+        frame.setServerTrafficIp(tcpStream.getServerTrafficIp());
     }
 
     /**

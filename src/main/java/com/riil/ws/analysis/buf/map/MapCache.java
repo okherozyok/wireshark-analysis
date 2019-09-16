@@ -1,6 +1,6 @@
 package com.riil.ws.analysis.buf.map;
 
-import com.riil.ws.analysis.buf.map.dns.DnsSession;
+import com.riil.ws.analysis.buf.map.udp.UdpStream;
 import com.riil.ws.analysis.buf.map.tcp.TcpStream;
 
 import java.util.HashMap;
@@ -11,7 +11,7 @@ public final class MapCache {
 
     private static final Map<Integer, FrameBean> FRAME_BEAN_MAP = new HashMap<>(INITIAL_CAPACITY);
     private static final Map<Integer, TcpStream> TCP_STREAM_MAP = new HashMap<>();
-    private static final Map<Integer, DnsSession> DNS_SESSION_MAP = new HashMap<>();
+    private static final Map<Integer, UdpStream> UDP_STREAM_MAP = new HashMap<>();
 
     // ip+port key，timestamp key
     private static final Map<Long, Map<Long, ConcurrentConnBean>> CONCURRENT_CONN_CACHE = new HashMap<>();
@@ -53,15 +53,15 @@ public final class MapCache {
         return CONCURRENT_REQ_CACHE;
     }
 
-    public static void putDnsSession(DnsSession dnsSession) {
-        DNS_SESSION_MAP.put(dnsSession.getUdpStreamNumber(), dnsSession);
+    public static void putUdpStream(UdpStream udpStream) {
+        UDP_STREAM_MAP.put(udpStream.getUdpStreamNumber(), udpStream);
     }
 
-    public static DnsSession getDnsSession(int udpStreamNumber) {
-        return DNS_SESSION_MAP.get(udpStreamNumber);
+    public static UdpStream getUdpStream(int udpStreamNumber) {
+        return UDP_STREAM_MAP.get(udpStreamNumber);
     }
 
-    public static Map<Integer, DnsSession> getDnsSessionMap() {
-        return DNS_SESSION_MAP;
+    public static Map<Integer, UdpStream> getUdpStreamMap() {
+        return UDP_STREAM_MAP;
     }
 }
