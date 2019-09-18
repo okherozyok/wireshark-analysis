@@ -1,9 +1,11 @@
 package com.riil.ws.analysis.buf.map;
 
 import java.io.FileWriter;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.riil.ws.analysis.buf.map.icmp.IcmpAnalyzer;
 import com.riil.ws.analysis.buf.map.udp.UdpAnalyzer;
 import com.riil.ws.analysis.buf.map.udp.UdpStream;
 import com.riil.ws.analysis.buf.map.tcp.TcpAnalyzer;
@@ -59,6 +61,9 @@ public class MapAnalyzer implements IAnalyzer {
     @Autowired
     private UdpAnalyzer udpAnalyzer;
 
+    @Autowired
+    private IcmpAnalyzer icmpAnalyzer;
+
     private RestHighLevelClient client;
 
     public void save(String indexLineJson, String frameLineJson) throws Exception {
@@ -66,23 +71,23 @@ public class MapAnalyzer implements IAnalyzer {
         MapCache.putFrame(frame.getFrameNumber(), frame);
 
         Integer tcpStreamNumber = frame.getTcpStreamNumber();
-        if (tcpStreamNumber != null ) {
+        Integer udpStreamNumber = frame.getUdpStreamNumber();
+        if (tcpStreamNumber != null) {
             TcpStream tcpStream = MapCache.getTcpStream(tcpStreamNumber);
             if (tcpStream == null) {
                 tcpStream = new TcpStream(tcpStreamNumber);
                 MapCache.putTcpStream(tcpStream);
             }
             tcpStream.append(frame);
-        }
-
-        Integer udpStreamNumber = frame.getUdpStreamNumber();
-        if (udpStreamNumber != null) {
+        } else if (udpStreamNumber != null) {
             UdpStream udpStream = MapCache.getUdpStream(udpStreamNumber);
             if (udpStream == null) {
                 udpStream = new UdpStream(udpStreamNumber);
                 MapCache.putUdpStream(udpStream);
             }
             udpStream.append(frame);
+        } else if (frame.containsIcmp()) {
+            MapCache.putIcmp(frame);
         }
     }
 
@@ -94,10 +99,15 @@ public class MapAnalyzer implements IAnalyzer {
             tcpAnalyzer.analysis(tcpStream);
         }
 
-        Set<Integer> dnsKeySet = MapCache.getUdpStreamMap().keySet();
-        for (Integer dnsId : dnsKeySet) {
-            UdpStream udpStream = MapCache.getUdpStream(dnsId);
+        Set<Integer> udpKeySet = MapCache.getUdpStreamMap().keySet();
+        for (Integer udpStreamNumber : udpKeySet) {
+            UdpStream udpStream = MapCache.getUdpStream(udpStreamNumber);
             udpAnalyzer.analysis(udpStream);
+        }
+
+        List<FrameBean> icmpList = MapCache.getIcmpList();
+        for (FrameBean frame : icmpList) {
+            icmpAnalyzer.analysis(frame);
         }
     }
 
@@ -144,7 +154,7 @@ public class MapAnalyzer implements IAnalyzer {
         }
     }
 
-    private void output2FileConcurrentReq()  throws Exception {
+    private void output2FileConcurrentReq() throws Exception {
         String linSep = getLineSeparator();
 
         try (FileWriter fw = new FileWriter(HTTP_CONCURRENT_REQ_INDEX_PREFIX + outputToFileName)) {

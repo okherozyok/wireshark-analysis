@@ -3,7 +3,9 @@ package com.riil.ws.analysis.buf.map;
 import com.riil.ws.analysis.buf.map.udp.UdpStream;
 import com.riil.ws.analysis.buf.map.tcp.TcpStream;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public final class MapCache {
@@ -12,6 +14,7 @@ public final class MapCache {
     private static final Map<Integer, FrameBean> FRAME_BEAN_MAP = new HashMap<>(INITIAL_CAPACITY);
     private static final Map<Integer, TcpStream> TCP_STREAM_MAP = new HashMap<>();
     private static final Map<Integer, UdpStream> UDP_STREAM_MAP = new HashMap<>();
+    private static final List<FrameBean> ICMP_LIST = new ArrayList<>();
 
     // ip+port key，timestamp key
     private static final Map<Long, Map<Long, ConcurrentConnBean>> CONCURRENT_CONN_CACHE = new HashMap<>();
@@ -63,5 +66,13 @@ public final class MapCache {
 
     public static Map<Integer, UdpStream> getUdpStreamMap() {
         return UDP_STREAM_MAP;
+    }
+
+    public static void putIcmp(FrameBean frame) {
+        ICMP_LIST.add(frame);
+    }
+
+    public static List<FrameBean> getIcmpList() {
+        return ICMP_LIST;
     }
 }

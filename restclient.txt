@@ -160,13 +160,22 @@ Content-Type: application/json
                     "server_ip":{
                         "type":"ip"
                     },
-                    "client_traffic_ip":{
+                    "client_ip_by_first":{
                         "type":"ip"
                     },
-                    "server_traffic_ip":{
+                    "server_ip_by_first":{
                         "type":"ip"
+                    },
+                    "client_port":{
+                        "type":"integer"
                     },
                     "server_port":{
+                        "type":"integer"
+                    },
+                    "client_port_by_first":{
+                        "type":"integer"
+                    },
+                    "server_port_by_first":{
                         "type":"integer"
                     },
                     "online_user":{
@@ -216,6 +225,12 @@ Content-Type: application/json
                     },
                     "dns_server_resp_no_ip":{
                         "type":"boolean"
+                    },
+                    "icmp_type":{
+                        "type":"short"
+                    },
+                    "icmp_code":{
+                        "type":"short"
                     }
                 }
             },

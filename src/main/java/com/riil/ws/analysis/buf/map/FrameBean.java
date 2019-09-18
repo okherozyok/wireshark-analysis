@@ -107,7 +107,7 @@ public class FrameBean {
 
     public boolean containsIcmp() {
         List<Integer> ipProto = layers.getIpProto();
-        if(ipProto == null) {
+        if (ipProto == null) {
             return false;
         }
 
@@ -147,6 +147,16 @@ public class FrameBean {
     }
 
     @JSONField(serialize = false)
+    public List<Integer> getIpFragment() {
+        return layers.getIpFragment();
+    }
+
+    @JSONField(serialize = false)
+    public Integer getTcpSrcPort() {
+        return layers.getTcpSrcPort();
+    }
+
+    @JSONField(serialize = false)
     public Integer getTcpDstPort() {
         return layers.getTcpDstPort();
     }
@@ -181,6 +191,16 @@ public class FrameBean {
         return layers.getDnsAnswerIp();
     }
 
+    @JSONField(serialize = false)
+    public Short getIcmpType() {
+        return layers.getIcmpType();
+    }
+
+    @JSONField(serialize = false)
+    public Short getIcmpCode() {
+        return layers.getIcmpCode();
+    }
+
     /**
      * 如果客户端ip已经存在，不再设置
      *
@@ -203,14 +223,42 @@ public class FrameBean {
         }
     }
 
+    public void setClientIpByFirst(String clientIpByFirst) {
+        layers.setClientIpByFirst(clientIpByFirst);
+    }
+
+    public void setServerIpByFirst(String serverIpByFirst) {
+        layers.setServerIpByFirst(serverIpByFirst);
+    }
+
+    /**
+     * 如果客户端port已经存在，不再设置
+     *
+     * @param port
+     */
+    public void setClientPort(Integer port) {
+        if (layers.getClientPort() == null) {
+            layers.setClientPort(port);
+        }
+    }
+
     /**
      * 如果服务端port已经存在，不再设置
+     *
      * @param port
      */
     public void setServerPort(Integer port) {
-        if(layers.getServerPort() == null) {
+        if (layers.getServerPort() == null) {
             layers.setServerPort(port);
         }
+    }
+
+    public void setClientPortByFirst(Integer port) {
+        layers.setClientPortByFirst(port);
+    }
+
+    public void setServerPortByFirst(Integer port) {
+        layers.setServerPortByFirst(port);
     }
 
     public void setOnlineUser(String onlineUser) {
@@ -362,13 +410,30 @@ public class FrameBean {
         private Integer clientIpInt;
         private Integer serverIpInt;
 
+        //  使用第一条frame判断客户端、服务端。
+        // 不使用clientIp、serverIp的原因是tcp标记中，如果没有syn和syn+ack，和http的request标记可能相反
+        private Integer clientIpByFirstInt;
+        private Integer serverIpByFirstInt;
+
+        @JSONField(name = FrameConstant.CLIENT_PORT)
+        private Integer clientPort;
+
         @JSONField(name = FrameConstant.SERVER_PORT)
         private Integer serverPort;
+
+        @JSONField(name = FrameConstant.CLIENT_PORT_BY_FIRST)
+        private Integer clientPortByFirst;
+
+        @JSONField(name = FrameConstant.SERVER_PORT_BY_FIRST)
+        private Integer serverPortByFirst;
 
         private Integer onlineUserInt;
 
         @JSONField(name = FrameConstant.IP_PROTO)
         private List<Integer> ipProto;
+
+        @JSONField(name = FrameConstant.IP_FRAGMENT)
+        private List<Integer> ipFragment;
 
         @JSONField(name = FrameConstant.TCP)
         private Boolean tcp;
@@ -543,6 +608,12 @@ public class FrameBean {
         @JSONField(name = FrameConstant.DNS_SERVER_RESP_NO_IP)
         private Boolean dnsServerRespNoIp;
 
+        @JSONField(name = FrameConstant.ICMP_TYPE)
+        private Short icmpType;
+
+        @JSONField(name = FrameConstant.ICMP_CODE)
+        private Short icmpCode;
+
         public void setSrcIp(String srcIp) {
             this.srcIpInt = IpV4Util.ipStr2Int(srcIp);
         }
@@ -596,12 +667,71 @@ public class FrameBean {
             }
         }
 
+        @JSONField(name = FrameConstant.CLIENT_IP_BY_FIRST)
+        public String getClientIpByFirst() {
+            if (clientIpByFirstInt != null) {
+                return IpV4Util.ipInt2Str(clientIpByFirstInt);
+            }
+
+            return null;
+        }
+
+
+        public void setClientIpByFirst(String clientIpByFirst) {
+            if (clientIpByFirst == null) {
+                clientIpByFirstInt = null;
+            } else {
+                clientIpByFirstInt = IpV4Util.ipStr2Int(clientIpByFirst);
+            }
+        }
+
+        @JSONField(name = FrameConstant.SERVER_IP_BY_FIRST)
+        public String getServerIpByFirst() {
+            if (serverIpByFirstInt != null) {
+                return IpV4Util.ipInt2Str(serverIpByFirstInt);
+            }
+
+            return null;
+        }
+
+        public void setServerIpByFirst(String serverIpByFirst) {
+            if (serverIpByFirst == null) {
+                serverIpByFirstInt = null;
+            } else {
+                serverIpByFirstInt = IpV4Util.ipStr2Int(serverIpByFirst);
+            }
+        }
+
+        public Integer getClientPort() {
+            return clientPort;
+        }
+
+        public void setClientPort(Integer clientPort) {
+            this.clientPort = clientPort;
+        }
+
         public Integer getServerPort() {
             return serverPort;
         }
 
         public void setServerPort(Integer serverPort) {
             this.serverPort = serverPort;
+        }
+
+        public Integer getClientPortByFirst() {
+            return clientPortByFirst;
+        }
+
+        public void setClientPortByFirst(Integer clientPortByFirst) {
+            this.clientPortByFirst = clientPortByFirst;
+        }
+
+        public Integer getServerPortByFirst() {
+            return serverPortByFirst;
+        }
+
+        public void setServerPortByFirst(Integer serverPortByFirst) {
+            this.serverPortByFirst = serverPortByFirst;
         }
 
         @JSONField(name = FrameConstant.ONLINE_USER)
@@ -627,6 +757,14 @@ public class FrameBean {
 
         public void setIpProto(List<Integer> ipProto) {
             this.ipProto = ipProto;
+        }
+
+        public List<Integer> getIpFragment() {
+            return ipFragment;
+        }
+
+        public void setIpFragment(List<Integer> ipFragment) {
+            this.ipFragment = ipFragment;
         }
 
         public Integer getFrameNumber() {
@@ -1113,6 +1251,22 @@ public class FrameBean {
 
         public void setDnsServerRespNoIp(Boolean dnsServerRespNoIp) {
             this.dnsServerRespNoIp = dnsServerRespNoIp;
+        }
+
+        public Short getIcmpType() {
+            return icmpType;
+        }
+
+        public void setIcmpType(Short icmpType) {
+            this.icmpType = icmpType;
+        }
+
+        public Short getIcmpCode() {
+            return icmpCode;
+        }
+
+        public void setIcmpCode(Short icmpCode) {
+            this.icmpCode = icmpCode;
         }
     }
 }

@@ -7,9 +7,17 @@ import java.util.List;
 
 public class UdpStream {
     private int udpStreamNumber;
-    private Long qryTime = null;
+    private Long dnsQryTime = null;
     private String clientIp = null;
     private String serverIp = null;
+
+    // 专为流量区分客户端、服务端ip使用。
+    // 不使用clientIp、serverIp的原因是与 Dns判断的clientIp、serverIp可能相反
+    private String clientIpByFirst = null;
+    private String serverIpByFirst = null;
+    private Integer clientPortByFirst = null;
+    private Integer serverPortByFirst = null;
+
     private Boolean hasDnsResult = null;
 
     private List<FrameBean> frames;
@@ -31,12 +39,12 @@ public class UdpStream {
         return frames;
     }
 
-    public Long getQryTime() {
-        return qryTime;
+    public Long getDnsQryTime() {
+        return dnsQryTime;
     }
 
-    public void setQryTime(Long qryTime) {
-        this.qryTime = qryTime;
+    public void setDnsQryTime(Long dnsQryTime) {
+        this.dnsQryTime = dnsQryTime;
     }
 
     public String getClientIp() {
@@ -53,6 +61,38 @@ public class UdpStream {
 
     public void setServerIp(String serverIp) {
         this.serverIp = serverIp;
+    }
+
+    public String getClientIpByFirst() {
+        return clientIpByFirst;
+    }
+
+    public void setClientIpByFirst(String clientIpByFirst) {
+        this.clientIpByFirst = clientIpByFirst;
+    }
+
+    public String getServerIpByFirst() {
+        return serverIpByFirst;
+    }
+
+    public void setServerIpByFirst(String serverIpByFirst) {
+        this.serverIpByFirst = serverIpByFirst;
+    }
+
+    public Integer getClientPortByFirst() {
+        return clientPortByFirst;
+    }
+
+    public void setClientPortByFirst(Integer clientPortByFirst) {
+        this.clientPortByFirst = clientPortByFirst;
+    }
+
+    public Integer getServerPortByFirst() {
+        return serverPortByFirst;
+    }
+
+    public void setServerPortByFirst(Integer serverPortByFirst) {
+        this.serverPortByFirst = serverPortByFirst;
     }
 
     public Boolean isHasDnsResult() {

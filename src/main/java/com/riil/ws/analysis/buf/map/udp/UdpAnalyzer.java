@@ -2,9 +2,11 @@ package com.riil.ws.analysis.buf.map.udp;
 
 import com.riil.ws.analysis.buf.map.FrameBean;
 import com.riil.ws.analysis.buf.map.FrameConstant;
+import com.riil.ws.analysis.buf.map.MapCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -15,6 +17,8 @@ public class UdpAnalyzer {
     public void analysis(UdpStream udpStream) throws Exception {
         List<FrameBean> frames = udpStream.getFrames();
         for (FrameBean frame : frames) {
+            markIpDirectionByFirst(frame, udpStream);
+
             // 比如：icmp的type=3 code=3，意思是 Port unreachable
             if (frame.containsIcmp()) {
                 continue;
@@ -23,6 +27,29 @@ public class UdpAnalyzer {
         }
 
         endDns(udpStream);
+    }
+
+    private void markIpDirectionByFirst(FrameBean frame, UdpStream udpStream) {
+        if (!StringUtils.isEmpty(udpStream.getClientIpByFirst())) {
+            frame.setClientIpByFirst(udpStream.getClientIpByFirst());
+            frame.setServerIpByFirst(udpStream.getServerIpByFirst());
+            frame.setClientPortByFirst(udpStream.getClientPortByFirst());
+            frame.setServerPortByFirst(udpStream.getServerPortByFirst());
+
+            setUdpIp4IpFragment(frame, udpStream);
+            return;
+        }
+
+        // 以第一条的srcIp作为客户端IP，与NPV保持一致
+        udpStream.setClientIpByFirst(frame.getSrcIp());
+        udpStream.setServerIpByFirst(frame.getDstIp());
+        udpStream.setClientPortByFirst(frame.getTcpSrcPort());
+        udpStream.setServerPortByFirst(frame.getTcpDstPort());
+        frame.setClientIpByFirst(udpStream.getClientIpByFirst());
+        frame.setServerIpByFirst(udpStream.getServerIpByFirst());
+        frame.setClientPortByFirst(udpStream.getClientPortByFirst());
+        frame.setServerPortByFirst(udpStream.getServerPortByFirst());
+        setUdpIp4IpFragment(frame, udpStream);
     }
 
     private void realTimeDns(FrameBean frame, UdpStream udpStream) {
@@ -38,8 +65,8 @@ public class UdpAnalyzer {
         }
 
         if (frame.isDnsQry()) {
-            if (udpStream.getQryTime() == null) {
-                udpStream.setQryTime(frame.getTimestamp());
+            if (udpStream.getDnsQryTime() == null) {
+                udpStream.setDnsQryTime(frame.getTimestamp());
             }
             if (udpStream.getClientIp() == null) {
                 udpStream.setClientIp(frame.getSrcIp());
@@ -47,8 +74,8 @@ public class UdpAnalyzer {
             }
         } else { // 获取到第一个响应的时候，结束分析。因为之前的请求有重发的，后续的响应是对重发的请求的响应。
             // 可能没有抓到请求包
-            if (udpStream.getQryTime() != null) {
-                frame.setDnsReplyDelay(frame.getTimestamp() - udpStream.getQryTime());
+            if (udpStream.getDnsQryTime() != null) {
+                frame.setDnsReplyDelay(frame.getTimestamp() - udpStream.getDnsQryTime());
             }
             if (udpStream.getClientIp() == null) {
                 frame.setClientIp(frame.getDstIp());
@@ -81,6 +108,24 @@ public class UdpAnalyzer {
             lastFrame.setServerIp(udpStream.getServerIp());
             lastFrame.setDnsNoResponse();
             lastFrame.setDnsReplyDelay(null);
+        }
+    }
+
+    /**
+     * UDP的长度大于1480后，会分包，此时wireshark只对最终包有udp.stream，其它分包没有udp.stream，
+     * 因此找到每个分包，标记上客户端、服务端流量ip
+     *
+     * @param frame
+     * @param udpStream
+     */
+    private void setUdpIp4IpFragment(FrameBean frame, UdpStream udpStream) {
+        List<Integer> ipFragments = frame.getIpFragment();
+        if (ipFragments != null) {
+            for (Integer frameNumber : ipFragments) {
+                FrameBean fragment = MapCache.getFrame(frameNumber);
+                fragment.setClientIpByFirst(udpStream.getClientIpByFirst());
+                fragment.setServerIpByFirst(udpStream.getServerIpByFirst());
+            }
         }
     }
 }

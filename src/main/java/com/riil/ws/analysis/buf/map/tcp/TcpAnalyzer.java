@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.awt.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +24,7 @@ public class TcpAnalyzer {
 
         List<FrameBean> frames = tcpStream.getFrames();
         for (FrameBean frame : frames) {
-            markIpDirection4Traffic(frame, tcpStream);
+            markIpDirectionByFirst(frame, tcpStream);
 
             // 比如：icmp的type=11 code=0，意思是 Time to live exceeded in transit
             if (frame.containsIcmp()) {
@@ -36,29 +35,39 @@ public class TcpAnalyzer {
         }
 
         endCreateConn(tcpStream);
-        onlySuccess(tcpStream);
+        afterCreateConn(tcpStream);
     }
 
-    private void markIpDirection4Traffic(FrameBean frame, TcpStream tcpStream) {
-        if (!StringUtils.isEmpty(tcpStream.getClientTrafficIp())) {
-            frame.setClientTrafficIp(tcpStream.getClientTrafficIp());
-            frame.setServerTrafficIp(tcpStream.getServerTrafficIp());
-
+    private void markIpDirectionByFirst(FrameBean frame, TcpStream tcpStream) {
+        if (!StringUtils.isEmpty(tcpStream.getClientIpByFirst())) {
+            frame.setClientIpByFirst(tcpStream.getClientIpByFirst());
+            frame.setServerIpByFirst(tcpStream.getServerIpByFirst());
+            frame.setClientPortByFirst(tcpStream.getClientPortByFirst());
+            frame.setServerPortByFirst(tcpStream.getServerPortByFirst());
             return;
         }
 
         if (frame.isTcpConnectionSyn()) {
-            tcpStream.setClientTrafficIp(frame.getSrcIp());
-            tcpStream.setServerTrafficIp(frame.getDstIp());
+            tcpStream.setClientIpByFirst(frame.getSrcIp());
+            tcpStream.setServerIpByFirst(frame.getDstIp());
+            tcpStream.setClientPortByFirst(frame.getTcpSrcPort());
+            tcpStream.setServerPortByFirst(frame.getTcpDstPort());
         } else if (frame.isTcpConnectionSack()) {
-            tcpStream.setClientTrafficIp(frame.getDstIp());
-            tcpStream.setServerTrafficIp(frame.getSrcIp());
+            tcpStream.setClientIpByFirst(frame.getDstIp());
+            tcpStream.setServerIpByFirst(frame.getSrcIp());
+            tcpStream.setClientPortByFirst(frame.getTcpDstPort());
+            tcpStream.setServerPortByFirst(frame.getTcpSrcPort());
         } else {
-            tcpStream.setClientTrafficIp(frame.getSrcIp());
-            tcpStream.setServerTrafficIp(frame.getDstIp());
+            // 没有syn 和 Sack时，与NPV一致，以第一条的srcIp作为客户端IP
+            tcpStream.setClientIpByFirst(frame.getSrcIp());
+            tcpStream.setServerIpByFirst(frame.getDstIp());
+            tcpStream.setClientPortByFirst(frame.getTcpSrcPort());
+            tcpStream.setServerPortByFirst(frame.getTcpDstPort());
         }
-        frame.setClientTrafficIp(tcpStream.getClientTrafficIp());
-        frame.setServerTrafficIp(tcpStream.getServerTrafficIp());
+        frame.setClientIpByFirst(tcpStream.getClientIpByFirst());
+        frame.setServerIpByFirst(tcpStream.getServerIpByFirst());
+        frame.setClientPortByFirst(tcpStream.getClientPortByFirst());
+        frame.setServerPortByFirst(tcpStream.getServerPortByFirst());
     }
 
     /**
@@ -77,7 +86,8 @@ public class TcpAnalyzer {
                 tcpStream.setSynTimeStamp(json.getTimestamp());
                 tcpStream.setClientIp(json.getSrcIp());
                 tcpStream.setServerIp(json.getDstIp());
-                tcpStream.setDstPort(json.getTcpDstPort());
+                tcpStream.setClientPort(json.getTcpSrcPort());
+                tcpStream.setServerPort(json.getTcpDstPort());
             }
 
             // 可能发生了syn重传，清除建连成功的标志
@@ -87,7 +97,8 @@ public class TcpAnalyzer {
                 // 丢失syn包的时候，纠正下客户端和服务端ip
                 tcpStream.setClientIp(json.getDstIp());
                 tcpStream.setServerIp(json.getSrcIp());
-                tcpStream.setDstPort(json.getTcpDstPort());
+                tcpStream.setClientPort(json.getTcpSrcPort());
+                tcpStream.setServerPort(json.getTcpDstPort());
             }
             tcpStream.addSackFrameNumber(json.getFrameNumber());
             tcpStream.setSackTimeStamp(json.getTimestamp());
@@ -267,20 +278,16 @@ public class TcpAnalyzer {
             connAckFrame.setTcpServerConnectionDelay(serverConnDelay);
             connAckFrame.setTcpConnectionDelay(clientConnDelay + serverConnDelay);
         }
-
-        onlineUser(tcpStream);
     }
 
     /**
      * 传输阶段，只计算建连成功的。
      */
-    private void onlySuccess(TcpStream tcpStream) {
-        if (tcpStream.getTcpConnectionSuccess() == null || tcpStream.getTcpConnectionSuccess().equals(Boolean.FALSE)) {
-            return;
-        }
-
+    private void afterCreateConn(TcpStream tcpStream) {
         List<FrameBean> frames = tcpStream.getFrames();
         for (FrameBean frame : frames) {
+            onlineUser(tcpStream, frame);
+
             onlySuccessRTT(tcpStream, frame);
             onlySuccessRetrans(tcpStream, frame);
             onlySuccessDisconnectionStart(tcpStream, frame);
@@ -291,6 +298,10 @@ public class TcpAnalyzer {
     }
 
     private void onlySuccessRTT(TcpStream tcpStream, FrameBean frame) {
+        if (!ifTcpConnectionSuccess(tcpStream)) {
+            return;
+        }
+
         // 不计算三次握手的
         if (frame.isTcpConnectionSyn() || frame.isTcpConnectionSack()) {
             return;
@@ -318,6 +329,10 @@ public class TcpAnalyzer {
     }
 
     private void onlySuccessRetrans(TcpStream tcpStream, FrameBean frame) {
+        if (!ifTcpConnectionSuccess(tcpStream)) {
+            return;
+        }
+
         if (!frame.isTcpLenBt0() || frame.isTcpConnectionSyn() || frame.isTcpConnectionSack() || frame.isTcpConnectionRst()
                 || frame.isTcpConnectionFin() || frame.isTcpKeepAlive() || frame.isTcpDupAck()) {
             return;
@@ -343,6 +358,10 @@ public class TcpAnalyzer {
     }
 
     private void onlySuccessConcurrentConn(TcpStream tcpStream) {
+        if (!ifTcpConnectionSuccess(tcpStream)) {
+            return;
+        }
+
         final long second = 1000;
 
         List<FrameBean> frames = tcpStream.getFrames();
@@ -353,7 +372,7 @@ public class TcpAnalyzer {
         long startTime = firstFrame.getTimestamp() / second * second;
         long endTime = lastFrame.getTimestamp() / second * second;
 
-        long ipPortKey = IpPortUtil.ipPortKey(tcpStream.getServerIp(), tcpStream.getDstPort());
+        long ipPortKey = IpPortUtil.ipPortKey(tcpStream.getServerIp(), tcpStream.getServerPort());
         Map<Long, Map<Long, ConcurrentConnBean>> concurrentConnCache = MapCache.getConcurrentConnCache();
         Map<Long, ConcurrentConnBean> concurrentConnBeanMap = concurrentConnCache.computeIfAbsent(ipPortKey, k -> new HashMap<>());
         while (startTime <= endTime) {
@@ -362,7 +381,7 @@ public class TcpAnalyzer {
                 concurrentConnBean = new ConcurrentConnBean();
                 concurrentConnBean.setIndex(firstFrameIndex.replace(PACKET_INDEX_PREFIX, TCP_CONCURRENT_CONN_INDEX_PREFIX));
                 concurrentConnBean.setServerIp(tcpStream.getServerIp());
-                concurrentConnBean.setTcpDstPort(tcpStream.getDstPort());
+                concurrentConnBean.setTcpDstPort(tcpStream.getServerPort());
                 concurrentConnBean.setTimestamp(startTime);
                 concurrentConnBeanMap.put(startTime, concurrentConnBean);
             }
@@ -380,6 +399,10 @@ public class TcpAnalyzer {
      * @param frame
      */
     private void onlySuccessDisconnectionStart(TcpStream tcpStream, FrameBean frame) {
+        if (!ifTcpConnectionSuccess(tcpStream)) {
+            return;
+        }
+
         if (frame.isTcpConnectionFin()) {
             if (tcpStream.getClientIp().equals(frame.getSrcIp())) {
                 if (tcpStream.getClientFinFrame() == null) {
@@ -409,7 +432,13 @@ public class TcpAnalyzer {
      * @param tcpStream
      */
     private void onlySuccessDisconnectionEnd(TcpStream tcpStream) {
+        if (!ifTcpConnectionSuccess(tcpStream)) {
+            return;
+        }
+
+        // FIXME 猎豹按照syslog的开始时间统计的拆连状态，所以临时把标记标在第一个frame上
         FrameBean frame = null;
+        FrameBean firstFrame = tcpStream.getFrames().get(0);
         if (tcpStream.getClientFinFrame() != null && tcpStream.getClientRstFrame() != null) {
             if (tcpStream.getClientRstFrame() > tcpStream.getClientFinFrame()) {
                 frame = MapCache.getFrame(tcpStream.getClientRstFrame());
@@ -418,7 +447,8 @@ public class TcpAnalyzer {
                         + tcpStream.getClientRstFrame() + " < clientFinFrame=" + tcpStream.getClientFinFrame());
                 frame = MapCache.getFrame(tcpStream.getClientFinFrame());
             }
-            frame.setTcpClientDisconnectionFinRst();
+            //frame.setTcpClientDisconnectionFinRst();
+            firstFrame.setTcpClientDisconnectionFinRst();
         } else if (tcpStream.getServerFinFrame() != null && tcpStream.getServerRstFrame() != null) {
             if (tcpStream.getServerRstFrame() > tcpStream.getServerFinFrame()) {
                 frame = MapCache.getFrame(tcpStream.getServerRstFrame());
@@ -427,51 +457,69 @@ public class TcpAnalyzer {
                         + tcpStream.getServerRstFrame() + " < serverFinFrame=" + tcpStream.getServerFinFrame());
                 frame = MapCache.getFrame(tcpStream.getServerFinFrame());
             }
-            frame.setTcpServerDisconnectionFinRst();
+            //frame.setTcpServerDisconnectionFinRst();
+            firstFrame.setTcpServerDisconnectionFinRst();
         } else if (tcpStream.getClientRstFrame() != null) {
             frame = MapCache.getFrame(tcpStream.getClientRstFrame());
-            frame.setTcpClientDisconnectionRst();
+            //frame.setTcpClientDisconnectionRst();
+            firstFrame.setTcpClientDisconnectionRst();
         } else if (tcpStream.getServerRstFrame() != null) {
             frame = MapCache.getFrame(tcpStream.getServerRstFrame());
-            frame.setTcpServerDisconnectionRst();
+            //frame.setTcpServerDisconnectionRst();
+            firstFrame.setTcpServerDisconnectionRst();
         } else if (tcpStream.getClientFinFrame() != null && tcpStream.getServerFinFrame() != null) {
             if (tcpStream.getClientFinFrame() > tcpStream.getServerFinFrame()) {
                 frame = MapCache.getFrame(tcpStream.getClientFinFrame());
             } else {
                 frame = MapCache.getFrame(tcpStream.getServerFinFrame());
             }
-            frame.setTcpDisConnectionNormal();
+            //frame.setTcpDisConnectionNormal();
+            firstFrame.setTcpDisConnectionNormal();
         } else if (tcpStream.getClientFinFrame() != null) {
             frame = MapCache.getFrame(tcpStream.getClientFinFrame());
-            frame.setTcpClientDisconnectionFinNoResp();
+            //frame.setTcpClientDisconnectionFinNoResp();
+            firstFrame.setTcpClientDisconnectionFinNoResp();
         } else if (tcpStream.getServerFinFrame() != null) {
             frame = MapCache.getFrame(tcpStream.getServerFinFrame());
-            frame.setTcpServerDisconnectionFinNoResp();
+            //frame.setTcpServerDisconnectionFinNoResp();
+            firstFrame.setTcpServerDisconnectionFinNoResp();
         }
-        if (frame != null) {
-            frame.setServerIp(tcpStream.getServerIp());
-            frame.setServerPort(tcpStream.getDstPort());
+        //if (frame != null) {
+        if (firstFrame != null) {
+            //frame.setClientIp(tcpStream.getClientIp());
+            firstFrame.setClientIp(tcpStream.getClientIp());
+            //frame.setServerIp(tcpStream.getServerIp());
+            firstFrame.setServerIp(tcpStream.getServerIp());
+            //frame.setClientPort(tcpStream.getClientPort());
+            firstFrame.setClientPort(tcpStream.getClientPort());
+            //frame.setServerPort(tcpStream.getDstPort());
+            firstFrame.setServerPort(tcpStream.getServerPort());
         } else {
             LOGGER.debug("tcpStream=" + tcpStream.getTcpStreamNumber() + " has no disconnection.");
         }
     }
 
     /**
-     * 在tcpStream的第一条报文上，设置在线用户
+     * 在tcpStream的第一条报文和每新的1分钟报文上，设置在线用户
      *
      * @param tcpStream
      */
-    private void onlineUser(TcpStream tcpStream) {
-        FrameBean firstFrame = tcpStream.getFrames().get(0);
-        if (tcpStream.getClientIp() != null) {
-            firstFrame.setOnlineUser(tcpStream.getClientIp());
-            firstFrame.setServerIp(tcpStream.getServerIp());
-            firstFrame.setServerPort(tcpStream.getDstPort());
+    private void onlineUser(TcpStream tcpStream, FrameBean frame) {
+        final int minute = 60000;
+        long wholeMinute = frame.getTimestamp() / minute * minute;
+        if (tcpStream.getOnlineUserTimeStamp() == null) {
+            tcpStream.setOnlineUserTimeStamp(wholeMinute);
+            frame.setOnlineUser(tcpStream.getClientIpByFirst());
         } else {
-            firstFrame.setOnlineUser(firstFrame.getSrcIp());
-            firstFrame.setServerIp(firstFrame.getDstIp());
-            firstFrame.setServerPort(firstFrame.getTcpDstPort());
+            if (wholeMinute > tcpStream.getOnlineUserTimeStamp()) {
+                tcpStream.setOnlineUserTimeStamp(wholeMinute);
+                // 在线用户的 客户端、服务端要和第一条标记的保持一致
+                frame.setOnlineUser(tcpStream.getClientIpByFirst());
+            }
         }
     }
 
+    private boolean ifTcpConnectionSuccess(TcpStream tcpStream) {
+        return Boolean.TRUE.equals(tcpStream.getTcpConnectionSuccess());
+    }
 }

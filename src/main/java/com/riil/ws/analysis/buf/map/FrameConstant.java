@@ -15,6 +15,7 @@ public final class FrameConstant {
 	public static final String FRAME_NUMBER = "frame_number";
 	public static final String FRAME_LEN = "frame_len";
 	public static final String IP_PROTO = "ip_proto";
+	public static final String IP_FRAGMENT = "ip_fragment";
 	public static final String TCP_STREAM = "tcp_stream";
 	public static final String TCP_SRCPORT = "tcp_srcport";
 	public static final String TCP_DSTPORT = "tcp_dstport";
@@ -56,9 +57,12 @@ public final class FrameConstant {
 	// 指标，补充的
 	public static final String CLIENT_IP = "client_ip";
 	public static final String SERVER_IP = "server_ip";
-	public static final String CLIENT_TRAFFIC_IP = "client_traffic_ip";
-	public static final String SERVER_TRAFFIC_IP = "server_traffic_ip";
+	public static final String CLIENT_IP_BY_FIRST = "client_ip_by_first";
+	public static final String SERVER_IP_BY_FIRST = "server_ip_by_first";
+	public static final String CLIENT_PORT = "client_port";
 	public static final String SERVER_PORT = "server_port";
+	public static final String CLIENT_PORT_BY_FIRST = "client_port_by_first";
+	public static final String SERVER_PORT_BY_FIRST = "server_port_by_first";
 	public static final String ONLINE_USER = "online_user";
 	public static final String TCP = "tcp";
 	public static final String TCP_FIRST_SEGMENT = "tcp_first_segment";
@@ -95,5 +99,7 @@ public final class FrameConstant {
 	public static final String DNS_ERROR_ANSWER = "dns_error_answer";
 	public static final String DNS_NO_RESPONSE = "dns_no_response";
 	public static final String DNS_SERVER_RESP_NO_IP = "dns_server_resp_no_ip";
+	public static final String ICMP_TYPE = "icmp_type";
+	public static final String ICMP_CODE = "icmp_code";
 
 }

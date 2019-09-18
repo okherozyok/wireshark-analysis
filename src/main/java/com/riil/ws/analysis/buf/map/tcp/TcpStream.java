@@ -14,12 +14,17 @@ public class TcpStream {
     private String clientIp = null;
     private String serverIp = null;
 
-    // 专为流量区分客户端、服务端ip使用。
+    // 根据第一条frame判断客户端、服务端。
     // 不使用clientIp、serverIp的原因是如果没有syn和syn+ack，和http的request标记可能相反
-    private String clientTrafficIp = null;
-    private String serverTrafficIp = null;
+    private String clientIpByFirst = null;
+    private String serverIpByFirst = null;
+    private Integer clientPortByFirst = null;
+    private Integer serverPortByFirst = null;
 
-    private Integer dstPort = null;
+    private String onlineUserIp = null;
+
+    private Integer clientPort = null;
+    private Integer serverPort = null;
     private Long synTimeStamp = null;
     private Long sackTimeStamp = null;
     private Set<Integer> sackFrameNumberSet = new LinkedHashSet<Integer>();
@@ -31,6 +36,7 @@ public class TcpStream {
     private Integer clientRstFrame = null;
     private Integer serverRstFrame = null;
     private boolean hasSyn = false;
+    private Long onlineUserTimeStamp = null;
 
     private List<FrameBean> frames;
 
@@ -59,28 +65,60 @@ public class TcpStream {
         this.serverIp = serverIp;
     }
 
-    public String getClientTrafficIp() {
-        return clientTrafficIp;
+    public String getClientIpByFirst() {
+        return clientIpByFirst;
     }
 
-    public void setClientTrafficIp(String clientTrafficIp) {
-        this.clientTrafficIp = clientTrafficIp;
+    public void setClientIpByFirst(String clientIpByFirst) {
+        this.clientIpByFirst = clientIpByFirst;
     }
 
-    public String getServerTrafficIp() {
-        return serverTrafficIp;
+    public String getServerIpByFirst() {
+        return serverIpByFirst;
     }
 
-    public void setServerTrafficIp(String serverTrafficIp) {
-        this.serverTrafficIp = serverTrafficIp;
+    public void setServerIpByFirst(String serverIpByFirst) {
+        this.serverIpByFirst = serverIpByFirst;
     }
 
-    public Integer getDstPort() {
-        return dstPort;
+    public String getOnlineUserIp() {
+        return onlineUserIp;
     }
 
-    public void setDstPort(Integer dstPort) {
-        this.dstPort = dstPort;
+    public void setOnlineUserIp(String onlineUserIp) {
+        this.onlineUserIp = onlineUserIp;
+    }
+
+    public Integer getClientPortByFirst() {
+        return clientPortByFirst;
+    }
+
+    public void setClientPortByFirst(Integer clientPortByFirst) {
+        this.clientPortByFirst = clientPortByFirst;
+    }
+
+    public Integer getServerPortByFirst() {
+        return serverPortByFirst;
+    }
+
+    public void setServerPortByFirst(Integer serverPortByFirst) {
+        this.serverPortByFirst = serverPortByFirst;
+    }
+
+    public Integer getClientPort() {
+        return clientPort;
+    }
+
+    public void setClientPort(Integer clientPort) {
+        this.clientPort = clientPort;
+    }
+
+    public Integer getServerPort() {
+        return serverPort;
+    }
+
+    public void setServerPort(Integer serverPort) {
+        this.serverPort = serverPort;
     }
 
     public Long getSynTimeStamp() {
@@ -179,6 +217,14 @@ public class TcpStream {
 
     public void setHasSyn(boolean hasSyn) {
         this.hasSyn = hasSyn;
+    }
+
+    public Long getOnlineUserTimeStamp() {
+        return onlineUserTimeStamp;
+    }
+
+    public void setOnlineUserTimeStamp(Long onlineUserTimeStamp) {
+        this.onlineUserTimeStamp = onlineUserTimeStamp;
     }
 
     public void append(FrameBean frame) {

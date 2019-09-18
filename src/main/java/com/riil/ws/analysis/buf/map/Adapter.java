@@ -30,6 +30,7 @@ public class Adapter {
         setFrameNumber();
         setFrameLen();
         setFrameProto();
+        setIpFragment();
         setSrcIp();
         setDstIp();
         setTcpConnectionSyn();
@@ -60,6 +61,8 @@ public class Adapter {
         setDnsFlagsRcode();
         setDnsQryName();
         setDnsAnswerIp();
+        setIcmpType();
+        setIcmpCode();
 
         return frame;
     }
@@ -98,6 +101,19 @@ public class Adapter {
                 ipProtos.add(Integer.valueOf(proto));
             }
             frame.getLayers().setIpProto(ipProtos);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void setIpFragment() {
+        Object objs = getLayerBy(FrameConstant.IP_FRAGMENT);
+        if (objs != null) {
+            List<String> fragments = (List<String>) objs;
+            List<Integer> ipFragments = new ArrayList<>(fragments.size());
+            for (String fragment : fragments) {
+                ipFragments.add(Integer.valueOf(fragment));
+            }
+            frame.getLayers().setIpFragment(ipFragments);
         }
     }
 
@@ -261,6 +277,14 @@ public class Adapter {
         }
     }
 
+    private void setIcmpType() {
+        frame.getLayers().setIcmpType(getShortLayerFirstBy(FrameConstant.ICMP_TYPE));
+    }
+
+    private void setIcmpCode() {
+        frame.getLayers().setIcmpCode(getShortLayerFirstBy(FrameConstant.ICMP_CODE));
+    }
+
     @SuppressWarnings("unchecked")
     private Integer getIntegerLayerFirstBy(String metric) {
         Object o = getLayerBy(metric);
@@ -276,6 +300,16 @@ public class Adapter {
         Object o = getLayerBy(metric);
         if (o != null) {
             return Long.valueOf(((List<String>) o).get(0));
+        }
+
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Short getShortLayerFirstBy(String metric) {
+        Object o = getLayerBy(metric);
+        if (o != null) {
+            return Short.valueOf(((List<String>) o).get(0));
         }
 
         return null;
