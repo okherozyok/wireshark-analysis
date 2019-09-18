@@ -4,8 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -19,6 +21,9 @@ public class Adapter {
     private JSONObject indexJson;
     private JSONObject json;
     private FrameBean frame;
+
+    @Value("${output.es.index}")
+    private String index;
 
     public FrameBean esJson2Bean(String esIndexJson, String frameJson) {
         frame = new FrameBean();
@@ -76,7 +81,11 @@ public class Adapter {
     }
 
     private void setIndex() {
-        frame.setIndex((String) ((JSONObject) indexJson.get(INDEX)).get(_INDEX));
+        if (StringUtils.isEmpty(index)) {
+            frame.setIndex((String) ((JSONObject) indexJson.get(INDEX)).get(_INDEX));
+        } else {
+            frame.setIndex(index.trim());
+        }
     }
 
     private void setTimeStamp() {

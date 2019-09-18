@@ -98,6 +98,7 @@ public class MapAnalyzer implements IAnalyzer {
             TcpStream tcpStream = MapCache.getTcpStream(tcpStreamNumber);
             tcpAnalyzer.analysis(tcpStream);
         }
+        System.out.println(tcpAnalyzer.returnSb());
 
         Set<Integer> udpKeySet = MapCache.getUdpStreamMap().keySet();
         for (Integer udpStreamNumber : udpKeySet) {

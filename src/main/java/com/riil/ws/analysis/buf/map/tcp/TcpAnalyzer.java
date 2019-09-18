@@ -19,6 +19,8 @@ import static com.riil.ws.analysis.buf.map.AnalyzerConstant.*;
 @Service
 public class TcpAnalyzer {
     private final Logger LOGGER = LoggerFactory.getLogger(TcpAnalyzer.class);
+    // TODO 打印出没有syn开头的tcpStream
+    private StringBuilder sb = new StringBuilder("not tcp.stream in {");
 
     public void analysis(TcpStream tcpStream) throws Exception {
 
@@ -36,6 +38,10 @@ public class TcpAnalyzer {
 
         endCreateConn(tcpStream);
         afterCreateConn(tcpStream);
+    }
+
+    public String returnSb() {
+        return sb.toString();
     }
 
     private void markIpDirectionByFirst(FrameBean frame, TcpStream tcpStream) {
@@ -57,12 +63,14 @@ public class TcpAnalyzer {
             tcpStream.setServerIpByFirst(frame.getSrcIp());
             tcpStream.setClientPortByFirst(frame.getTcpDstPort());
             tcpStream.setServerPortByFirst(frame.getTcpSrcPort());
+            sb.append(tcpStream.getTcpStreamNumber() + " ");
         } else {
             // 没有syn 和 Sack时，与NPV一致，以第一条的srcIp作为客户端IP
             tcpStream.setClientIpByFirst(frame.getSrcIp());
             tcpStream.setServerIpByFirst(frame.getDstIp());
             tcpStream.setClientPortByFirst(frame.getTcpSrcPort());
             tcpStream.setServerPortByFirst(frame.getTcpDstPort());
+            sb.append(tcpStream.getTcpStreamNumber() + " ");
         }
         frame.setClientIpByFirst(tcpStream.getClientIpByFirst());
         frame.setServerIpByFirst(tcpStream.getServerIpByFirst());
