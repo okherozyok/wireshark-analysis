@@ -2,11 +2,7 @@ package com.riil.ws.analysis.buf.map.tcp;
 
 import com.riil.ws.analysis.buf.map.FrameBean;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class TcpStream {
     private Integer tcpStreamNumber;
@@ -31,6 +27,8 @@ public class TcpStream {
     private Long tcpConnAckTimeStamp = null;
     private Integer tcpConnAckFrameNumber = null;
     private Boolean tcpConnectionSuccess = null;
+    private Map<Integer, List<Integer>> clientDupAckMap = new HashMap<>();
+    private Map<Integer, List<Integer>> serverDupAckMap = new HashMap<>();
     private Integer clientFinFrame = null;
     private Integer serverFinFrame = null;
     private Integer clientRstFrame = null;
@@ -179,6 +177,22 @@ public class TcpStream {
         this.tcpConnectionSuccess = tcpConnectionSuccess;
     }
 
+    public void putClientDupAck(Integer dupAckFrame, Integer dupAckNum) {
+        putDupAck(clientDupAckMap, dupAckFrame, dupAckNum);
+    }
+
+    public int getClientDupAckNum() {
+        return getDupAck(clientDupAckMap);
+    }
+
+    public void putServerDupAck(Integer dupAckFrame, Integer dupAckNum) {
+        putDupAck(serverDupAckMap, dupAckFrame, dupAckNum);
+    }
+
+    public int getServerDupAckNum() {
+        return getDupAck(serverDupAckMap);
+    }
+
     public Integer getClientFinFrame() {
         return clientFinFrame;
     }
@@ -233,5 +247,27 @@ public class TcpStream {
 
     public List<FrameBean> getFrames() {
         return frames;
+    }
+
+    public void putDupAck(Map<Integer, List<Integer>> map, Integer dupAckFrame, Integer dupAckNum) {
+        List<Integer> nums = map.get(dupAckFrame);
+        if (nums == null) {
+            nums = new ArrayList<>();
+            map.put(dupAckFrame, nums);
+        }
+
+        nums.add(dupAckNum);
+    }
+
+    public int getDupAck(Map<Integer, List<Integer>> map) {
+        int count = 0;
+        Set<Integer> keySet = map.keySet();
+        for (Integer dupAckFrame : keySet) {
+            if (map.get(dupAckFrame).size() >= 3) {
+                count++;
+            }
+        }
+
+        return count;
     }
 }

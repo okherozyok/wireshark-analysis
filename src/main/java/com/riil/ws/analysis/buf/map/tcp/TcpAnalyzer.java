@@ -298,9 +298,11 @@ public class TcpAnalyzer {
 
             onlySuccessRTT(tcpStream, frame);
             onlySuccessRetrans(tcpStream, frame);
+            onlySuccessDupAckStart(tcpStream, frame);
             onlySuccessDisconnectionStart(tcpStream, frame);
         }
 
+        onlySuccessDupAckEnd(tcpStream);
         onlySuccessDisconnectionEnd(tcpStream);
         onlySuccessConcurrentConn(tcpStream);
     }
@@ -342,7 +344,7 @@ public class TcpAnalyzer {
         }
 
         if (!frame.isTcpLenBt0() || frame.isTcpConnectionSyn() || frame.isTcpConnectionSack() || frame.isTcpConnectionRst()
-                || frame.isTcpConnectionFin() || frame.isTcpKeepAlive() || frame.isTcpDupAck()) {
+                || frame.isTcpConnectionFin() || frame.isTcpKeepAlive()) {
             return;
         }
 
@@ -400,6 +402,27 @@ public class TcpAnalyzer {
         }
     }
 
+    private void onlySuccessDupAckStart(TcpStream tcpStream, FrameBean frame) {
+        if (!ifTcpConnectionSuccess(tcpStream)) {
+            return;
+        }
+
+        Integer dupAckFrame = frame.getTcpAnalysisDuplicateAckFrame();
+        Integer dupAckNum = frame.getTcpAnalysisDuplicateAckNum();
+        if (frame.getTcpAnalysisDuplicateAckFrame() != null) {
+            if (dupAckNum == null) {
+                LOGGER.error("tcpStream=" + tcpStream.getTcpStreamNumber() + " dupAckNum is null");
+                return;
+            }
+
+            if (tcpStream.getClientIp().equals(frame.getSrcIp())) {
+                tcpStream.putClientDupAck(dupAckFrame, dupAckNum);
+            } else {
+                tcpStream.putServerDupAck(dupAckFrame, dupAckNum);
+            }
+        }
+    }
+
     /**
      * 仅建连成功时，记录拆连
      *
@@ -431,6 +454,18 @@ public class TcpAnalyzer {
                     tcpStream.setServerRstFrame(frame.getFrameNumber());
                 }
             }
+        }
+    }
+
+    private void onlySuccessDupAckEnd(TcpStream tcpStream) {
+        if (tcpStream.getClientDupAckNum() > 0 || tcpStream.getServerDupAckNum() > 0) {
+            FrameBean firstFrame = tcpStream.getFrames().get(0);
+            firstFrame.setTcpClientDupAck(tcpStream.getClientDupAckNum());
+            firstFrame.setTcpServerDupAck(tcpStream.getServerDupAckNum());
+            firstFrame.setClientIp(tcpStream.getClientIp());
+            firstFrame.setServerIp(tcpStream.getServerIp());
+            firstFrame.setClientPort(tcpStream.getClientPort());
+            firstFrame.setServerPort(tcpStream.getServerPort());
         }
     }
 

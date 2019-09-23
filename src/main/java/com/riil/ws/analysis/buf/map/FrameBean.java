@@ -73,12 +73,6 @@ public class FrameBean {
     }
 
     @JSONField(serialize = false)
-    public boolean isTcpDupAck() {
-        Boolean tcpAnalysisDuplicateAck = layers.getTcpAnalysisDuplicateAck();
-        return tcpAnalysisDuplicateAck == null ? false : tcpAnalysisDuplicateAck;
-    }
-
-    @JSONField(serialize = false)
     public boolean isRetrans() {
         Boolean tcpAnalysisRetransmission = layers.getTcpAnalysisRetransmission();
         return tcpAnalysisRetransmission == null ? false : tcpAnalysisRetransmission;
@@ -134,6 +128,16 @@ public class FrameBean {
         Float tcpAnalysisAckRtt = layers.getTcpAnalysisAckRtt();
         BigDecimal bd = new BigDecimal(String.valueOf(tcpAnalysisAckRtt));
         return bd.setScale(3, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(1000L)).longValue();
+    }
+
+    @JSONField(serialize = false)
+    public Integer getTcpAnalysisDuplicateAckFrame() {
+        return layers.getTcpAnalysisDuplicateAckFrame();
+    }
+
+    @JSONField(serialize = false)
+    public Integer getTcpAnalysisDuplicateAckNum() {
+        return layers.getTcpAnalysisDuplicateAckNum();
     }
 
     @JSONField(serialize = false)
@@ -349,6 +353,14 @@ public class FrameBean {
         layers.setTcpDownRetrans(true);
     }
 
+    public void setTcpClientDupAck(Integer nums) {
+        layers.setTcpClientDupAck(nums);
+    }
+
+    public void setTcpServerDupAck(Integer nums) {
+        layers.setTcpServerDupAck(nums);
+    }
+
     public void setHttpReqTransDelay(Long delay) {
         layers.setHttpReqTransDelay(delay);
     }
@@ -474,8 +486,11 @@ public class FrameBean {
         @JSONField(name = FrameConstant.TCP_ANALYSIS_ACK_RTT)
         private Float tcpAnalysisAckRtt;
 
-        @JSONField(name = FrameConstant.TCP_ANALYSIS_DUPLICATE_ACK)
-        private Boolean tcpAnalysisDuplicateAck;
+        @JSONField(name = FrameConstant.TCP_ANALYSIS_DUPLICATE_ACK_FRAME)
+        private Integer tcpAnalysisDuplicateAckFrame;
+
+        @JSONField(name = FrameConstant.TCP_ANALYSIS_DUPLICATE_ACK_NUM)
+        private Integer tcpAnalysisDuplicateAckNum;
 
         @JSONField(name = FrameConstant.TCP_FIRST_SEGMENT)
         private Integer tcpFirstSegment;
@@ -488,6 +503,7 @@ public class FrameBean {
 
         @JSONField(name = FrameConstant.TCP_CONNECTION_SUCCESS)
         private Boolean tcpConnectionSuccess;
+
 
         @JSONField(name = FrameConstant.TCP_CLIENT_CONNECTION_RST)
         private Boolean tcpClientConnectionRst;
@@ -548,6 +564,12 @@ public class FrameBean {
 
         @JSONField(name = FrameConstant.TCP_DOWN_RETRANS)
         private Boolean tcpDownRetrans;
+
+        @JSONField(name = FrameConstant.TCP_CLIENT_DUP_ACK)
+        private Integer tcpClientDupAck;
+
+        @JSONField(name = FrameConstant.TCP_SERVER_DUP_ACK)
+        private Integer tcpServerDupAck;
 
         @JSONField(name = FrameConstant.HTTP_REQUEST)
         private Boolean httpRequest;
@@ -879,12 +901,20 @@ public class FrameBean {
             this.tcpAnalysisAckRtt = tcpAnalysisAckRtt;
         }
 
-        public Boolean getTcpAnalysisDuplicateAck() {
-            return tcpAnalysisDuplicateAck;
+        public Integer getTcpAnalysisDuplicateAckFrame() {
+            return tcpAnalysisDuplicateAckFrame;
         }
 
-        public void setTcpAnalysisDuplicateAck(Boolean tcpAnalysisDuplicateAck) {
-            this.tcpAnalysisDuplicateAck = tcpAnalysisDuplicateAck;
+        public void setTcpAnalysisDuplicateAckFrame(Integer tcpAnalysisDuplicateAckFrame) {
+            this.tcpAnalysisDuplicateAckFrame = tcpAnalysisDuplicateAckFrame;
+        }
+
+        public Integer getTcpAnalysisDuplicateAckNum() {
+            return tcpAnalysisDuplicateAckNum;
+        }
+
+        public void setTcpAnalysisDuplicateAckNum(Integer tcpAnalysisDuplicateAckNum) {
+            this.tcpAnalysisDuplicateAckNum = tcpAnalysisDuplicateAckNum;
         }
 
         public Integer getTcpFirstSegment() {
@@ -1069,6 +1099,22 @@ public class FrameBean {
 
         public void setTcpDownRetrans(Boolean tcpDownRetrans) {
             this.tcpDownRetrans = tcpDownRetrans;
+        }
+
+        public Integer getTcpClientDupAck() {
+            return tcpClientDupAck;
+        }
+
+        public void setTcpClientDupAck(Integer tcpClientDupAck) {
+            this.tcpClientDupAck = tcpClientDupAck;
+        }
+
+        public Integer getTcpServerDupAck() {
+            return tcpServerDupAck;
+        }
+
+        public void setTcpServerDupAck(Integer tcpServerDupAck) {
+            this.tcpServerDupAck = tcpServerDupAck;
         }
 
         public Long getTcpClientConnectionDelay() {

@@ -50,7 +50,8 @@ public class Adapter {
         setTcpAck();
         setTcpAnalysisAcksFrame();
         setTcpAnalysisAckRtt();
-        setTcpAnalysisDuplicateAck();
+        setTcpAnalysisDuplicateAckFrame();
+        setTcpAnalysisDuplicateAckNum();
         setTcpFirstSegment();
         setTcpAnalysisRetransmission();
         setTcpAnalysisKeepAlive();
@@ -183,8 +184,12 @@ public class Adapter {
         frame.getLayers().setTcpAnalysisAckRtt(getFloatLayerFirstBy(FrameConstant.TCP_ANALYSIS_ACK_RTT));
     }
 
-    private void setTcpAnalysisDuplicateAck() {
-        frame.getLayers().setTcpAnalysisDuplicateAck(getBooleanLayerBy(FrameConstant.TCP_ANALYSIS_DUPLICATE_ACK));
+    private void setTcpAnalysisDuplicateAckFrame() {
+        frame.getLayers().setTcpAnalysisDuplicateAckFrame(getIntegerLayerFirstBy(FrameConstant.TCP_ANALYSIS_DUPLICATE_ACK_FRAME));
+    }
+
+    private void setTcpAnalysisDuplicateAckNum() {
+        frame.getLayers().setTcpAnalysisDuplicateAckNum(getIntegerLayerFirstBy(FrameConstant.TCP_ANALYSIS_DUPLICATE_ACK_NUM));
     }
 
     private void setTcpFirstSegment() {
