@@ -76,8 +76,17 @@ Content-Type: application/json
                     "tcp_analysis_keep_alive":{
                         "type":"boolean"
                     },
-                    "tcp_analysis_duplicate_ack":{
-                        "type":"boolean"
+                    "tcp_analysis_duplicate_ack_frame":{
+                        "type":"integer"
+                    },
+                    "tcp_analysis_duplicate_ack_num":{
+                        "type":"integer"
+                    },
+                    "tcp_client_dup_ack":{
+                        "type":"integer"
+                    },
+                    "tcp_server_dup_ack":{
+                        "type":"integer"
                     },
                     "http_request":{
                         "type":"boolean"
