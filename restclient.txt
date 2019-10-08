@@ -88,6 +88,12 @@ Content-Type: application/json
                     "tcp_server_dup_ack":{
                         "type":"integer"
                     },
+                    "tcp_client_zero_window":{
+                        "type":"integer"
+                    },
+                    "tcp_server_zero_window":{
+                        "type":"integer"
+                    },
                     "http_request":{
                         "type":"boolean"
                     },

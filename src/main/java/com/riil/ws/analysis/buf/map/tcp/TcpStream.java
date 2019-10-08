@@ -29,6 +29,8 @@ public class TcpStream {
     private Boolean tcpConnectionSuccess = null;
     private Map<Integer, List<Integer>> clientDupAckMap = new HashMap<>();
     private Map<Integer, List<Integer>> serverDupAckMap = new HashMap<>();
+    private int clientZeroWinNum = 0;
+    private int serverZeroWinNum = 0;
     private Integer clientFinFrame = null;
     private Integer serverFinFrame = null;
     private Integer clientRstFrame = null;
@@ -191,6 +193,22 @@ public class TcpStream {
 
     public int getServerDupAckNum() {
         return getDupAck(serverDupAckMap);
+    }
+
+    public void addClientZeroWinNum() {
+        clientZeroWinNum ++;
+    }
+
+    public int getClientZeroWinNum() {
+        return clientZeroWinNum;
+    }
+
+    public void addServerZeroWinNum() {
+        serverZeroWinNum ++;
+    }
+
+    public int getServerZeroWinNum() {
+        return serverZeroWinNum;
     }
 
     public Integer getClientFinFrame() {

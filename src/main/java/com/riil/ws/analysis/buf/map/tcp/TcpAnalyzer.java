@@ -45,6 +45,11 @@ public class TcpAnalyzer {
     }
 
     private void markIpDirectionByFirst(FrameBean frame, TcpStream tcpStream) {
+        // TODO NPV没有处理tcp.stream中的icmp流量
+        if (frame.containsIcmp()) {
+            return;
+        }
+
         if (!StringUtils.isEmpty(tcpStream.getClientIpByFirst())) {
             frame.setClientIpByFirst(tcpStream.getClientIpByFirst());
             frame.setServerIpByFirst(tcpStream.getServerIpByFirst());
@@ -299,10 +304,12 @@ public class TcpAnalyzer {
             onlySuccessRTT(tcpStream, frame);
             onlySuccessRetrans(tcpStream, frame);
             onlySuccessDupAckStart(tcpStream, frame);
+            onlySuccessZeroWindowStart(tcpStream, frame);
             onlySuccessDisconnectionStart(tcpStream, frame);
         }
 
         onlySuccessDupAckEnd(tcpStream);
+        onlySuccessZeroWindowEnd(tcpStream);
         onlySuccessDisconnectionEnd(tcpStream);
         onlySuccessConcurrentConn(tcpStream);
     }
@@ -374,10 +381,9 @@ public class TcpAnalyzer {
 
         final long second = 1000;
 
-        List<FrameBean> frames = tcpStream.getFrames();
-        FrameBean firstFrame = frames.get(0);
+        FrameBean firstFrame = getFirstFrame(tcpStream);
         String firstFrameIndex = firstFrame.getIndex();
-        FrameBean lastFrame = frames.get(frames.size() - 1);
+        FrameBean lastFrame = getLastFrame(tcpStream);
 
         long startTime = firstFrame.getTimestamp() / second * second;
         long endTime = lastFrame.getTimestamp() / second * second;
@@ -423,6 +429,20 @@ public class TcpAnalyzer {
         }
     }
 
+    private void onlySuccessZeroWindowStart(TcpStream tcpStream, FrameBean frame) {
+        if (!ifTcpConnectionSuccess(tcpStream)) {
+            return;
+        }
+
+        if (frame.isTcpZeroWindow()) {
+            if (tcpStream.getClientIp().equals(frame.getSrcIp())) {
+                tcpStream.addClientZeroWinNum();
+            } else {
+                tcpStream.addServerZeroWinNum();
+            }
+        }
+    }
+
     /**
      * 仅建连成功时，记录拆连
      *
@@ -459,13 +479,19 @@ public class TcpAnalyzer {
 
     private void onlySuccessDupAckEnd(TcpStream tcpStream) {
         if (tcpStream.getClientDupAckNum() > 0 || tcpStream.getServerDupAckNum() > 0) {
-            FrameBean firstFrame = tcpStream.getFrames().get(0);
+            FrameBean firstFrame = getFirstFrame(tcpStream);
             firstFrame.setTcpClientDupAck(tcpStream.getClientDupAckNum());
             firstFrame.setTcpServerDupAck(tcpStream.getServerDupAckNum());
-            firstFrame.setClientIp(tcpStream.getClientIp());
-            firstFrame.setServerIp(tcpStream.getServerIp());
-            firstFrame.setClientPort(tcpStream.getClientPort());
-            firstFrame.setServerPort(tcpStream.getServerPort());
+            setFrameClientServer(firstFrame, tcpStream);
+        }
+    }
+
+    private void onlySuccessZeroWindowEnd(TcpStream tcpStream) {
+        if (tcpStream.getClientZeroWinNum() > 0 || tcpStream.getServerZeroWinNum() > 0) {
+            FrameBean firstFrame = getFirstFrame(tcpStream);
+            firstFrame.setTcpClientZeroWindow(tcpStream.getClientZeroWinNum());
+            firstFrame.setTcpServerZeroWindow(tcpStream.getServerZeroWinNum());
+            setFrameClientServer(firstFrame, tcpStream);
         }
     }
 
@@ -530,13 +556,10 @@ public class TcpAnalyzer {
         //if (frame != null) {
         if (firstFrame != null) {
             //frame.setClientIp(tcpStream.getClientIp());
-            firstFrame.setClientIp(tcpStream.getClientIp());
             //frame.setServerIp(tcpStream.getServerIp());
-            firstFrame.setServerIp(tcpStream.getServerIp());
             //frame.setClientPort(tcpStream.getClientPort());
-            firstFrame.setClientPort(tcpStream.getClientPort());
             //frame.setServerPort(tcpStream.getDstPort());
-            firstFrame.setServerPort(tcpStream.getServerPort());
+            setFrameClientServer(firstFrame, tcpStream);
         } else {
             LOGGER.debug("tcpStream=" + tcpStream.getTcpStreamNumber() + " has no disconnection.");
         }
@@ -564,5 +587,21 @@ public class TcpAnalyzer {
 
     private boolean ifTcpConnectionSuccess(TcpStream tcpStream) {
         return Boolean.TRUE.equals(tcpStream.getTcpConnectionSuccess());
+    }
+
+    private void setFrameClientServer(FrameBean frame, TcpStream tcpStream) {
+        frame.setClientIp(tcpStream.getClientIp());
+        frame.setServerIp(tcpStream.getServerIp());
+        frame.setClientPort(tcpStream.getClientPort());
+        frame.setServerPort(tcpStream.getServerPort());
+    }
+
+    private FrameBean getFirstFrame(TcpStream tcpStream) {
+        return tcpStream.getFrames().get(0);
+    }
+
+    private FrameBean getLastFrame(TcpStream tcpStream) {
+        List<FrameBean> frames = tcpStream.getFrames();
+        return frames.get(frames.size() - 1);
     }
 }

@@ -30,6 +30,11 @@ public class UdpAnalyzer {
     }
 
     private void markIpDirectionByFirst(FrameBean frame, UdpStream udpStream) {
+        // TODO NPV没有处理udp.stream中的icmp流量，
+        if (frame.containsIcmp()) {
+            return;
+        }
+
         if (!StringUtils.isEmpty(udpStream.getClientIpByFirst())) {
             frame.setClientIpByFirst(udpStream.getClientIpByFirst());
             frame.setServerIpByFirst(udpStream.getServerIpByFirst());

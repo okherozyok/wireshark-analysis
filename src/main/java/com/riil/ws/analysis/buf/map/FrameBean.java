@@ -73,6 +73,12 @@ public class FrameBean {
     }
 
     @JSONField(serialize = false)
+    public boolean isTcpZeroWindow() {
+        Boolean tcpZeroWindow = layers.getTcpAnalysisZeroWindow();
+        return tcpZeroWindow == null ? false : tcpZeroWindow;
+    }
+
+    @JSONField(serialize = false)
     public boolean isRetrans() {
         Boolean tcpAnalysisRetransmission = layers.getTcpAnalysisRetransmission();
         return tcpAnalysisRetransmission == null ? false : tcpAnalysisRetransmission;
@@ -353,12 +359,20 @@ public class FrameBean {
         layers.setTcpDownRetrans(true);
     }
 
-    public void setTcpClientDupAck(Integer nums) {
-        layers.setTcpClientDupAck(nums);
+    public void setTcpClientDupAck(Integer num) {
+        layers.setTcpClientDupAck(num);
     }
 
-    public void setTcpServerDupAck(Integer nums) {
-        layers.setTcpServerDupAck(nums);
+    public void setTcpServerDupAck(Integer num) {
+        layers.setTcpServerDupAck(num);
+    }
+
+    public void setTcpClientZeroWindow(Integer num) {
+        layers.setTcpClientZeroWindow(num);
+    }
+
+    public void setTcpServerZeroWindow(Integer num) {
+        layers.setTcpServerZeroWindow(num);
     }
 
     public void setHttpReqTransDelay(Long delay) {
@@ -501,9 +515,11 @@ public class FrameBean {
         @JSONField(name = FrameConstant.TCP_ANALYSIS_KEEP_ALIVE)
         private Boolean tcpAnalysisKeepAlive;
 
+        @JSONField(name = FrameConstant.TCP_ANALYSIS_ZERO_WINDOW)
+        private Boolean tcpAnalysisZeroWindow;
+
         @JSONField(name = FrameConstant.TCP_CONNECTION_SUCCESS)
         private Boolean tcpConnectionSuccess;
-
 
         @JSONField(name = FrameConstant.TCP_CLIENT_CONNECTION_RST)
         private Boolean tcpClientConnectionRst;
@@ -570,6 +586,12 @@ public class FrameBean {
 
         @JSONField(name = FrameConstant.TCP_SERVER_DUP_ACK)
         private Integer tcpServerDupAck;
+
+        @JSONField(name = FrameConstant.TCP_CLIENT_ZERO_WINDOW)
+        private Integer tcpClientZeroWindow;
+
+        @JSONField(name = FrameConstant.TCP_SERVER_ZERO_WINDOW)
+        private Integer tcpServerZeroWindow;
 
         @JSONField(name = FrameConstant.HTTP_REQUEST)
         private Boolean httpRequest;
@@ -941,6 +963,14 @@ public class FrameBean {
             this.tcpAnalysisKeepAlive = tcpAnalysisKeepAlive;
         }
 
+        public Boolean getTcpAnalysisZeroWindow() {
+            return tcpAnalysisZeroWindow;
+        }
+
+        public void setTcpAnalysisZeroWindow(Boolean tcpAnalysisZeroWindow) {
+            this.tcpAnalysisZeroWindow = tcpAnalysisZeroWindow;
+        }
+
         public Boolean getTcpConnectionSuccess() {
             return tcpConnectionSuccess;
         }
@@ -1115,6 +1145,22 @@ public class FrameBean {
 
         public void setTcpServerDupAck(Integer tcpServerDupAck) {
             this.tcpServerDupAck = tcpServerDupAck;
+        }
+
+        public Integer getTcpClientZeroWindow() {
+            return tcpClientZeroWindow;
+        }
+
+        public void setTcpClientZeroWindow(Integer tcpClientZeroWindow) {
+            this.tcpClientZeroWindow = tcpClientZeroWindow;
+        }
+
+        public Integer getTcpServerZeroWindow() {
+            return tcpServerZeroWindow;
+        }
+
+        public void setTcpServerZeroWindow(Integer tcpServerZeroWindow) {
+            this.tcpServerZeroWindow = tcpServerZeroWindow;
         }
 
         public Long getTcpClientConnectionDelay() {

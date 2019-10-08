@@ -31,6 +31,7 @@ public final class FrameConstant {
 	public static final String TCP_ANALYSIS_ACKS_FRAME = "tcp_analysis_acks_frame";
 	public static final String TCP_ANALYSIS_ACK_RTT = "tcp_analysis_ack_rtt";
 	public static final String TCP_ANALYSIS_KEEP_ALIVE = "tcp_analysis_keep_alive";
+	public static final String TCP_ANALYSIS_ZERO_WINDOW = "tcp_analysis_zero_window";
 	public static final String TCP_ANALYSIS_DUPLICATE_ACK_FRAME = "tcp_analysis_duplicate_ack_frame";
 	public static final String TCP_ANALYSIS_DUPLICATE_ACK_NUM = "tcp_analysis_duplicate_ack_num";
 	public static final String TCP_ANALYSIS_RETRANSMISSION = "tcp_analysis_retransmission";
@@ -88,6 +89,8 @@ public final class FrameConstant {
 	public static final String TCP_DOWN_RETRANS = "tcp_down_retrans";
 	public static final String TCP_CLIENT_DUP_ACK = "tcp_client_dup_ack";
 	public static final String TCP_SERVER_DUP_ACK = "tcp_server_dup_ack";
+	public static final String TCP_CLIENT_ZERO_WINDOW = "tcp_client_zero_window";
+	public static final String TCP_SERVER_ZERO_WINDOW = "tcp_server_zero_window";
 	public static final String TCP_UP_PAYLOAD = "tcp_up_payload";
 	public static final String TCP_DOWN_PAYLOAD = "tcp_down_payload";
 	public static final String HTTP_REQ_TRANS_DELAY = "http_req_trans_delay";

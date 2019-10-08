@@ -55,6 +55,7 @@ public class Adapter {
         setTcpFirstSegment();
         setTcpAnalysisRetransmission();
         setTcpAnalysisKeepAlive();
+        setTcpAnalysisZeroWindow();
         setHttpRequest();
         setHttpResponse();
         setHttpRequestIn();
@@ -202,6 +203,10 @@ public class Adapter {
 
     private void setTcpAnalysisKeepAlive() {
         frame.getLayers().setTcpAnalysisKeepAlive(getBooleanLayerBy(FrameConstant.TCP_ANALYSIS_KEEP_ALIVE));
+    }
+
+    private void setTcpAnalysisZeroWindow() {
+        frame.getLayers().setTcpAnalysisZeroWindow(getBooleanLayerBy(FrameConstant.TCP_ANALYSIS_ZERO_WINDOW));
     }
 
     private void setHttpRequest() {
