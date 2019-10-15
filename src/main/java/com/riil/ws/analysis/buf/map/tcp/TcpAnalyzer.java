@@ -4,6 +4,7 @@ import com.riil.ws.analysis.buf.map.*;
 import com.riil.ws.analysis.common.IpPortUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -21,6 +22,8 @@ public class TcpAnalyzer {
     private final Logger LOGGER = LoggerFactory.getLogger(TcpAnalyzer.class);
     // TODO 打印出没有syn开头的tcpStream
     private StringBuilder sb = new StringBuilder("not tcp.stream in {");
+    @Value("${output.es.index}")
+    private String index;
 
     public void analysis(TcpStream tcpStream) throws Exception {
 
@@ -189,7 +192,11 @@ public class TcpAnalyzer {
         ConcurrentReqBean concurrentReqBean = concurrentReqBeanMap.get(startTime);
         if (concurrentReqBean == null) {
             concurrentReqBean = new ConcurrentReqBean();
-            concurrentReqBean.setIndex(json.getIndex().replace(PACKET_INDEX_PREFIX, HTTP_CONCURRENT_REQ_INDEX_PREFIX));
+            if (StringUtils.isEmpty(index)) {
+                concurrentReqBean.setIndex(json.getIndex().replace(PACKET_INDEX_PREFIX, HTTP_CONCURRENT_REQ_INDEX_PREFIX));
+            } else {
+                concurrentReqBean.setIndex(HTTP_CONCURRENT_REQ_INDEX_PREFIX + "_" + index.trim());
+            }
             concurrentReqBean.setServerIp(json.getDstIp());
             concurrentReqBean.setTcpDstPort(json.getTcpDstPort());
             concurrentReqBean.setTimestamp(startTime);
@@ -395,7 +402,11 @@ public class TcpAnalyzer {
             ConcurrentConnBean concurrentConnBean = concurrentConnBeanMap.get(startTime);
             if (concurrentConnBean == null) {
                 concurrentConnBean = new ConcurrentConnBean();
-                concurrentConnBean.setIndex(firstFrameIndex.replace(PACKET_INDEX_PREFIX, TCP_CONCURRENT_CONN_INDEX_PREFIX));
+                if (StringUtils.isEmpty(index)) {
+                    concurrentConnBean.setIndex(firstFrameIndex.replace(PACKET_INDEX_PREFIX, TCP_CONCURRENT_CONN_INDEX_PREFIX));
+                } else {
+                    concurrentConnBean.setIndex(TCP_CONCURRENT_CONN_INDEX_PREFIX + "_" + index.trim());
+                }
                 concurrentConnBean.setServerIp(tcpStream.getServerIp());
                 concurrentConnBean.setTcpDstPort(tcpStream.getServerPort());
                 concurrentConnBean.setTimestamp(startTime);
