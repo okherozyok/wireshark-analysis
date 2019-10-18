@@ -9,10 +9,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static com.riil.ws.analysis.buf.map.AnalyzerConstant.*;
+import static com.riil.ws.analysis.common.Contants.*;
 
 /**
  * @author GlobalZ
@@ -183,8 +188,7 @@ public class TcpAnalyzer {
             return;
         }
 
-        final long second = 1000;
-        long startTime = json.getTimestamp() / second * second;
+        long startTime = json.getTimestamp() / SECOND_BY_MS * SECOND_BY_MS;
 
         long ipPortKey = IpPortUtil.ipPortKey(json.getDstIp(), json.getTcpDstPort());
         Map<Long, Map<Long, ConcurrentReqBean>> concurrentReqCache = MapCache.getConcurrentReqCache();
@@ -308,7 +312,7 @@ public class TcpAnalyzer {
         for (FrameBean frame : frames) {
             onlineUser(tcpStream, frame);
 
-            onlySuccessRTT(tcpStream, frame);
+            //onlySuccessRTT(tcpStream, frame);
             onlySuccessRetrans(tcpStream, frame);
             onlySuccessDupAckStart(tcpStream, frame);
             onlySuccessZeroWindowStart(tcpStream, frame);
@@ -386,14 +390,12 @@ public class TcpAnalyzer {
             return;
         }
 
-        final long second = 1000;
-
         FrameBean firstFrame = getFirstFrame(tcpStream);
         String firstFrameIndex = firstFrame.getIndex();
         FrameBean lastFrame = getLastFrame(tcpStream);
 
-        long startTime = firstFrame.getTimestamp() / second * second;
-        long endTime = lastFrame.getTimestamp() / second * second;
+        long startTime = firstFrame.getTimestamp() / SECOND_BY_MS * SECOND_BY_MS;
+        long endTime = lastFrame.getTimestamp() / SECOND_BY_MS * SECOND_BY_MS;
 
         long ipPortKey = IpPortUtil.ipPortKey(tcpStream.getServerIp(), tcpStream.getServerPort());
         Map<Long, Map<Long, ConcurrentConnBean>> concurrentConnCache = MapCache.getConcurrentConnCache();
@@ -415,7 +417,7 @@ public class TcpAnalyzer {
             concurrentConnBean.addConnectCount();
             concurrentConnBean.addTcpStream(tcpStream.getTcpStreamNumber());
 
-            startTime += second;
+            startTime += SECOND_BY_MS;
         }
     }
 
@@ -447,9 +449,19 @@ public class TcpAnalyzer {
 
         if (frame.isTcpZeroWindow()) {
             if (tcpStream.getClientIp().equals(frame.getSrcIp())) {
-                tcpStream.addClientZeroWinNum();
+                zeroWinSetLambda(tcpStream, frame, () -> tcpStream.getClientZeroWinStartTime(),
+                        timeStame -> tcpStream.setClientZeroWinStartTime(timeStame),
+                        () -> tcpStream.getClientZeroWinNum(),
+                        (clientIncrementMetric, zeroWinNum) -> clientIncrementMetric.setTcpClientZeroWindow(zeroWinNum),
+                        aVoid -> tcpStream.clearClientZeroWinNum(),
+                        aVoid -> tcpStream.addClientZeroWinNum());
             } else {
-                tcpStream.addServerZeroWinNum();
+                zeroWinSetLambda(tcpStream, frame, () -> tcpStream.getServerZeroWinStartTime(),
+                        timeStame -> tcpStream.setServerZeroWinStartTime(timeStame),
+                        () -> tcpStream.getServerZeroWinNum(),
+                        (serverIncrementMetric, zeroWinNum) -> serverIncrementMetric.setTcpServerZeroWindow(zeroWinNum),
+                        aVoid -> tcpStream.clearServerZeroWinNum(),
+                        aVoid -> tcpStream.addServerZeroWinNum());
             }
         }
     }
@@ -498,11 +510,63 @@ public class TcpAnalyzer {
     }
 
     private void onlySuccessZeroWindowEnd(TcpStream tcpStream) {
-        if (tcpStream.getClientZeroWinNum() > 0 || tcpStream.getServerZeroWinNum() > 0) {
-            FrameBean firstFrame = getFirstFrame(tcpStream);
-            firstFrame.setTcpClientZeroWindow(tcpStream.getClientZeroWinNum());
-            firstFrame.setTcpServerZeroWindow(tcpStream.getServerZeroWinNum());
-            setFrameClientServer(firstFrame, tcpStream);
+        zeroWinEndLambda(tcpStream, () -> tcpStream.getClientZeroWinStartTime(), () -> tcpStream.getClientZeroWinNum(),
+                (clientIncrementMetric, zeroWinNum) -> clientIncrementMetric.setTcpClientZeroWindow(zeroWinNum),
+                aVoid -> tcpStream.addClientZeroWinNum());
+        zeroWinEndLambda(tcpStream, () -> tcpStream.getServerZeroWinStartTime(), () -> tcpStream.getServerZeroWinNum(),
+                (serverIncrementMetric, zeroWinNum) -> serverIncrementMetric.setTcpServerZeroWindow(zeroWinNum),
+                aVoid -> tcpStream.addServerZeroWinNum());
+
+    }
+
+    private void zeroWinSetLambda(TcpStream tcpStream, FrameBean frame,
+                                  Supplier<Long> getZeroWinStartTime, Consumer<Long> setZeroWinStartTime,
+                                  Supplier<Integer> getZeroWinNum,
+                                  BiConsumer<IncrementMetricBean, Integer> setTcpZeroWindow,
+                                  Consumer<Void> clearZeroWinNum,
+                                  Consumer<Void> addZeroWinNum) {
+        if (getZeroWinStartTime.get() == 0) {
+            setZeroWinStartTime.accept(getFirstFrame(tcpStream).getTimestamp());
+        }
+        while (frame.getTimestamp() >= (getZeroWinStartTime.get() + MINUTE_BY_MS)) {
+            zeroWinEndLambda(tcpStream, getZeroWinStartTime, getZeroWinNum, setTcpZeroWindow, clearZeroWinNum);
+            setZeroWinStartTime.accept(getZeroWinStartTime.get() + MINUTE_BY_MS);
+        }
+
+        addZeroWinNum.accept(null);
+    }
+
+    private void zeroWinEndLambda(TcpStream tcpStream, Supplier<Long> getZeroWinStartTime, Supplier<Integer> getZeroWinNum,
+                                  BiConsumer<IncrementMetricBean, Integer> setTcpZeroWindow, Consumer<Void> clearZeroWinNum) {
+        if (getZeroWinNum.get() > 0) {
+            Map<Integer, Map<Long, IncrementMetricBean>> incrementMetricCache = MapCache.getIncrementMetricCache();
+            Map<Long, IncrementMetricBean> timeStampIncMetricMap = incrementMetricCache.get(tcpStream.getTcpStreamNumber());
+            IncrementMetricBean incMetric = null;
+            if (timeStampIncMetricMap == null) {
+                incMetric = new IncrementMetricBean();
+                timeStampIncMetricMap = new LinkedHashMap<>();
+                timeStampIncMetricMap.put(getZeroWinStartTime.get(), incMetric);
+                incrementMetricCache.put(tcpStream.getTcpStreamNumber(), timeStampIncMetricMap);
+            }
+            incMetric = timeStampIncMetricMap.get(getZeroWinStartTime.get());
+            if (incMetric == null) {
+                incMetric = new IncrementMetricBean();
+                timeStampIncMetricMap.put(getZeroWinStartTime.get(), incMetric);
+            }
+
+            if (StringUtils.isEmpty(index)) {
+                incMetric.setIndex(getFirstFrame(tcpStream).getIndex().replace(PACKET_INDEX_PREFIX, INCREMENT_METRIC_PREFIX));
+            } else {
+                incMetric.setIndex(INCREMENT_METRIC_PREFIX + UNDER_LINE + index.trim());
+            }
+            incMetric.setTcpStream(tcpStream.getTcpStreamNumber());
+            incMetric.setTimestamp(getZeroWinStartTime.get());
+            setTcpZeroWindow.accept(incMetric, getZeroWinNum.get());
+            incMetric.setClientIp(tcpStream.getClientIp());
+            incMetric.setServerIp(tcpStream.getServerIp());
+            incMetric.setClientPort(tcpStream.getClientPort());
+            incMetric.setServerPort(tcpStream.getServerPort());
+            clearZeroWinNum.accept(null);
         }
     }
 

@@ -23,12 +23,14 @@ public class TcpStream {
     private Integer serverPort = null;
     private Long synTimeStamp = null;
     private Long sackTimeStamp = null;
-    private Set<Integer> sackFrameNumberSet = new LinkedHashSet<Integer>();
+    private Set<Integer> sackFrameNumberSet = new LinkedHashSet<>();
     private Long tcpConnAckTimeStamp = null;
     private Integer tcpConnAckFrameNumber = null;
     private Boolean tcpConnectionSuccess = null;
     private Map<Integer, List<Integer>> clientDupAckMap = new HashMap<>();
     private Map<Integer, List<Integer>> serverDupAckMap = new HashMap<>();
+    private long clientZeroWinStartTime = 0;
+    private long serverZeroWinStartTime = 0;
     private int clientZeroWinNum = 0;
     private int serverZeroWinNum = 0;
     private Integer clientFinFrame = null;
@@ -195,16 +197,40 @@ public class TcpStream {
         return getDupAck(serverDupAckMap);
     }
 
+    public long getClientZeroWinStartTime() {
+        return clientZeroWinStartTime;
+    }
+
+    public void setClientZeroWinStartTime(long clientZeroWinStartTime) {
+        this.clientZeroWinStartTime = clientZeroWinStartTime;
+    }
+
+    public long getServerZeroWinStartTime() {
+        return serverZeroWinStartTime;
+    }
+
+    public void setServerZeroWinStartTime(long serverZeroWinStartTime) {
+        this.serverZeroWinStartTime = serverZeroWinStartTime;
+    }
+
+    public void clearClientZeroWinNum() {
+        clientZeroWinNum = 0;
+    }
+
     public void addClientZeroWinNum() {
-        clientZeroWinNum ++;
+        clientZeroWinNum++;
     }
 
     public int getClientZeroWinNum() {
         return clientZeroWinNum;
     }
 
+    public void clearServerZeroWinNum() {
+        serverZeroWinNum = 0;
+    }
+
     public void addServerZeroWinNum() {
-        serverZeroWinNum ++;
+        serverZeroWinNum++;
     }
 
     public int getServerZeroWinNum() {

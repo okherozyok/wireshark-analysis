@@ -29,6 +29,7 @@ import com.riil.ws.analysis.buf.IAnalyzer;
 
 import static com.riil.ws.analysis.buf.map.AnalyzerConstant.*;
 import static com.riil.ws.analysis.buf.map.AnalyzerConstant.generateIndexJson;
+import static com.riil.ws.analysis.common.Contants.UNDER_LINE;
 
 @Service
 public class MapAnalyzer implements IAnalyzer {
@@ -120,6 +121,7 @@ public class MapAnalyzer implements IAnalyzer {
             //output2ESConcurrentReq();
         } else if (outputTo.equals(OUTPUT_TO_FILE)) {
             output2File();
+            output2FileIncrementMetrin();
             output2FileConcurrentConn();
             output2FileConcurrentReq();
         } else {
@@ -136,6 +138,20 @@ public class MapAnalyzer implements IAnalyzer {
             for (int i = 1; i <= size; i++) {
                 fw.append(adapter.esBean2IndexJson(MapCache.getFrameMap().get(i))).append(linSep)
                         .append(adapter.esBean2FrameJson(MapCache.getFrameMap().get(i))).append(linSep);
+            }
+        }
+    }
+
+    private void output2FileIncrementMetrin() throws Exception {
+        String linSep = getLineSeparator();
+        try (FileWriter fw = new FileWriter(INCREMENT_METRIC_PREFIX + UNDER_LINE + outputToFileName)) {
+            Map<Integer, Map<Long, IncrementMetricBean>> incrementMetricCache = MapCache.getIncrementMetricCache();
+            for (Integer streamNumber : incrementMetricCache.keySet()) {
+                Map<Long, IncrementMetricBean> incrementMetricBeanMap = incrementMetricCache.get(streamNumber);
+                for (Long timestamp : incrementMetricBeanMap.keySet()) {
+                    fw.append(generateIndexJson(incrementMetricBeanMap.get(timestamp).getIndex())).append(linSep)
+                            .append(JSON.toJSONString(incrementMetricBeanMap.get(timestamp))).append(linSep);
+                }
             }
         }
     }
