@@ -199,7 +199,7 @@ public class TcpAnalyzer {
             if (StringUtils.isEmpty(index)) {
                 concurrentReqBean.setIndex(json.getIndex().replace(PACKET_INDEX_PREFIX, HTTP_CONCURRENT_REQ_INDEX_PREFIX));
             } else {
-                concurrentReqBean.setIndex(HTTP_CONCURRENT_REQ_INDEX_PREFIX + "_" + index.trim());
+                concurrentReqBean.setIndex(HTTP_CONCURRENT_REQ_INDEX_PREFIX + UNDER_LINE + index.trim());
             }
             concurrentReqBean.setServerIp(json.getDstIp());
             concurrentReqBean.setTcpDstPort(json.getTcpDstPort());
@@ -407,7 +407,7 @@ public class TcpAnalyzer {
                 if (StringUtils.isEmpty(index)) {
                     concurrentConnBean.setIndex(firstFrameIndex.replace(PACKET_INDEX_PREFIX, TCP_CONCURRENT_CONN_INDEX_PREFIX));
                 } else {
-                    concurrentConnBean.setIndex(TCP_CONCURRENT_CONN_INDEX_PREFIX + "_" + index.trim());
+                    concurrentConnBean.setIndex(TCP_CONCURRENT_CONN_INDEX_PREFIX + UNDER_LINE + index.trim());
                 }
                 concurrentConnBean.setServerIp(tcpStream.getServerIp());
                 concurrentConnBean.setTcpDstPort(tcpStream.getServerPort());

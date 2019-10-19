@@ -117,6 +117,7 @@ public class MapAnalyzer implements IAnalyzer {
     public void output() throws Exception {
         if (outputTo.equals(OUTPUT_TO_ES)) {
             output2ES();
+            //output2ESIncrementMetric();
             //output2ESConcurrentConn();
             //output2ESConcurrentReq();
         } else if (outputTo.equals(OUTPUT_TO_FILE)) {
@@ -206,6 +207,36 @@ public class MapAnalyzer implements IAnalyzer {
                 bulkRequest = new BulkRequest();
             }
         }
+        if (bulkRequest.numberOfActions() > 0) {
+            bulk2ES(client, bulkRequest);
+        }
+
+    }
+
+    private void output2ESIncrementMetric() throws Exception {
+        RestHighLevelClient client = newRestHighLevelClient();
+        BulkRequest bulkRequest = new BulkRequest();
+        int count = 0;
+
+        Map<Integer, Map<Long, IncrementMetricBean>> incrementMetricCache = MapCache.getIncrementMetricCache();
+        for (Integer tcpStream : incrementMetricCache.keySet()) {
+            Map<Long, IncrementMetricBean> incrementMetricBeanMap = incrementMetricCache.get(tcpStream);
+            for (Long timestamp : incrementMetricBeanMap.keySet()) {
+                IncrementMetricBean incrementMetricBean = incrementMetricBeanMap.get(timestamp);
+
+                IndexRequest indexRequest = new IndexRequest(incrementMetricBean.getIndex());
+                indexRequest.source(JSON.toJSONString(incrementMetricBean), XContentType.JSON);
+                bulkRequest.add(indexRequest);
+                count++;
+
+                if (count % outputToESBulkSize == 0) {
+                    bulk2ES(client, bulkRequest);
+                    bulkRequest = new BulkRequest();
+                }
+            }
+
+        }
+
         if (bulkRequest.numberOfActions() > 0) {
             bulk2ES(client, bulkRequest);
         }

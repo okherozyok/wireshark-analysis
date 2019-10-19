@@ -257,6 +257,42 @@ Content-Type: application/json
 }
 
 {
+    "index_patterns":"increment_metric-*",
+    "settings":{
+        "number_of_shards":1,
+        "number_of_replicas":0
+    },
+    "mappings":{
+        "properties":{
+            "tcp_stream":{
+                "type":"integer"
+            },            
+            "timestamp":{
+                "type":"date"
+            },
+            "client_ip":{
+                "type":"ip"
+            },
+            "server_ip":{
+                "type":"ip"
+            },
+            "client_port":{
+                "type":"integer"
+            },
+            "server_port":{
+                "type":"integer"
+            },
+            "tcp_client_zero_window":{
+                "type":"integer"
+            },
+            "tcp_server_zero_window":{
+                "type":"integer"
+            }
+        }
+    }
+}
+
+{
     "index_patterns":"tcp_concurrent_conn-*",
     "settings":{
         "number_of_shards":1,
