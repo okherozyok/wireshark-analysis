@@ -9,7 +9,7 @@ public final class MapCache {
     private static final int INITIAL_CAPACITY = 100000;
 
     private static final Map<Integer, FrameBean> FRAME_BEAN_MAP = new HashMap<>(INITIAL_CAPACITY);
-    private static final Map<Integer, TcpStream> TCP_STREAM_MAP = new HashMap<>();
+    private static final Map<Integer, TcpStream> TCP_STREAM_MAP = new LinkedHashMap<>();
     private static final Map<Integer, UdpStream> UDP_STREAM_MAP = new HashMap<>();
     private static final List<FrameBean> ICMP_LIST = new ArrayList<>();
 

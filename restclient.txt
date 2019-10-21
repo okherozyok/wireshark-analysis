@@ -257,7 +257,7 @@ Content-Type: application/json
 }
 
 {
-    "index_patterns":"increment_metric-*",
+    "index_patterns":"statistics_metric-*",
     "settings":{
         "number_of_shards":1,
         "number_of_replicas":0
