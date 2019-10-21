@@ -14,7 +14,7 @@ public final class MapCache {
     private static final List<FrameBean> ICMP_LIST = new ArrayList<>();
 
     // tcpStream key，timestamp key
-    private static final Map<Integer, Map<Long, IncrementMetricBean>> INCREMENT_METRIC_CACHE = new LinkedHashMap<>();
+    private static final Map<Integer, Map<Long, StatisticsMetricBean>> STATISTICS_METRIC_CACHE = new LinkedHashMap<>();
 
     // ip+port key，timestamp key
     private static final Map<Long, Map<Long, ConcurrentConnBean>> CONCURRENT_CONN_CACHE = new HashMap<>();
@@ -48,8 +48,8 @@ public final class MapCache {
         return TCP_STREAM_MAP;
     }
 
-    public static Map<Integer, Map<Long, IncrementMetricBean>> getIncrementMetricCache() {
-        return INCREMENT_METRIC_CACHE;
+    public static Map<Integer, Map<Long, StatisticsMetricBean>> getStatisticsMetricCache() {
+        return STATISTICS_METRIC_CACHE;
     }
 
     public static Map<Long, Map<Long, ConcurrentConnBean>> getConcurrentConnCache() {

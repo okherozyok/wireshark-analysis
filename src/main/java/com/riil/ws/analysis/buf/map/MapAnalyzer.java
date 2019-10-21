@@ -145,10 +145,10 @@ public class MapAnalyzer implements IAnalyzer {
 
     private void output2FileIncrementMetrin() throws Exception {
         String linSep = getLineSeparator();
-        try (FileWriter fw = new FileWriter(INCREMENT_METRIC_PREFIX + UNDER_LINE + outputToFileName)) {
-            Map<Integer, Map<Long, IncrementMetricBean>> incrementMetricCache = MapCache.getIncrementMetricCache();
+        try (FileWriter fw = new FileWriter(STATISTICS_METRIC_PREFIX + UNDER_LINE + outputToFileName)) {
+            Map<Integer, Map<Long, StatisticsMetricBean>> incrementMetricCache = MapCache.getStatisticsMetricCache();
             for (Integer streamNumber : incrementMetricCache.keySet()) {
-                Map<Long, IncrementMetricBean> incrementMetricBeanMap = incrementMetricCache.get(streamNumber);
+                Map<Long, StatisticsMetricBean> incrementMetricBeanMap = incrementMetricCache.get(streamNumber);
                 for (Long timestamp : incrementMetricBeanMap.keySet()) {
                     fw.append(generateIndexJson(incrementMetricBeanMap.get(timestamp).getIndex())).append(linSep)
                             .append(JSON.toJSONString(incrementMetricBeanMap.get(timestamp))).append(linSep);
@@ -218,11 +218,11 @@ public class MapAnalyzer implements IAnalyzer {
         BulkRequest bulkRequest = new BulkRequest();
         int count = 0;
 
-        Map<Integer, Map<Long, IncrementMetricBean>> incrementMetricCache = MapCache.getIncrementMetricCache();
+        Map<Integer, Map<Long, StatisticsMetricBean>> incrementMetricCache = MapCache.getStatisticsMetricCache();
         for (Integer tcpStream : incrementMetricCache.keySet()) {
-            Map<Long, IncrementMetricBean> incrementMetricBeanMap = incrementMetricCache.get(tcpStream);
+            Map<Long, StatisticsMetricBean> incrementMetricBeanMap = incrementMetricCache.get(tcpStream);
             for (Long timestamp : incrementMetricBeanMap.keySet()) {
-                IncrementMetricBean incrementMetricBean = incrementMetricBeanMap.get(timestamp);
+                StatisticsMetricBean incrementMetricBean = incrementMetricBeanMap.get(timestamp);
 
                 IndexRequest indexRequest = new IndexRequest(incrementMetricBean.getIndex());
                 indexRequest.source(JSON.toJSONString(incrementMetricBean), XContentType.JSON);

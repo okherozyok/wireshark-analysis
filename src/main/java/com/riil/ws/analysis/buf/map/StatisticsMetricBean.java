@@ -3,7 +3,7 @@ package com.riil.ws.analysis.buf.map;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.riil.ws.analysis.common.IpV4Util;
 
-public class IncrementMetricBean {
+public class StatisticsMetricBean {
     @JSONField(serialize = false)
     private String index;
     private Integer tcpStream;

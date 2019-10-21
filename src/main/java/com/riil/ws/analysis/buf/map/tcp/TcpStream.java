@@ -29,6 +29,7 @@ public class TcpStream {
     private Boolean tcpConnectionSuccess = null;
     private Map<Integer, List<Integer>> clientDupAckMap = new HashMap<>();
     private Map<Integer, List<Integer>> serverDupAckMap = new HashMap<>();
+    private long metricStatisticsStartTime = 0;
     private long clientZeroWinStartTime = 0;
     private long serverZeroWinStartTime = 0;
     private int clientZeroWinNum = 0;
@@ -195,6 +196,14 @@ public class TcpStream {
 
     public int getServerDupAckNum() {
         return getDupAck(serverDupAckMap);
+    }
+
+    public long getMetricStatisticsStartTime() {
+        return metricStatisticsStartTime;
+    }
+
+    public void setMetricStatisticsStartTime(long metricStatisticsStartTime) {
+        this.metricStatisticsStartTime = metricStatisticsStartTime;
     }
 
     public long getClientZeroWinStartTime() {
