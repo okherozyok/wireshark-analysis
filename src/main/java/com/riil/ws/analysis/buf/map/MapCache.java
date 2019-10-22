@@ -1,5 +1,6 @@
 package com.riil.ws.analysis.buf.map;
 
+import com.riil.ws.analysis.buf.map.tcp.StatisticsMetricBean;
 import com.riil.ws.analysis.buf.map.udp.UdpStream;
 import com.riil.ws.analysis.buf.map.tcp.TcpStream;
 

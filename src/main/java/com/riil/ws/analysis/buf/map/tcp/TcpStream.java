@@ -34,6 +34,10 @@ public class TcpStream {
     private long serverZeroWinStartTime = 0;
     private int clientZeroWinNum = 0;
     private int serverZeroWinNum = 0;
+    private int lessEq64 = 0;
+    private int between65_511 = 0;
+    private int between512_1023 = 0;
+    private int greaterEq1024 = 0;
     private Integer clientFinFrame = null;
     private Integer serverFinFrame = null;
     private Integer clientRstFrame = null;
@@ -244,6 +248,54 @@ public class TcpStream {
 
     public int getServerZeroWinNum() {
         return serverZeroWinNum;
+    }
+
+    public void addLessEq64() {
+        lessEq64++;
+    }
+
+    public void clearLessEq64() {
+        lessEq64 = 0;
+    }
+
+    public int getLessEq64() {
+        return lessEq64;
+    }
+
+    public void addBetween65_511() {
+        between65_511++;
+    }
+
+    public void clearBetween65_511() {
+        between65_511 = 0;
+    }
+
+    public int getBetween65_511() {
+        return between65_511;
+    }
+
+    public void addBetween512_1023() {
+        between512_1023++;
+    }
+
+    public void clearBetween512_1023() {
+        between512_1023 = 0;
+    }
+
+    public int getBetween512_1023() {
+        return between512_1023;
+    }
+
+    public void addGreaterEq1024() {
+        greaterEq1024++;
+    }
+
+    public void clearGreaterEq1024() {
+        greaterEq1024 = 0;
+    }
+
+    public int getGreaterEq1024() {
+        return greaterEq1024;
     }
 
     public Integer getClientFinFrame() {

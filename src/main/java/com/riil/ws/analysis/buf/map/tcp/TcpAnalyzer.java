@@ -30,6 +30,7 @@ public class TcpAnalyzer {
     public void analysis(TcpStream tcpStream) throws Exception {
         LongConnectionMetricAnalyzer longAnalyzer = new LongConnectionMetricAnalyzer();
         longAnalyzer.registerMetric(new ZeroWin(index));
+        longAnalyzer.registerMetric(new FrameLen(index));
         longAnalyzer.start(tcpStream);
 
         List<FrameBean> frames = tcpStream.getFrames();

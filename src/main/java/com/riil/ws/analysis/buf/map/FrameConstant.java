@@ -91,6 +91,10 @@ public final class FrameConstant {
 	public static final String TCP_SERVER_DUP_ACK = "tcp_server_dup_ack";
 	public static final String TCP_CLIENT_ZERO_WINDOW = "tcp_client_zero_window";
 	public static final String TCP_SERVER_ZERO_WINDOW = "tcp_server_zero_window";
+	public static final String TCP_FRAME_LEN_LESS_EQ_64 = "tcp_frame_len_less_eq_64";
+	public static final String TCP_FRAME_LEN_BETWEEN_65_511 = "tcp_frame_len_between_65_511";
+	public static final String TCP_FRAME_LEN_BETWEEN_512_1023 = "tcp_frame_len_between_512_1023";
+	public static final String TCP_FRAME_LEN_GREATER_EQ_1024 = "tcp_frame_len_greater_eq_1024";
 	public static final String TCP_UP_PAYLOAD = "tcp_up_payload";
 	public static final String TCP_DOWN_PAYLOAD = "tcp_down_payload";
 	public static final String HTTP_REQ_TRANS_DELAY = "http_req_trans_delay";

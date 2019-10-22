@@ -120,6 +120,11 @@ public class FrameBean {
     }
 
     @JSONField(serialize = false)
+    public int getFrameLength() {
+        return layers.getFrameLen();
+    }
+
+    @JSONField(serialize = false)
     public Integer getTcpStreamNumber() {
         return layers.getTcpStream();
     }

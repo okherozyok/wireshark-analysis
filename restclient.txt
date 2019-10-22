@@ -287,6 +287,18 @@ Content-Type: application/json
             },
             "tcp_server_zero_window":{
                 "type":"integer"
+            },
+            "tcp_frame_len_less_eq_64":{
+                "type":"integer"
+            },
+            "tcp_frame_len_between_65_511":{
+                "type":"integer"
+            },
+            "tcp_frame_len_between_512_1023":{
+                "type":"integer"
+            },
+            "tcp_frame_len_greater_eq_1024":{
+                "type":"integer"
             }
         }
     }

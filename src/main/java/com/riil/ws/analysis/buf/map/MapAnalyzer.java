@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.riil.ws.analysis.buf.map.icmp.IcmpAnalyzer;
+import com.riil.ws.analysis.buf.map.tcp.StatisticsMetricBean;
 import com.riil.ws.analysis.buf.map.udp.UdpAnalyzer;
 import com.riil.ws.analysis.buf.map.udp.UdpStream;
 import com.riil.ws.analysis.buf.map.tcp.TcpAnalyzer;
@@ -116,8 +117,8 @@ public class MapAnalyzer implements IAnalyzer {
     @Override
     public void output() throws Exception {
         if (outputTo.equals(OUTPUT_TO_ES)) {
-            output2ES();
-            //output2ESIncrementMetric();
+            //output2ES();
+            output2ESStatisticsMetric();
             //output2ESConcurrentConn();
             //output2ESConcurrentReq();
         } else if (outputTo.equals(OUTPUT_TO_FILE)) {
@@ -213,7 +214,7 @@ public class MapAnalyzer implements IAnalyzer {
 
     }
 
-    private void output2ESIncrementMetric() throws Exception {
+    private void output2ESStatisticsMetric() throws Exception {
         RestHighLevelClient client = newRestHighLevelClient();
         BulkRequest bulkRequest = new BulkRequest();
         int count = 0;
