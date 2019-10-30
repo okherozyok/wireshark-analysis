@@ -317,7 +317,7 @@ public class TcpAnalyzer {
         for (FrameBean frame : frames) {
             onlineUser(tcpStream, frame);
 
-            //onlySuccessRTT(tcpStream, frame);
+            onlySuccessRTT(tcpStream, frame);
             onlySuccessRetrans(tcpStream, frame);
             onlySuccessDupAckStart(tcpStream, frame);
             onlySuccessDisconnectionStart(tcpStream, frame);
@@ -498,9 +498,7 @@ public class TcpAnalyzer {
             return;
         }
 
-        // FIXME 猎豹按照syslog的开始时间统计的拆连状态，所以临时把标记标在第一个frame上
         FrameBean frame = null;
-        FrameBean firstFrame = tcpStream.getFrames().get(0);
         if (tcpStream.getClientFinFrame() != null && tcpStream.getClientRstFrame() != null) {
             if (tcpStream.getClientRstFrame() > tcpStream.getClientFinFrame()) {
                 frame = MapCache.getFrame(tcpStream.getClientRstFrame());
@@ -509,8 +507,7 @@ public class TcpAnalyzer {
                         + tcpStream.getClientRstFrame() + " < clientFinFrame=" + tcpStream.getClientFinFrame());
                 frame = MapCache.getFrame(tcpStream.getClientFinFrame());
             }
-            //frame.setTcpClientDisconnectionFinRst();
-            firstFrame.setTcpClientDisconnectionFinRst();
+            frame.setTcpClientDisconnectionFinRst();
         } else if (tcpStream.getServerFinFrame() != null && tcpStream.getServerRstFrame() != null) {
             if (tcpStream.getServerRstFrame() > tcpStream.getServerFinFrame()) {
                 frame = MapCache.getFrame(tcpStream.getServerRstFrame());
@@ -519,40 +516,29 @@ public class TcpAnalyzer {
                         + tcpStream.getServerRstFrame() + " < serverFinFrame=" + tcpStream.getServerFinFrame());
                 frame = MapCache.getFrame(tcpStream.getServerFinFrame());
             }
-            //frame.setTcpServerDisconnectionFinRst();
-            firstFrame.setTcpServerDisconnectionFinRst();
+            frame.setTcpServerDisconnectionFinRst();
         } else if (tcpStream.getClientRstFrame() != null) {
             frame = MapCache.getFrame(tcpStream.getClientRstFrame());
-            //frame.setTcpClientDisconnectionRst();
-            firstFrame.setTcpClientDisconnectionRst();
+            frame.setTcpClientDisconnectionRst();
         } else if (tcpStream.getServerRstFrame() != null) {
             frame = MapCache.getFrame(tcpStream.getServerRstFrame());
-            //frame.setTcpServerDisconnectionRst();
-            firstFrame.setTcpServerDisconnectionRst();
+            frame.setTcpServerDisconnectionRst();
         } else if (tcpStream.getClientFinFrame() != null && tcpStream.getServerFinFrame() != null) {
             if (tcpStream.getClientFinFrame() > tcpStream.getServerFinFrame()) {
                 frame = MapCache.getFrame(tcpStream.getClientFinFrame());
             } else {
                 frame = MapCache.getFrame(tcpStream.getServerFinFrame());
             }
-            //frame.setTcpDisConnectionNormal();
-            firstFrame.setTcpDisConnectionNormal();
+            frame.setTcpDisConnectionNormal();
         } else if (tcpStream.getClientFinFrame() != null) {
             frame = MapCache.getFrame(tcpStream.getClientFinFrame());
-            //frame.setTcpClientDisconnectionFinNoResp();
-            firstFrame.setTcpClientDisconnectionFinNoResp();
+            frame.setTcpClientDisconnectionFinNoResp();
         } else if (tcpStream.getServerFinFrame() != null) {
             frame = MapCache.getFrame(tcpStream.getServerFinFrame());
-            //frame.setTcpServerDisconnectionFinNoResp();
-            firstFrame.setTcpServerDisconnectionFinNoResp();
+            frame.setTcpServerDisconnectionFinNoResp();
         }
-        //if (frame != null) {
-        if (firstFrame != null) {
-            //frame.setClientIp(tcpStream.getClientIp());
-            //frame.setServerIp(tcpStream.getServerIp());
-            //frame.setClientPort(tcpStream.getClientPort());
-            //frame.setServerPort(tcpStream.getDstPort());
-            setFrameClientServer(firstFrame, tcpStream);
+        if (frame != null) {
+            setFrameClientServer(frame, tcpStream);
         } else {
             LOGGER.debug("tcpStream=" + tcpStream.getTcpStreamNumber() + " has no disconnection.");
         }
