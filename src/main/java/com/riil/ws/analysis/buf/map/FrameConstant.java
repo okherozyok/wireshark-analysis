@@ -5,8 +5,7 @@ public final class FrameConstant {
 	public static final Integer ICMP_PROTO_NUM = 1;
 	public static final Integer TCP_PROTO_NUM = 6;
 	public static final Integer UDP_PROTO_NUM = 17;
-	public static final String ZERO_STRING="0";
-	
+
 	// 结构
 	public static final String LAYERS = "layers";
 
@@ -59,12 +58,8 @@ public final class FrameConstant {
 	// 指标，补充的
 	public static final String CLIENT_IP = "client_ip";
 	public static final String SERVER_IP = "server_ip";
-	public static final String CLIENT_IP_BY_FIRST = "client_ip_by_first";
-	public static final String SERVER_IP_BY_FIRST = "server_ip_by_first";
 	public static final String CLIENT_PORT = "client_port";
 	public static final String SERVER_PORT = "server_port";
-	public static final String CLIENT_PORT_BY_FIRST = "client_port_by_first";
-	public static final String SERVER_PORT_BY_FIRST = "server_port_by_first";
 	public static final String ONLINE_USER = "online_user";
 	public static final String TCP = "tcp";
 	public static final String TCP_FIRST_SEGMENT = "tcp_first_segment";

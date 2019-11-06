@@ -24,13 +24,11 @@ public class IcmpAnalyzer {
 
         // ping request
         if (icmpType == 8 && icmpCode == 0) {
-            // 为了方便流量过滤，与tcp、udp保持一致，用clientIpByFirst等
-            frame.setClientIpByFirst(frame.getSrcIp());
-            frame.setServerIpByFirst(frame.getDstIp());
+            frame.setClientIp(frame.getSrcIp());
+            frame.setServerIp(frame.getDstIp());
         } else if (icmpType == 0 && icmpCode == 0) { // ping response
-            // 为了方便流量过滤，与tcp、udp保持一致，用clientIpByFirst等
-            frame.setClientIpByFirst(frame.getDstIp());
-            frame.setServerIpByFirst(frame.getSrcIp());
+            frame.setClientIp(frame.getDstIp());
+            frame.setServerIp(frame.getSrcIp());
         }
     }
 }

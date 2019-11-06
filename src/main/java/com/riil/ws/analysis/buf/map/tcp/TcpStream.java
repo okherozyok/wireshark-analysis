@@ -7,20 +7,15 @@ import java.util.*;
 public class TcpStream {
     private Integer tcpStreamNumber;
 
-    private String clientIp = null;
-    private String serverIp = null;
-
     // 根据第一条frame判断客户端、服务端。
     // 不使用clientIp、serverIp的原因是如果没有syn和syn+ack，和http的request标记可能相反
-    private String clientIpByFirst = null;
-    private String serverIpByFirst = null;
-    private Integer clientPortByFirst = null;
-    private Integer serverPortByFirst = null;
+    private String clientIp = null;
+    private String serverIp = null;
+    private Integer clientPort = null;
+    private Integer serverPort = null;
 
     private String onlineUserIp = null;
 
-    private Integer clientPort = null;
-    private Integer serverPort = null;
     private Long synTimeStamp = null;
     private Long sackTimeStamp = null;
     private Set<Integer> sackFrameNumberSet = new LinkedHashSet<>();
@@ -72,44 +67,12 @@ public class TcpStream {
         this.serverIp = serverIp;
     }
 
-    public String getClientIpByFirst() {
-        return clientIpByFirst;
-    }
-
-    public void setClientIpByFirst(String clientIpByFirst) {
-        this.clientIpByFirst = clientIpByFirst;
-    }
-
-    public String getServerIpByFirst() {
-        return serverIpByFirst;
-    }
-
-    public void setServerIpByFirst(String serverIpByFirst) {
-        this.serverIpByFirst = serverIpByFirst;
-    }
-
     public String getOnlineUserIp() {
         return onlineUserIp;
     }
 
     public void setOnlineUserIp(String onlineUserIp) {
         this.onlineUserIp = onlineUserIp;
-    }
-
-    public Integer getClientPortByFirst() {
-        return clientPortByFirst;
-    }
-
-    public void setClientPortByFirst(Integer clientPortByFirst) {
-        this.clientPortByFirst = clientPortByFirst;
-    }
-
-    public Integer getServerPortByFirst() {
-        return serverPortByFirst;
-    }
-
-    public void setServerPortByFirst(Integer serverPortByFirst) {
-        this.serverPortByFirst = serverPortByFirst;
     }
 
     public Integer getClientPort() {

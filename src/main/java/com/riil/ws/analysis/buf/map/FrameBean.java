@@ -172,6 +172,16 @@ public class FrameBean {
     }
 
     @JSONField(serialize = false)
+    public Integer getUdpDstPort() {
+        return layers.getUdpDstPort();
+    }
+
+    @JSONField(serialize = false)
+    public Integer getUdpSrcPort() {
+        return layers.getUdpSrcPort();
+    }
+
+    @JSONField(serialize = false)
     public Integer getTcpDstPort() {
         return layers.getTcpDstPort();
     }
@@ -238,14 +248,6 @@ public class FrameBean {
         }
     }
 
-    public void setClientIpByFirst(String clientIpByFirst) {
-        layers.setClientIpByFirst(clientIpByFirst);
-    }
-
-    public void setServerIpByFirst(String serverIpByFirst) {
-        layers.setServerIpByFirst(serverIpByFirst);
-    }
-
     /**
      * 如果客户端port已经存在，不再设置
      *
@@ -266,14 +268,6 @@ public class FrameBean {
         if (layers.getServerPort() == null) {
             layers.setServerPort(port);
         }
-    }
-
-    public void setClientPortByFirst(Integer port) {
-        layers.setClientPortByFirst(port);
-    }
-
-    public void setServerPortByFirst(Integer port) {
-        layers.setServerPortByFirst(port);
     }
 
     public void setOnlineUser(String onlineUser) {
@@ -441,22 +435,11 @@ public class FrameBean {
         private Integer clientIpInt;
         private Integer serverIpInt;
 
-        //  使用第一条frame判断客户端、服务端。
-        // 不使用clientIp、serverIp的原因是tcp标记中，如果没有syn和syn+ack，和http的request标记可能相反
-        private Integer clientIpByFirstInt;
-        private Integer serverIpByFirstInt;
-
         @JSONField(name = FrameConstant.CLIENT_PORT)
         private Integer clientPort;
 
         @JSONField(name = FrameConstant.SERVER_PORT)
         private Integer serverPort;
-
-        @JSONField(name = FrameConstant.CLIENT_PORT_BY_FIRST)
-        private Integer clientPortByFirst;
-
-        @JSONField(name = FrameConstant.SERVER_PORT_BY_FIRST)
-        private Integer serverPortByFirst;
 
         private Integer onlineUserInt;
 
@@ -716,41 +699,6 @@ public class FrameBean {
             }
         }
 
-        @JSONField(name = FrameConstant.CLIENT_IP_BY_FIRST)
-        public String getClientIpByFirst() {
-            if (clientIpByFirstInt != null) {
-                return IpV4Util.ipInt2Str(clientIpByFirstInt);
-            }
-
-            return null;
-        }
-
-
-        public void setClientIpByFirst(String clientIpByFirst) {
-            if (clientIpByFirst == null) {
-                clientIpByFirstInt = null;
-            } else {
-                clientIpByFirstInt = IpV4Util.ipStr2Int(clientIpByFirst);
-            }
-        }
-
-        @JSONField(name = FrameConstant.SERVER_IP_BY_FIRST)
-        public String getServerIpByFirst() {
-            if (serverIpByFirstInt != null) {
-                return IpV4Util.ipInt2Str(serverIpByFirstInt);
-            }
-
-            return null;
-        }
-
-        public void setServerIpByFirst(String serverIpByFirst) {
-            if (serverIpByFirst == null) {
-                serverIpByFirstInt = null;
-            } else {
-                serverIpByFirstInt = IpV4Util.ipStr2Int(serverIpByFirst);
-            }
-        }
-
         public Integer getClientPort() {
             return clientPort;
         }
@@ -765,22 +713,6 @@ public class FrameBean {
 
         public void setServerPort(Integer serverPort) {
             this.serverPort = serverPort;
-        }
-
-        public Integer getClientPortByFirst() {
-            return clientPortByFirst;
-        }
-
-        public void setClientPortByFirst(Integer clientPortByFirst) {
-            this.clientPortByFirst = clientPortByFirst;
-        }
-
-        public Integer getServerPortByFirst() {
-            return serverPortByFirst;
-        }
-
-        public void setServerPortByFirst(Integer serverPortByFirst) {
-            this.serverPortByFirst = serverPortByFirst;
         }
 
         @JSONField(name = FrameConstant.ONLINE_USER)

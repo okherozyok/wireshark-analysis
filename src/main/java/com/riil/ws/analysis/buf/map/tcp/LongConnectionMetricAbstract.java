@@ -40,10 +40,10 @@ public abstract class LongConnectionMetricAbstract {
             }
             statMetric.setTcpStream(tcpStream.getTcpStreamNumber());
             statMetric.setTimestamp(tcpStream.getMetricStatisticsStartTime());
-            statMetric.setClientIp(tcpStream.getClientIpByFirst());
-            statMetric.setServerIp(tcpStream.getServerIpByFirst());
-            statMetric.setClientPort(tcpStream.getClientPortByFirst());
-            statMetric.setServerPort(tcpStream.getServerPortByFirst());
+            statMetric.setClientIp(tcpStream.getClientIp());
+            statMetric.setServerIp(tcpStream.getServerIp());
+            statMetric.setClientPort(tcpStream.getClientPort());
+            statMetric.setServerPort(tcpStream.getServerPort());
             timeStampStatMetricMap.put(tcpStream.getMetricStatisticsStartTime(), statMetric);
         }
 

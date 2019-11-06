@@ -11,12 +11,8 @@ public class UdpStream {
     private String clientIp = null;
     private String serverIp = null;
 
-    // 专为流量区分客户端、服务端ip使用。
-    // 不使用clientIp、serverIp的原因是与 Dns判断的clientIp、serverIp可能相反
-    private String clientIpByFirst = null;
-    private String serverIpByFirst = null;
-    private Integer clientPortByFirst = null;
-    private Integer serverPortByFirst = null;
+    private Integer clientPort = null;
+    private Integer serverPort = null;
 
     private Boolean hasDnsResult = null;
 
@@ -63,36 +59,20 @@ public class UdpStream {
         this.serverIp = serverIp;
     }
 
-    public String getClientIpByFirst() {
-        return clientIpByFirst;
+    public Integer getClientPort() {
+        return clientPort;
     }
 
-    public void setClientIpByFirst(String clientIpByFirst) {
-        this.clientIpByFirst = clientIpByFirst;
+    public void setClientPort(Integer clientPort) {
+        this.clientPort = clientPort;
     }
 
-    public String getServerIpByFirst() {
-        return serverIpByFirst;
+    public Integer getServerPort() {
+        return serverPort;
     }
 
-    public void setServerIpByFirst(String serverIpByFirst) {
-        this.serverIpByFirst = serverIpByFirst;
-    }
-
-    public Integer getClientPortByFirst() {
-        return clientPortByFirst;
-    }
-
-    public void setClientPortByFirst(Integer clientPortByFirst) {
-        this.clientPortByFirst = clientPortByFirst;
-    }
-
-    public Integer getServerPortByFirst() {
-        return serverPortByFirst;
-    }
-
-    public void setServerPortByFirst(Integer serverPortByFirst) {
-        this.serverPortByFirst = serverPortByFirst;
+    public void setServerPort(Integer serverPort) {
+        this.serverPort = serverPort;
     }
 
     public Boolean isHasDnsResult() {

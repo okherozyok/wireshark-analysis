@@ -3,6 +3,7 @@ package com.riil.ws.analysis.buf.map.udp;
 import com.riil.ws.analysis.buf.map.FrameBean;
 import com.riil.ws.analysis.buf.map.FrameConstant;
 import com.riil.ws.analysis.buf.map.MapCache;
+import com.riil.ws.analysis.common.Contants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -35,25 +36,31 @@ public class UdpAnalyzer {
             return;
         }
 
-        if (!StringUtils.isEmpty(udpStream.getClientIpByFirst())) {
-            frame.setClientIpByFirst(udpStream.getClientIpByFirst());
-            frame.setServerIpByFirst(udpStream.getServerIpByFirst());
-            frame.setClientPortByFirst(udpStream.getClientPortByFirst());
-            frame.setServerPortByFirst(udpStream.getServerPortByFirst());
+        if (!StringUtils.isEmpty(udpStream.getClientIp())) {
+            frame.setClientIp(udpStream.getClientIp());
+            frame.setServerIp(udpStream.getServerIp());
+            frame.setClientPort(udpStream.getClientPort());
+            frame.setServerPort(udpStream.getServerPort());
 
             setUdpIp4IpFragment(frame, udpStream);
             return;
         }
 
-        // 以第一条的srcIp作为客户端IP，与NPV保持一致
-        udpStream.setClientIpByFirst(frame.getSrcIp());
-        udpStream.setServerIpByFirst(frame.getDstIp());
-        udpStream.setClientPortByFirst(frame.getTcpSrcPort());
-        udpStream.setServerPortByFirst(frame.getTcpDstPort());
-        frame.setClientIpByFirst(udpStream.getClientIpByFirst());
-        frame.setServerIpByFirst(udpStream.getServerIpByFirst());
-        frame.setClientPortByFirst(udpStream.getClientPortByFirst());
-        frame.setServerPortByFirst(udpStream.getServerPortByFirst());
+        if (frame.getUdpSrcPort().equals(Contants.DNS_PORT)) {
+            udpStream.setClientIp(frame.getDstIp());
+            udpStream.setServerIp(frame.getSrcIp());
+            udpStream.setClientPort(frame.getUdpDstPort());
+            udpStream.setServerPort(frame.getUdpSrcPort());
+        } else { // 以第一条的srcIp作为客户端IP，与NPV保持一致
+            udpStream.setClientIp(frame.getSrcIp());
+            udpStream.setServerIp(frame.getDstIp());
+            udpStream.setClientPort(frame.getUdpSrcPort());
+            udpStream.setServerPort(frame.getUdpDstPort());
+        }
+        frame.setClientIp(udpStream.getClientIp());
+        frame.setServerIp(udpStream.getServerIp());
+        frame.setClientPort(udpStream.getClientPort());
+        frame.setServerPort(udpStream.getServerPort());
         setUdpIp4IpFragment(frame, udpStream);
     }
 
@@ -128,8 +135,8 @@ public class UdpAnalyzer {
         if (ipFragments != null) {
             for (Integer frameNumber : ipFragments) {
                 FrameBean fragment = MapCache.getFrame(frameNumber);
-                fragment.setClientIpByFirst(udpStream.getClientIpByFirst());
-                fragment.setServerIpByFirst(udpStream.getServerIpByFirst());
+                fragment.setClientIp(udpStream.getClientIp());
+                fragment.setServerIp(udpStream.getServerIp());
             }
         }
     }

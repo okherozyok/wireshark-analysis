@@ -37,6 +37,6 @@ public class ZeroWin extends LongConnectionMetricAbstract implements LongConnect
     }
 
     private boolean isClient(TcpStream tcpStream, FrameBean frame) {
-        return tcpStream.getClientIpByFirst().equals(frame.getSrcIp());
+        return tcpStream.getClientIp().equals(frame.getSrcIp());
     }
 }
