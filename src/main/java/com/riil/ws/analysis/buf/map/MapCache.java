@@ -1,6 +1,7 @@
 package com.riil.ws.analysis.buf.map;
 
-import com.riil.ws.analysis.buf.map.tcp.StatisticsMetricBean;
+import com.riil.ws.analysis.buf.map.tcp.LongConnectionMetricBean;
+import com.riil.ws.analysis.buf.map.tcp.WholeTimePointMetricBean;
 import com.riil.ws.analysis.buf.map.udp.UdpStream;
 import com.riil.ws.analysis.buf.map.tcp.TcpStream;
 
@@ -15,7 +16,9 @@ public final class MapCache {
     private static final List<FrameBean> ICMP_LIST = new ArrayList<>();
 
     // tcpStream key，timestamp key
-    private static final Map<Integer, Map<Long, StatisticsMetricBean>> STATISTICS_METRIC_CACHE = new LinkedHashMap<>();
+    private static final Map<Integer, Map<Long, LongConnectionMetricBean>> LONG_CONNECTION_METRIC_CACHE = new LinkedHashMap<>();
+    // tcpStream key，timestamp key
+    private static final Map<Integer, Map<Long, WholeTimePointMetricBean>> WHOLE_TIME_POINT_METRIC_CACHE = new LinkedHashMap<>();
 
     // ip+port key，timestamp key
     private static final Map<Long, Map<Long, ConcurrentConnBean>> CONCURRENT_CONN_CACHE = new HashMap<>();
@@ -49,8 +52,12 @@ public final class MapCache {
         return TCP_STREAM_MAP;
     }
 
-    public static Map<Integer, Map<Long, StatisticsMetricBean>> getStatisticsMetricCache() {
-        return STATISTICS_METRIC_CACHE;
+    public static Map<Integer, Map<Long, LongConnectionMetricBean>> getLongConnectionMetricCache() {
+        return LONG_CONNECTION_METRIC_CACHE;
+    }
+
+    public static Map<Integer, Map<Long, WholeTimePointMetricBean>> getWholeTimePointMetricCache() {
+        return WHOLE_TIME_POINT_METRIC_CACHE;
     }
 
     public static Map<Long, Map<Long, ConcurrentConnBean>> getConcurrentConnCache() {

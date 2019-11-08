@@ -6,7 +6,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.riil.ws.analysis.buf.map.icmp.IcmpAnalyzer;
-import com.riil.ws.analysis.buf.map.tcp.StatisticsMetricBean;
+import com.riil.ws.analysis.buf.map.tcp.LongConnectionMetricBean;
+import com.riil.ws.analysis.buf.map.tcp.WholeTimePointMetricBean;
 import com.riil.ws.analysis.buf.map.udp.UdpAnalyzer;
 import com.riil.ws.analysis.buf.map.udp.UdpStream;
 import com.riil.ws.analysis.buf.map.tcp.TcpAnalyzer;
@@ -117,13 +118,15 @@ public class MapAnalyzer implements IAnalyzer {
     @Override
     public void output() throws Exception {
         if (outputTo.equals(OUTPUT_TO_ES)) {
-            output2ES();
-            //output2ESStatisticsMetric();
+            //output2ES();
+            //output2ESLongConnMetric();
+            output2ESWholeTimePointMetric();
             //output2ESConcurrentConn();
             //output2ESConcurrentReq();
         } else if (outputTo.equals(OUTPUT_TO_FILE)) {
             output2File();
-            output2FileIncrementMetrin();
+            output2FileLongConnMetric();
+            output2FileWholeTimePointMetric();
             output2FileConcurrentConn();
             output2FileConcurrentReq();
         } else {
@@ -144,15 +147,29 @@ public class MapAnalyzer implements IAnalyzer {
         }
     }
 
-    private void output2FileIncrementMetrin() throws Exception {
+    private void output2FileLongConnMetric() throws Exception {
         String linSep = getLineSeparator();
-        try (FileWriter fw = new FileWriter(STATISTICS_METRIC_PREFIX + UNDER_LINE + outputToFileName)) {
-            Map<Integer, Map<Long, StatisticsMetricBean>> incrementMetricCache = MapCache.getStatisticsMetricCache();
+        try (FileWriter fw = new FileWriter(LONG_CONN_METRIC_PREFIX + UNDER_LINE + outputToFileName)) {
+            Map<Integer, Map<Long, LongConnectionMetricBean>> incrementMetricCache = MapCache.getLongConnectionMetricCache();
             for (Integer streamNumber : incrementMetricCache.keySet()) {
-                Map<Long, StatisticsMetricBean> incrementMetricBeanMap = incrementMetricCache.get(streamNumber);
+                Map<Long, LongConnectionMetricBean> incrementMetricBeanMap = incrementMetricCache.get(streamNumber);
                 for (Long timestamp : incrementMetricBeanMap.keySet()) {
                     fw.append(generateIndexJson(incrementMetricBeanMap.get(timestamp).getIndex())).append(linSep)
                             .append(JSON.toJSONString(incrementMetricBeanMap.get(timestamp))).append(linSep);
+                }
+            }
+        }
+    }
+
+    private void output2FileWholeTimePointMetric() throws Exception {
+        String linSep = getLineSeparator();
+        try (FileWriter fw = new FileWriter(WHOLE_TIME_POINT_METRIC_PREFIX + UNDER_LINE + outputToFileName)) {
+            Map<Integer, Map<Long, WholeTimePointMetricBean>> wholeTimePointMetricCache = MapCache.getWholeTimePointMetricCache();
+            for (Integer streamNumber : wholeTimePointMetricCache.keySet()) {
+                Map<Long, WholeTimePointMetricBean> map = wholeTimePointMetricCache.get(streamNumber);
+                for (Long timestamp : map.keySet()) {
+                    fw.append(generateIndexJson(map.get(timestamp).getIndex())).append(linSep)
+                            .append(JSON.toJSONString(map.get(timestamp))).append(linSep);
                 }
             }
         }
@@ -214,19 +231,48 @@ public class MapAnalyzer implements IAnalyzer {
 
     }
 
-    private void output2ESStatisticsMetric() throws Exception {
+    private void output2ESLongConnMetric() throws Exception {
         RestHighLevelClient client = newRestHighLevelClient();
         BulkRequest bulkRequest = new BulkRequest();
         int count = 0;
 
-        Map<Integer, Map<Long, StatisticsMetricBean>> incrementMetricCache = MapCache.getStatisticsMetricCache();
-        for (Integer tcpStream : incrementMetricCache.keySet()) {
-            Map<Long, StatisticsMetricBean> incrementMetricBeanMap = incrementMetricCache.get(tcpStream);
-            for (Long timestamp : incrementMetricBeanMap.keySet()) {
-                StatisticsMetricBean incrementMetricBean = incrementMetricBeanMap.get(timestamp);
+        Map<Integer, Map<Long, LongConnectionMetricBean>> longConnMetricCache = MapCache.getLongConnectionMetricCache();
+        for (Integer tcpStream : longConnMetricCache.keySet()) {
+            Map<Long, LongConnectionMetricBean> map = longConnMetricCache.get(tcpStream);
+            for (Long timestamp : map.keySet()) {
+                LongConnectionMetricBean bean = map.get(timestamp);
 
-                IndexRequest indexRequest = new IndexRequest(incrementMetricBean.getIndex());
-                indexRequest.source(JSON.toJSONString(incrementMetricBean), XContentType.JSON);
+                IndexRequest indexRequest = new IndexRequest(bean.getIndex());
+                indexRequest.source(JSON.toJSONString(bean), XContentType.JSON);
+                bulkRequest.add(indexRequest);
+                count++;
+
+                if (count % outputToESBulkSize == 0) {
+                    bulk2ES(client, bulkRequest);
+                    bulkRequest = new BulkRequest();
+                }
+            }
+
+        }
+
+        if (bulkRequest.numberOfActions() > 0) {
+            bulk2ES(client, bulkRequest);
+        }
+    }
+
+    private void output2ESWholeTimePointMetric() throws Exception {
+        RestHighLevelClient client = newRestHighLevelClient();
+        BulkRequest bulkRequest = new BulkRequest();
+        int count = 0;
+
+        Map<Integer, Map<Long, WholeTimePointMetricBean>> wholeTimePointMetricCache = MapCache.getWholeTimePointMetricCache();
+        for (Integer tcpStream : wholeTimePointMetricCache.keySet()) {
+            Map<Long, WholeTimePointMetricBean> map = wholeTimePointMetricCache.get(tcpStream);
+            for (Long timestamp : map.keySet()) {
+                WholeTimePointMetricBean bean = map.get(timestamp);
+
+                IndexRequest indexRequest = new IndexRequest(bean.getIndex());
+                indexRequest.source(JSON.toJSONString(bean), XContentType.JSON);
                 bulkRequest.add(indexRequest);
                 count++;
 

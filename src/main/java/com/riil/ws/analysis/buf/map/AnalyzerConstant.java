@@ -6,7 +6,8 @@ public final class AnalyzerConstant {
     public static final String OUTPUT_TO_ES = "ES";
     public static final String OUTPUT_TO_FILE = "File";
     public static final String PACKET_INDEX_PREFIX="packets";
-    public static final String STATISTICS_METRIC_PREFIX ="statistics_metric";
+    public static final String LONG_CONN_METRIC_PREFIX ="long_conn_metric";
+    public static final String WHOLE_TIME_POINT_METRIC_PREFIX ="whole_time_point_metric";
     public static final String TCP_CONCURRENT_CONN_INDEX_PREFIX="tcp_concurrent_conn";
     public static final String HTTP_CONCURRENT_REQ_INDEX_PREFIX ="http_concurrent_req";
 

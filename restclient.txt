@@ -245,7 +245,7 @@ Content-Type: application/json
 }
 
 {
-    "index_patterns":"statistics_metric-*",
+    "index_patterns":"long_conn_metric-*",
     "settings":{
         "number_of_shards":1,
         "number_of_replicas":0
@@ -287,6 +287,39 @@ Content-Type: application/json
             },
             "tcp_frame_len_greater_eq_1024":{
                 "type":"integer"
+            }
+        }
+    }
+}
+
+{
+    "index_patterns":"whole_time_point_metric-*",
+    "settings":{
+        "number_of_shards":1,
+        "number_of_replicas":0
+    },
+    "mappings":{
+        "properties":{
+            "tcp_stream":{
+                "type":"integer"
+            },            
+            "timestamp":{
+                "type":"date"
+            },
+            "client_ip":{
+                "type":"ip"
+            },
+            "server_ip":{
+                "type":"ip"
+            },
+            "client_port":{
+                "type":"integer"
+            },
+            "server_port":{
+                "type":"integer"
+            },
+            "online_user":{
+                "type":"ip"
             }
         }
     }

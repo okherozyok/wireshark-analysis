@@ -34,6 +34,10 @@ public class TcpAnalyzer {
         longAnalyzer.registerMetric(new FrameLen(index));
         longAnalyzer.start(tcpStream);
 
+        WholeTimePointMetricAnalyzer wholeTimePointAnalyzer = new WholeTimePointMetricAnalyzer();
+        wholeTimePointAnalyzer.registerMetric(new OnlineUser(index));
+        wholeTimePointAnalyzer.start(tcpStream);
+
         List<FrameBean> frames = tcpStream.getFrames();
         for (FrameBean frame : frames) {
             markIpDirectionByFirst(frame, tcpStream);
@@ -44,12 +48,14 @@ public class TcpAnalyzer {
             }
 
             longAnalyzer.every(tcpStream, frame);
+            wholeTimePointAnalyzer.every(tcpStream, frame);
 
             realTimeCreateConn(frame, tcpStream);
             http(frame, tcpStream);
         }
 
         longAnalyzer.end(tcpStream);
+        wholeTimePointAnalyzer.end(tcpStream);
         endCreateConn(tcpStream);
         afterCreateConn(tcpStream);
     }
@@ -304,7 +310,7 @@ public class TcpAnalyzer {
     private void afterCreateConn(TcpStream tcpStream) {
         List<FrameBean> frames = tcpStream.getFrames();
         for (FrameBean frame : frames) {
-            onlineUser(tcpStream, frame);
+            //onlineUser(tcpStream, frame);
 
             onlySuccessRTT(tcpStream, frame);
             onlySuccessRetrans(tcpStream, frame);

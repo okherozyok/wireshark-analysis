@@ -14,6 +14,7 @@ public class TcpStream {
     private Integer clientPort = null;
     private Integer serverPort = null;
 
+    private long wholeTimePointStartTime = 0;
     private String onlineUserIp = null;
 
     private Long synTimeStamp = null;
@@ -24,7 +25,7 @@ public class TcpStream {
     private Boolean tcpConnectionSuccess = null;
     private Map<Integer, List<Integer>> clientDupAckMap = new HashMap<>();
     private Map<Integer, List<Integer>> serverDupAckMap = new HashMap<>();
-    private long metricStatisticsStartTime = 0;
+    private long longConnMetricStartTime = 0;
     private long clientZeroWinStartTime = 0;
     private long serverZeroWinStartTime = 0;
     private int clientZeroWinNum = 0;
@@ -65,6 +66,14 @@ public class TcpStream {
 
     public void setServerIp(String serverIp) {
         this.serverIp = serverIp;
+    }
+
+    public long getWholeTimePointStartTime() {
+        return wholeTimePointStartTime;
+    }
+
+    public void setWholeTimePointStartTime(long wholeTimePointStartTime) {
+        this.wholeTimePointStartTime = wholeTimePointStartTime;
     }
 
     public String getOnlineUserIp() {
@@ -165,12 +174,12 @@ public class TcpStream {
         return getDupAck(serverDupAckMap);
     }
 
-    public long getMetricStatisticsStartTime() {
-        return metricStatisticsStartTime;
+    public long getLongConnMetricStartTime() {
+        return longConnMetricStartTime;
     }
 
-    public void setMetricStatisticsStartTime(long metricStatisticsStartTime) {
-        this.metricStatisticsStartTime = metricStatisticsStartTime;
+    public void setLongConnMetricStartTime(long longConnMetricStartTime) {
+        this.longConnMetricStartTime = longConnMetricStartTime;
     }
 
     public long getClientZeroWinStartTime() {

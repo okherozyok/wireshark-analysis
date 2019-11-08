@@ -2,9 +2,9 @@ package com.riil.ws.analysis.buf.map.tcp;
 
 import com.riil.ws.analysis.buf.map.FrameBean;
 
-public class FrameLen extends LongConnectionMetricAbstract implements LongConnectionMetricInterface {
+public class FrameLen extends AbstractLongConnectionMetric implements LongConnectionMetricInterface {
     FrameLen(String index) {
-        this.index = index;
+        super(index);
     }
 
     @Override
@@ -32,13 +32,13 @@ public class FrameLen extends LongConnectionMetricAbstract implements LongConnec
 
     @Override
     public void finalSettlement(TcpStream tcpStream) {
-        integerSettlement(tcpStream, tcpStream::getLessEq64, StatisticsMetricBean::setTcpFrameLenLessEq64,
+        integerSettlement(tcpStream, tcpStream::getLessEq64, LongConnectionMetricBean::setTcpFrameLenLessEq64,
                 aVoid -> tcpStream.clearLessEq64());
-        integerSettlement(tcpStream, tcpStream::getBetween65_511, StatisticsMetricBean::setTcpFrameLenBetween65_511,
+        integerSettlement(tcpStream, tcpStream::getBetween65_511, LongConnectionMetricBean::setTcpFrameLenBetween65_511,
                 aVoid -> tcpStream.clearBetween65_511());
-        integerSettlement(tcpStream, tcpStream::getBetween512_1023, StatisticsMetricBean::setTcpFrameLenBetween512_1023,
+        integerSettlement(tcpStream, tcpStream::getBetween512_1023, LongConnectionMetricBean::setTcpFrameLenBetween512_1023,
                 aVoid -> tcpStream.clearBetween512_1023());
-        integerSettlement(tcpStream, tcpStream::getGreaterEq1024, StatisticsMetricBean::setTcpFrameLenGreaterEq1024,
+        integerSettlement(tcpStream, tcpStream::getGreaterEq1024, LongConnectionMetricBean::setTcpFrameLenGreaterEq1024,
                 aVoid -> tcpStream.clearGreaterEq1024());
     }
 }

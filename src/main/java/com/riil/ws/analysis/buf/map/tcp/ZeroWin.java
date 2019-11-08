@@ -2,9 +2,9 @@ package com.riil.ws.analysis.buf.map.tcp;
 
 import com.riil.ws.analysis.buf.map.FrameBean;
 
-public class ZeroWin extends LongConnectionMetricAbstract implements LongConnectionMetricInterface {
+public class ZeroWin extends AbstractLongConnectionMetric implements LongConnectionMetricInterface {
     ZeroWin(String index) {
-        this.index = index;
+        super(index);
     }
 
     @Override
@@ -30,9 +30,9 @@ public class ZeroWin extends LongConnectionMetricAbstract implements LongConnect
 
     @Override
     public void finalSettlement(TcpStream tcpStream) {
-        integerSettlement(tcpStream, tcpStream::getClientZeroWinNum, StatisticsMetricBean::setTcpClientZeroWindow,
+        integerSettlement(tcpStream, tcpStream::getClientZeroWinNum, LongConnectionMetricBean::setTcpClientZeroWindow,
                 aVoid -> tcpStream.clearClientZeroWinNum());
-        integerSettlement(tcpStream, tcpStream::getServerZeroWinNum, StatisticsMetricBean::setTcpServerZeroWindow,
+        integerSettlement(tcpStream, tcpStream::getServerZeroWinNum, LongConnectionMetricBean::setTcpServerZeroWindow,
                 aVoid -> tcpStream.clearServerZeroWinNum());
     }
 
